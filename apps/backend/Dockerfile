@@ -7,10 +7,9 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY yarn.lock ./
 
 # Install dependencies
-RUN yarn install --frozen-lockfile
+RUN npm install
 
 # Build the app
 FROM base AS builder
@@ -19,7 +18,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build the application
-RUN yarn build
+RUN npm run build
 
 # Production image
 FROM base AS runner
@@ -39,4 +38,4 @@ USER nodejs
 
 EXPOSE 3001
 
-CMD ["yarn", "start"]
+CMD ["npm", "start"]
