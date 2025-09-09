@@ -110,7 +110,8 @@ router.patch('/:eventId/registration', authenticateToken, async (req: AuthReques
     await redisService.updateEventRegistration(req.params.eventId, newStatus);
     
     // Emit real-time update
-    req.app.get('io').to(`event:${req.params.eventId}`).emit('registrationToggled', { 
+    const io = (req.app as any).get('io');
+    io?.to(`event:${req.params.eventId}`).emit('registrationToggled', { 
       registrationOpen: newStatus 
     });
     
@@ -137,6 +138,114 @@ router.get('/:eventId/participants', authenticateToken, async (req: AuthRequest,
     res.json(participants);
   } catch (error) {
     console.error('Get participants error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get participant details (public endpoint for waiting page)
+router.get('/:eventId/participants/:participantId', async (req, res) => {
+  try {
+    const { eventId, participantId } = req.params;
+    
+    const event = await redisService.getEvent(eventId);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    
+    const participants = await redisService.getEventParticipants(eventId);
+    const participant = participants.find(p => p.id === participantId);
+    
+    if (!participant) {
+      return res.status(404).json({ error: 'Participant not found' });
+    }
+    
+    // Return only safe participant data
+    res.json({
+      id: participant.id,
+      name: participant.name,
+      eventId: participant.eventId,
+      registeredAt: participant.registeredAt
+    });
+  } catch (error) {
+    console.error('Get participant error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Check if participant is winner (public endpoint)
+router.get('/:eventId/participants/:participantId/winner', async (req, res) => {
+  try {
+    const { eventId, participantId } = req.params;
+    
+    const event = await redisService.getEvent(eventId);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    
+    const winners = await redisService.getEventWinners(eventId);
+    const winner = winners.find(w => w.participantId === participantId);
+    
+    if (winner) {
+      res.json(winner);
+    } else {
+      res.json({ isWinner: false });
+    }
+  } catch (error) {
+    console.error('Check winner error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Check if name is available (public endpoint)
+router.get('/:eventId/check-name/:name', async (req, res) => {
+  try {
+    const { eventId, name } = req.params;
+    
+    const event = await redisService.getEvent(eventId);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    
+    if (!event.registrationOpen) {
+      return res.json({ available: false, reason: 'Registration closed' });
+    }
+    
+    const isNameTaken = await redisService.isParticipantNameTaken(eventId, name);
+    
+    res.json({ 
+      available: !isNameTaken,
+      reason: isNameTaken ? 'Name already taken' : null
+    });
+  } catch (error) {
+    console.error('Check name availability error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Check if user already registered by name (public endpoint)
+router.get('/:eventId/find-participant/:name', async (req, res) => {
+  try {
+    const { eventId, name } = req.params;
+    
+    const event = await redisService.getEvent(eventId);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    
+    const participants = await redisService.getEventParticipants(eventId);
+    const participant = participants.find(p => p.name.toLowerCase() === name.toLowerCase());
+    
+    if (participant) {
+      res.json({
+        found: true,
+        participantId: participant.id,
+        name: participant.name
+      });
+    } else {
+      res.json({ found: false });
+    }
+  } catch (error) {
+    console.error('Find participant error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -172,7 +281,8 @@ router.post('/:eventId/participants', async (req, res) => {
     await redisService.addParticipant(participant);
     
     // Emit real-time update
-    req.app.get('io').to(`event:${req.params.eventId}`).emit('participantRegistered', participant);
+    const io = (req.app as any).get('io');
+    io?.to(`event:${req.params.eventId}`).emit('participantRegistered', participant);
     
     res.status(201).json(participant);
   } catch (error) {
@@ -229,7 +339,8 @@ router.post('/:eventId/draw', authenticateToken, async (req: AuthRequest, res) =
     await redisService.addWinner(winner);
     
     // Emit real-time update
-    req.app.get('io').to(`event:${req.params.eventId}`).emit('winnerDrawn', winner);
+    const io = (req.app as any).get('io');
+    io?.to(`event:${req.params.eventId}`).emit('winnerDrawn', winner);
     
     res.json(winner);
   } catch (error) {

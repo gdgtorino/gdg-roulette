@@ -1,10 +1,9 @@
-import { Request, Response, NextFunction, Application } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/auth';
 import type { JWTPayload } from '../types';
 
 export interface AuthRequest extends Request {
   admin?: JWTPayload;
-  app?: Application;
 }
 
 export function authenticateToken(req: AuthRequest, res: Response, next: NextFunction): void {
@@ -12,7 +11,8 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json({ error: 'Access token required' });
+    res.status(401).json({ error: 'Access token required' });
+    return;
   }
 
   try {
@@ -20,6 +20,7 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
     req.admin = admin;
     next();
   } catch (error) {
-    return res.status(403).json({ error: 'Invalid or expired token' });
+    res.status(403).json({ error: 'Invalid or expired token' });
+    return;
   }
 }
