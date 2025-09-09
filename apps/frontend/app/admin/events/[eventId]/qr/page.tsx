@@ -266,7 +266,7 @@ export default function EventQRPage(): JSX.Element {
             <CardHeader>
               <CardTitle className="dark:text-white">{t('admin.registeredParticipants')}</CardTitle>
               <CardDescription className="dark:text-gray-300">
-                {t('admin.participantsCount', { count: participants.length })}
+                {t('admin.participantsCount').replace('{count}', participants.length.toString())}
               </CardDescription>
             </CardHeader>
             <CardContent>

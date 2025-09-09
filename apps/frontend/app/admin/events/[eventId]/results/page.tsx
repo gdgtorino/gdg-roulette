@@ -180,7 +180,7 @@ export default function ResultsPage(): JSX.Element {
             <CardHeader>
               <CardTitle className="dark:text-white">🏆 {t('admin.winners')}</CardTitle>
               <CardDescription className="dark:text-gray-300">
-                {t('admin.winnersInOrder', { count: winners.length })}
+                {t('admin.winnersInOrder').replace('{count}', winners.length.toString())}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -246,7 +246,7 @@ export default function ResultsPage(): JSX.Element {
                         </div>
                         {isWinner && winner && (
                           <div className="text-sm font-semibold text-yellow-700 dark:text-yellow-300">
-                            ✨ {t('admin.winnerPosition', { position: winner.drawOrder })}
+                            ✨ {t('admin.winnerPosition').replace('{position}', winner.drawOrder.toString())}
                           </div>
                         )}
                       </div>
@@ -272,7 +272,7 @@ export default function ResultsPage(): JSX.Element {
             <CardHeader>
               <CardTitle className="dark:text-white">📋 {t('admin.nonWinners')}</CardTitle>
               <CardDescription className="dark:text-gray-300">
-                {t('admin.participantsNotDrawn', { count: nonWinners.length })}
+                {t('admin.participantsNotDrawn').replace('{count}', nonWinners.length.toString())}
               </CardDescription>
             </CardHeader>
             <CardContent>

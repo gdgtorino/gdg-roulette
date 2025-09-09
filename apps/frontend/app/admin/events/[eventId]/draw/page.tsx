@@ -341,7 +341,7 @@ export default function DrawPage(): JSX.Element {
             <CardHeader>
               <CardTitle className="text-gray-900 dark:text-gray-100">🎰 {t('draw.drawWinner')}</CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-400">
-                {t('draw.participantsAvailable', { count: availableParticipants.length })}
+                {t('draw.participantsAvailable').replace('{count}', availableParticipants.length.toString())}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -359,7 +359,7 @@ export default function DrawPage(): JSX.Element {
                         {currentWinner.participantName}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {t('draw.winnerNumber', { number: currentWinner.drawOrder })}
+                        {t('draw.winnerNumber').replace('{number}', currentWinner.drawOrder.toString())}
                       </div>
                     </div>
                   ) : rouletteSpinning ? (
@@ -414,7 +414,7 @@ export default function DrawPage(): JSX.Element {
             <CardHeader>
               <CardTitle className="text-gray-900 dark:text-gray-100">🏆 {t('draw.winners')}</CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-400">
-                {t('draw.winnersDrawnSoFar', { count: winners.length })}
+                {t('draw.winnersDrawnSoFar').replace('{count}', winners.length.toString())}
               </CardDescription>
             </CardHeader>
             <CardContent>
