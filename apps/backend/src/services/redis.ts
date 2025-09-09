@@ -85,6 +85,7 @@ class RedisService {
       createdBy: event.createdBy,
       createdAt: event.createdAt.toISOString(),
       registrationOpen: event.registrationOpen.toString(),
+      closed: event.closed.toString(),
       qrCode: event.qrCode
     });
     
@@ -102,6 +103,7 @@ class RedisService {
       createdBy: event.createdBy,
       createdAt: new Date(event.createdAt),
       registrationOpen: event.registrationOpen === 'true',
+      closed: event.closed === 'true',
       qrCode: event.qrCode
     };
   }
@@ -120,6 +122,10 @@ class RedisService {
 
   async updateEventRegistration(eventId: string, open: boolean): Promise<void> {
     await this.client.hSet(`event:${eventId}`, 'registrationOpen', open.toString());
+  }
+
+  async updateEventClosed(eventId: string, closed: boolean): Promise<void> {
+    await this.client.hSet(`event:${eventId}`, 'closed', closed.toString());
   }
 
   async deleteEvent(eventId: string): Promise<void> {

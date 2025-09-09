@@ -6,11 +6,12 @@ interface UseSocketOptions {
   onParticipantRegistered?: (participant: unknown) => void;
   onRegistrationToggled?: (data: { registrationOpen: boolean }) => void;
   onWinnerDrawn?: (winner: unknown) => void;
+  onEventClosed?: (data: { closed: boolean }) => void;
 }
 
 export function useSocket(options: UseSocketOptions = {}): Socket | null {
   const socketRef = useRef<Socket | null>(null);
-  const { eventId, onParticipantRegistered, onRegistrationToggled, onWinnerDrawn } = options;
+  const { eventId, onParticipantRegistered, onRegistrationToggled, onWinnerDrawn, onEventClosed } = options;
 
   useEffect(() => {
     // Only connect if we don't have a socket or it's disconnected
@@ -56,6 +57,11 @@ export function useSocket(options: UseSocketOptions = {}): Socket | null {
       onWinnerDrawn?.(winner);
     };
 
+    const handleEventClosed = (data: { closed: boolean }): void => {
+      console.log('Event closed:', data);
+      onEventClosed?.(data);
+    };
+
     // Add event listeners
     socket.on('connect', handleConnect);
     socket.on('disconnect', handleDisconnect);
@@ -71,6 +77,10 @@ export function useSocket(options: UseSocketOptions = {}): Socket | null {
     if (onWinnerDrawn) {
       socket.on('winnerDrawn', handleWinnerDrawn);
     }
+    
+    if (onEventClosed) {
+      socket.on('eventClosed', handleEventClosed);
+    }
 
     // Join event room on connect if not already connected
     if (socket.connected && eventId) {
@@ -84,13 +94,14 @@ export function useSocket(options: UseSocketOptions = {}): Socket | null {
       socket.off('participantRegistered', handleParticipantRegistered);
       socket.off('registrationToggled', handleRegistrationToggled);
       socket.off('winnerDrawn', handleWinnerDrawn);
+      socket.off('eventClosed', handleEventClosed);
       
       // Leave event room
       if (eventId) {
         socket.emit('leaveEvent', eventId);
       }
     };
-  }, [eventId, onParticipantRegistered, onRegistrationToggled, onWinnerDrawn]);
+  }, [eventId, onParticipantRegistered, onRegistrationToggled, onWinnerDrawn, onEventClosed]);
 
   // Cleanup on unmount
   useEffect(() => {

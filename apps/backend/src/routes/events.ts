@@ -43,6 +43,7 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
       createdBy: req.admin!.adminId,
       createdAt: new Date(),
       registrationOpen: true,
+      closed: false,
       qrCode
     };
     
@@ -118,6 +119,33 @@ router.patch('/:eventId/registration', authenticateToken, async (req: AuthReques
     res.json({ registrationOpen: newStatus });
   } catch (error) {
     console.error('Toggle registration error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Close event (end extraction)
+router.patch('/:eventId/close', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const event = await redisService.getEvent(req.params.eventId);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    
+    if (event.createdBy !== req.admin!.adminId) {
+      return res.status(403).json({ error: 'Not authorized to close this event' });
+    }
+    
+    await redisService.updateEventClosed(req.params.eventId, true);
+    
+    // Emit real-time update
+    const io = (req.app as any).get('io');
+    io?.to(`event:${req.params.eventId}`).emit('eventClosed', { 
+      closed: true 
+    });
+    
+    res.json({ closed: true });
+  } catch (error) {
+    console.error('Close event error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

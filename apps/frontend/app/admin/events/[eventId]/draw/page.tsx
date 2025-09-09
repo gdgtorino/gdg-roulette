@@ -19,6 +19,7 @@ interface Event {
   id: string;
   name: string;
   registrationOpen: boolean;
+  closed: boolean;
 }
 
 interface Participant {
@@ -193,6 +194,41 @@ export default function DrawPage(): JSX.Element {
     setShowWinner(false);
   };
 
+  const closeEvent = async (): Promise<void> => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`/api/events/${eventId}/close`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        setModal({
+          open: true,
+          title: 'Estrazione Chiusa',
+          message: 'L\'estrazione è stata chiusa. I partecipanti che non hanno vinto riceveranno la notifica.',
+          type: 'success'
+        });
+        await fetchEventData();
+      } else {
+        const error = await response.json() as { error: string };
+        setModal({
+          open: true,
+          title: 'Errore',
+          message: error.error || "Errore nella chiusura dell'estrazione",
+          type: 'error'
+        });
+      }
+    } catch (error) {
+      setModal({
+        open: true,
+        title: 'Errore',
+        message: "Errore di rete",
+        type: 'error'
+      });
+    }
+  };
+
   // Socket.io for real-time updates
   useSocket({
     eventId,
@@ -258,12 +294,22 @@ export default function DrawPage(): JSX.Element {
               <h1 className="text-2xl font-bold text-gray-900">{event.name}</h1>
               <p className="text-gray-600">Lottery Draw</p>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => window.location.href = '/admin/dashboard'}
-            >
-              Back to Dashboard
-            </Button>
+            <div className="flex gap-2">
+              {event && !event.closed && winners.length > 0 && (
+                <Button
+                  variant="destructive"
+                  onClick={closeEvent}
+                >
+                  Chiudi Estrazione
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                onClick={() => window.location.href = '/admin/dashboard'}
+              >
+                Back to Dashboard
+              </Button>
+            </div>
           </div>
         </div>
       </div>

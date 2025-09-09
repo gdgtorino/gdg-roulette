@@ -11,6 +11,7 @@ export interface Event {
   createdBy: string;
   createdAt: Date;
   registrationOpen: boolean;
+  closed: boolean;
   qrCode: string;
 }
 

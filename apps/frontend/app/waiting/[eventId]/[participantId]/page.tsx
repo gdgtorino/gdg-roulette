@@ -5,11 +5,15 @@ import { useParams } from "next/navigation";
 import confetti from "canvas-confetti";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSocket } from "@/hooks/useSocket";
+import { useTranslation } from "@/hooks/useTranslation";
+import DarkModeToggle from "@/components/DarkModeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface Event {
   id: string;
   name: string;
   registrationOpen: boolean;
+  closed: boolean;
 }
 
 interface Participant {
@@ -29,12 +33,14 @@ export default function WaitingPage(): JSX.Element {
   const params = useParams();
   const eventId = params.eventId as string;
   const participantId = params.participantId as string;
+  const { t } = useTranslation();
   
   const [event, setEvent] = useState<Event | null>(null);
   const [participant, setParticipant] = useState<Participant | null>(null);
   const [isWinner, setIsWinner] = useState(false);
   const [winnerDetails, setWinnerDetails] = useState<Winner | null>(null);
   const [registrationOpen, setRegistrationOpen] = useState(true);
+  const [eventClosed, setEventClosed] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async (): Promise<void> => {
@@ -45,6 +51,7 @@ export default function WaitingPage(): JSX.Element {
         const eventData = await eventResponse.json() as Event;
         setEvent(eventData);
         setRegistrationOpen(eventData.registrationOpen);
+        setEventClosed(eventData.closed);
       }
 
       // Fetch participant details (public endpoint)
@@ -141,6 +148,10 @@ export default function WaitingPage(): JSX.Element {
       console.log('Registration toggled:', data);
       setRegistrationOpen(data.registrationOpen);
     },
+    onEventClosed: (data) => {
+      console.log('Event closed:', data);
+      setEventClosed(data.closed);
+    },
   });
 
   useEffect(() => {
@@ -149,22 +160,68 @@ export default function WaitingPage(): JSX.Element {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div>Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+        <div className="text-gray-900 dark:text-gray-100">{t('common.loading')}</div>
       </div>
     );
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-rose-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-rose-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <CardTitle className="text-red-600">Event Not Found</CardTitle>
+            <CardTitle className="text-red-600 dark:text-red-400">{t('registration.notFound')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-gray-600">
-              The event you're looking for doesn't exist or has ended.
+            <p className="text-center text-gray-600 dark:text-gray-300">
+              {t('registration.notFoundMessage')}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (eventClosed && !isWinner) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4 flex gap-2">
+          <LanguageSwitcher />
+          <DarkModeToggle />
+        </div>
+        <Card className="w-full max-w-md border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-800">
+          <CardHeader className="text-center bg-gradient-to-r from-gray-400 to-gray-500 dark:from-gray-700 dark:to-gray-800 text-white rounded-t-lg">
+            <CardTitle className="text-3xl font-bold">{t('loser.sorry')}</CardTitle>
+            <CardDescription className="text-gray-100 text-lg">
+              {t('loser.extractionEnded')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-8 text-center">
+            <div className="mb-6">
+              <div className="text-6xl mb-4">🎯</div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                {participant?.name || "Partecipante"}
+              </h2>
+              <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
+                <strong>{t('loser.didntWin')}</strong>
+              </p>
+              <p className="text-lg font-semibold text-gray-600 dark:text-gray-400">
+                {event.name}
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg p-4 mb-4">
+              <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                {t('loser.sorryMessage')}
+              </p>
+              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">
+                {t('loser.thanksForParticipating')}
+              </p>
+            </div>
+
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t('loser.tryAgain')}
             </p>
           </CardContent>
         </Card>
