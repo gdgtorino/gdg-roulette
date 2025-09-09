@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: the-draw-traefik
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - the-draw-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: the-draw-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - the-draw-network
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: the-draw-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - CORS_ORIGIN=http://localhost
+      - ADMIN_DEFAULT_USER=${ADMIN_DEFAULT_USER:-admin}
+      - ADMIN_DEFAULT_PASSWORD=${ADMIN_DEFAULT_PASSWORD:-admin}
+    depends_on:
+      - redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`localhost`) && PathPrefix(`/api`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=3001"
+    networks:
+      - the-draw-network
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    container_name: the-draw-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost/api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`localhost`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+    networks:
+      - the-draw-network
+
+volumes:
+  redis-data:
+
+networks:
+  the-draw-network:
+    driver: bridge
