@@ -8,6 +8,7 @@ import { redisService } from './services/redis';
 import { createDefaultAdmin } from './utils/auth';
 import authRoutes from './routes/auth';
 import eventRoutes from './routes/events';
+import adminRoutes from './routes/admin';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.set('io', io);
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

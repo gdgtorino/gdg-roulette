@@ -4,6 +4,7 @@ import type { JWTPayload } from '../types';
 
 export interface AuthRequest extends Request {
   admin?: JWTPayload;
+  app?: Express.Application;
 }
 
 export function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {

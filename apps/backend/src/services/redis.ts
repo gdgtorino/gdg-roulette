@@ -2,7 +2,7 @@ import { createClient } from 'redis';
 import type { Admin, Event, Participant, Winner } from '../types';
 
 class RedisService {
-  private client;
+  public client;
 
   constructor() {
     this.client = createClient({
@@ -44,6 +44,37 @@ class RedisService {
       password: admin.password,
       createdAt: admin.createdAt.toISOString()
     });
+    
+    // Add to admins list for easier listing
+    await this.client.sAdd('admins', admin.username);
+  }
+
+  async getAllAdmins(): Promise<Admin[]> {
+    const usernames = await this.client.sMembers('admins');
+    const admins: Admin[] = [];
+    
+    for (const username of usernames) {
+      const admin = await this.getAdmin(username);
+      if (admin) admins.push(admin);
+    }
+    
+    return admins.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  }
+
+  async deleteAdmin(username: string): Promise<void> {
+    const admin = await this.getAdmin(username);
+    if (!admin) return;
+    
+    // Delete all admin's events first
+    const adminEvents = await this.getAdminEvents(admin.id);
+    for (const event of adminEvents) {
+      await this.deleteEvent(event.id);
+    }
+    
+    // Remove from admins list and delete admin record
+    await this.client.sRem('admins', username);
+    await this.client.del(`admin:${username}`);
+    await this.client.del(`admin:${admin.id}:events`);
   }
 
   // Event operations

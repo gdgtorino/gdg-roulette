@@ -28,7 +28,11 @@ export async function createDefaultAdmin(): Promise<void> {
   const password = process.env.ADMIN_DEFAULT_PASSWORD || 'admin';
   
   const existingAdmin = await redisService.getAdmin(username);
-  if (existingAdmin) return;
+  if (existingAdmin) {
+    // Ensure default admin is in the admins set
+    await redisService.client.sAdd('admins', username);
+    return;
+  }
   
   const hashedPassword = await hashPassword(password);
   const admin: Admin = {
