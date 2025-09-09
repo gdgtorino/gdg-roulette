@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,17 @@ export default function RegisterPage(): JSX.Element {
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [error, setError] = useState("");
+  const [nameValidation, setNameValidation] = useState<{
+    isChecking: boolean;
+    isAvailable: boolean | null;
+    message: string;
+  }>({
+    isChecking: false,
+    isAvailable: null,
+    message: ""
+  });
+  
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   const fetchEvent = async (): Promise<void> => {
     try {
@@ -57,6 +68,65 @@ export default function RegisterPage(): JSX.Element {
     return `${adjective}-${noun}-${number}`;
   };
 
+  const checkExistingParticipant = async (participantName: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/events/${eventId}/find-participant/${encodeURIComponent(participantName)}`);
+      if (response.ok) {
+        const data = await response.json() as { found: boolean; participantId?: string };
+        if (data.found && data.participantId) {
+          // Redirect to existing participant's waiting page
+          window.location.href = `/waiting/${eventId}/${data.participantId}`;
+          return true; // Found existing participant
+        }
+      }
+    } catch (error) {
+      console.error("Failed to check existing participant:", error);
+    }
+    return false; // No existing participant found
+  };
+
+  const checkNameAvailability = async (participantName: string): Promise<void> => {
+    if (!participantName.trim()) {
+      setNameValidation({
+        isChecking: false,
+        isAvailable: null,
+        message: ""
+      });
+      return;
+    }
+
+    setNameValidation(prev => ({ ...prev, isChecking: true }));
+
+    try {
+      const response = await fetch(`/api/events/${eventId}/check-name/${encodeURIComponent(participantName)}`);
+      if (response.ok) {
+        const data = await response.json() as { available: boolean; reason?: string };
+        setNameValidation({
+          isChecking: false,
+          isAvailable: data.available,
+          message: data.available ? "Name is available!" : (data.reason || "Name not available")
+        });
+      }
+    } catch (error) {
+      console.error("Failed to check name availability:", error);
+      setNameValidation({
+        isChecking: false,
+        isAvailable: null,
+        message: "Error checking name availability"
+      });
+    }
+  };
+
+  const debouncedCheckName = (participantName: string) => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    
+    debounceTimer.current = setTimeout(() => {
+      void checkNameAvailability(participantName);
+    }, 500);
+  };
+
   const register = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setLoading(true);
@@ -64,6 +134,14 @@ export default function RegisterPage(): JSX.Element {
 
     try {
       const registrationName = name.trim() || await generateDefaultName();
+      
+      // First check if participant already exists (for redirect system)
+      if (name.trim()) {
+        const existingFound = await checkExistingParticipant(registrationName);
+        if (existingFound) {
+          return; // Stop registration if existing participant was found and redirected
+        }
+      }
       
       const response = await fetch(`/api/events/${eventId}/participants`, {
         method: "POST",
@@ -75,8 +153,8 @@ export default function RegisterPage(): JSX.Element {
 
       if (response.ok) {
         const participant = await response.json();
-        setRegistered(true);
-        setName(participant.name);
+        // Redirect to private waiting page
+        window.location.href = `/waiting/${eventId}/${participant.id}`;
       } else {
         const error = await response.json() as { error: string };
         setError(error.error || "Registration failed");
@@ -91,6 +169,25 @@ export default function RegisterPage(): JSX.Element {
   useEffect(() => {
     void fetchEvent();
   }, [eventId]);
+
+  useEffect(() => {
+    if (name.trim()) {
+      debouncedCheckName(name.trim());
+    } else {
+      setNameValidation({
+        isChecking: false,
+        isAvailable: null,
+        message: ""
+      });
+    }
+    
+    // Cleanup timer on unmount
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [name]);
 
   if (!event && !error) {
     return (
@@ -116,7 +213,7 @@ export default function RegisterPage(): JSX.Element {
   }
 
   if (!event) {
-    return null;
+    return <div>Loading...</div>;
   }
 
   if (registered) {
@@ -181,21 +278,65 @@ export default function RegisterPage(): JSX.Element {
           
           <form onSubmit={register} className="space-y-4">
             <div>
-              <Input
-                type="text"
-                placeholder="Enter your name (optional - we'll generate one for you)"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={50}
-                className="text-center"
-              />
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Enter your name (optional - we'll generate one for you)"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength={50}
+                  className={`text-center ${
+                    nameValidation.isAvailable === false 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : nameValidation.isAvailable === true 
+                        ? 'border-green-500 focus:border-green-500' 
+                        : ''
+                  }`}
+                />
+                {nameValidation.isChecking && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                  </div>
+                )}
+                {!nameValidation.isChecking && nameValidation.isAvailable === true && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-600">
+                    ✓
+                  </div>
+                )}
+                {!nameValidation.isChecking && nameValidation.isAvailable === false && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-600">
+                    ✗
+                  </div>
+                )}
+              </div>
+              
+              {nameValidation.message && (
+                <p className={`text-xs mt-1 text-center ${
+                  nameValidation.isAvailable === true 
+                    ? 'text-green-600' 
+                    : nameValidation.isAvailable === false 
+                      ? 'text-red-600' 
+                      : 'text-gray-600'
+                }`}>
+                  {nameValidation.message}
+                </p>
+              )}
+              
               <p className="text-xs text-gray-500 mt-1 text-center">
                 Leave empty for a fun auto-generated name!
               </p>
             </div>
             
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? "Registering..." : "Join Lottery 🎯"}
+            <Button 
+              type="submit" 
+              className="w-full" 
+              size="lg" 
+              disabled={loading || (name.trim() && nameValidation.isAvailable === false) || nameValidation.isChecking}
+            >
+              {loading ? "Registering..." : 
+               nameValidation.isChecking ? "Checking name..." :
+               (name.trim() && nameValidation.isAvailable === false) ? "Name not available" :
+               "Join Lottery 🎯"}
             </Button>
           </form>
           

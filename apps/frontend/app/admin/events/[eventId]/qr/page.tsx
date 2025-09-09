@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useSocket } from "@/hooks/useSocket";
 
 interface Event {
@@ -30,8 +31,22 @@ export default function EventQRPage(): JSX.Element {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [toggleLoading, setToggleLoading] = useState(false);
+  const [registrationUrl, setRegistrationUrl] = useState("");
+  const [modal, setModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    open: false,
+    title: '',
+    message: '',
+    type: 'success'
+  });
 
-  const registrationUrl = `${window.location.origin}/register/${eventId}`;
+  useEffect(() => {
+    setRegistrationUrl(`${window.location.origin}/register/${eventId}`);
+  }, [eventId]);
 
   const fetchEventData = async (): Promise<void> => {
     try {
@@ -84,10 +99,20 @@ export default function EventQRPage(): JSX.Element {
         }
       } else {
         const error = await response.json() as { error: string };
-        alert(error.error || "Failed to toggle registration");
+        setModal({
+          open: true,
+          title: 'Error',
+          message: error.error || "Failed to toggle registration",
+          type: 'error'
+        });
       }
     } catch (error) {
-      alert("Network error");
+      setModal({
+        open: true,
+        title: 'Error',
+        message: "Network error",
+        type: 'error'
+      });
     } finally {
       setToggleLoading(false);
     }
@@ -95,13 +120,19 @@ export default function EventQRPage(): JSX.Element {
 
   const copyLink = (): void => {
     void navigator.clipboard.writeText(registrationUrl);
-    alert("Registration link copied to clipboard!");
+    setModal({
+      open: true,
+      title: 'Success',
+      message: "Registration link copied to clipboard!",
+      type: 'success'
+    });
   };
 
   // Socket.io for real-time updates
   useSocket({
     eventId,
     onParticipantRegistered: (participant) => {
+      console.log('New participant registered:', participant);
       // Add new participant to the list
       setParticipants(prev => [...prev, participant as Participant]);
     },
@@ -252,6 +283,23 @@ export default function EventQRPage(): JSX.Element {
           </Card>
         </div>
       </div>
+
+      {/* Modal for notifications */}
+      <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className={modal.type === 'error' ? 'text-red-600' : 'text-green-600'}>
+              {modal.title}
+            </DialogTitle>
+            <DialogDescription>
+              {modal.message}
+            </DialogDescription>
+          </DialogHeader>
+          <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>
+            OK
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
