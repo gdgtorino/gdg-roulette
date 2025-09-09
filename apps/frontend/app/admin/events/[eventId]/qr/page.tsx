@@ -106,16 +106,16 @@ export default function EventQRPage(): JSX.Element {
         const error = await response.json() as { error: string };
         setModal({
           open: true,
-          title: 'Error',
-          message: error.error || "Failed to toggle registration",
+          title: t('common.error'),
+          message: error.error || t('admin.failedToToggle'),
           type: 'error'
         });
       }
     } catch (error) {
       setModal({
         open: true,
-        title: 'Error',
-        message: "Network error",
+        title: t('common.error'),
+        message: t('common.networkError'),
         type: 'error'
       });
     } finally {
@@ -127,8 +127,8 @@ export default function EventQRPage(): JSX.Element {
     void navigator.clipboard.writeText(registrationUrl);
     setModal({
       open: true,
-      title: 'Success',
-      message: "Registration link copied to clipboard!",
+      title: t('common.success'),
+      message: t('admin.linkCopied'),
       type: 'success'
     });
   };
@@ -226,10 +226,10 @@ export default function EventQRPage(): JSX.Element {
               <div className="mb-6">
                 <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                   event.registrationOpen 
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
+                    ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200'
+                    : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200'
                 }`}>
-                  Registration {event.registrationOpen ? 'Open' : 'Closed'}
+                  {t('admin.registration')} {event.registrationOpen ? t('admin.open') : t('admin.closed')}
                 </div>
               </div>
 
@@ -241,10 +241,10 @@ export default function EventQRPage(): JSX.Element {
                 size="lg"
               >
                 {toggleLoading 
-                  ? "Processing..." 
+                  ? t('admin.processing')
                   : event.registrationOpen 
-                    ? "Close Registration & Start Draw" 
-                    : "Reopen Registration"
+                    ? t('admin.closeRegistrationStart') 
+                    : t('admin.reopenRegistration')
                 }
               </Button>
 
@@ -254,7 +254,7 @@ export default function EventQRPage(): JSX.Element {
                     onClick={() => window.location.href = `/admin/events/${eventId}/draw`}
                     size="lg"
                   >
-                    Go to Draw Page
+                    {t('admin.goToDrawPage')}
                   </Button>
                 </div>
               )}
@@ -262,11 +262,11 @@ export default function EventQRPage(): JSX.Element {
           </Card>
 
           {/* Participants List */}
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>Registered Participants</CardTitle>
-              <CardDescription>
-                {participants.length} participants registered
+              <CardTitle className="dark:text-white">{t('admin.registeredParticipants')}</CardTitle>
+              <CardDescription className="dark:text-gray-300">
+                {t('admin.participantsCount', { count: participants.length })}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -274,19 +274,19 @@ export default function EventQRPage(): JSX.Element {
                 {participants.map((participant, index) => (
                   <div
                     key={participant.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
+                    className="flex items-center justify-between p-3 border dark:border-gray-600 dark:bg-gray-700 rounded-lg"
                   >
                     <div>
-                      <div className="font-medium">#{index + 1} {participant.name}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="font-medium dark:text-white">#{index + 1} {participant.name}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
                         {new Date(participant.registeredAt).toLocaleString()}
                       </div>
                     </div>
                   </div>
                 ))}
                 {participants.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    No participants yet. Share the QR code to get started!
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    {t('admin.noParticipantsYet')}
                   </div>
                 )}
               </div>
@@ -297,17 +297,17 @@ export default function EventQRPage(): JSX.Element {
 
       {/* Modal for notifications */}
       <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
-        <DialogContent>
+        <DialogContent className="dark:bg-gray-800 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle className={modal.type === 'error' ? 'text-red-600' : 'text-green-600'}>
+            <DialogTitle className={modal.type === 'error' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
               {modal.title}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="dark:text-gray-300">
               {modal.message}
             </DialogDescription>
           </DialogHeader>
           <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>
-            OK
+            {t('common.ok')}
           </Button>
         </DialogContent>
       </Dialog>
