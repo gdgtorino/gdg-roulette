@@ -1,13 +1,17 @@
 services:
   traefik:
-    image: traefik:v3.0
+    image: traefik:v3.1
     container_name: the-draw-traefik
+    restart: unless-stopped
     command:
       - "--api.dashboard=true"
+      - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--log.level=INFO"
+      - "--accesslog=true"
     ports:
       - "8090:80"
       - "8443:443"
@@ -16,22 +20,35 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - the-draw-network
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   redis:
     image: redis:7-alpine
     container_name: the-draw-redis
+    restart: unless-stopped
     ports:
       - "6380:6379"
     volumes:
       - redis-data:/data
     networks:
       - the-draw-network
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   backend:
     build:
       context: ./apps/backend
       dockerfile: Dockerfile
     container_name: the-draw-backend
+    restart: unless-stopped
     environment:
       - NODE_ENV=production
       - PORT=3001
@@ -41,27 +58,46 @@ services:
       - ADMIN_DEFAULT_USER=${ADMIN_DEFAULT_USER:-admin}
       - ADMIN_DEFAULT_PASSWORD=${ADMIN_DEFAULT_PASSWORD:-admin}
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`localhost:8090`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.rule=Host(`localhost`) && PathPrefix(`/api`)"
       - "traefik.http.services.backend.loadbalancer.server.port=3001"
+      - "traefik.http.routers.backend.middlewares=backend-stripprefix"
+      - "traefik.http.middlewares.backend-stripprefix.stripprefix.prefixes=/api"
     networks:
       - the-draw-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   frontend:
     build:
       context: ./apps/frontend
       dockerfile: Dockerfile
     container_name: the-draw-frontend
+    restart: unless-stopped
     environment:
+      - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=http://localhost:8090/api
+    depends_on:
+      backend:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`localhost:8090`)"
+      - "traefik.http.routers.frontend.rule=Host(`localhost`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.frontend.priority=1"
     networks:
       - the-draw-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   redis-data:
