@@ -5,6 +5,14 @@ import { useParams } from "next/navigation";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useSocket } from "@/hooks/useSocket";
 
 interface Event {
@@ -39,6 +47,7 @@ export default function DrawPage(): JSX.Element {
   const [currentWinner, setCurrentWinner] = useState<Winner | null>(null);
   const [rouletteSpinning, setRouletteSpinning] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
+  const [modal, setModal] = useState<{open: boolean; title: string; message: string; type: 'success' | 'error';}>({ open: false, title: '', message: '', type: 'success' });
 
   const fetchEventData = async (): Promise<void> => {
     try {
@@ -84,7 +93,7 @@ export default function DrawPage(): JSX.Element {
 
   const drawWinner = async (): Promise<void> => {
     if (availableParticipants.length === 0) {
-      alert("No participants available to draw!");
+      setModal({ open: true, title: 'No Participants', message: 'No participants available to draw!', type: 'error' });
       return;
     }
 
@@ -116,11 +125,11 @@ export default function DrawPage(): JSX.Element {
           
         } else {
           const error = await response.json() as { error: string };
-          alert(error.error || "Failed to draw winner");
+          setModal({ open: true, title: 'Draw Failed', message: error.error || 'Failed to draw winner', type: 'error' });
           setRouletteSpinning(false);
         }
       } catch (error) {
-        alert("Network error");
+        setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
         setRouletteSpinning(false);
       } finally {
         setDrawing(false);
@@ -396,6 +405,21 @@ export default function DrawPage(): JSX.Element {
           </Card>
         )}
       </div>
+      
+      {/* Error Modal */}
+      <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{modal.title}</DialogTitle>
+            <DialogDescription>
+              {modal.message}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

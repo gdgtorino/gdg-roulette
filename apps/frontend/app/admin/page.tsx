@@ -4,11 +4,20 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function AdminPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [modal, setModal] = useState<{open: boolean; title: string; message: string; type: 'success' | 'error';}>({ open: false, title: '', message: '', type: 'success' });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,10 +37,10 @@ export default function AdminPage() {
         window.location.href = "/admin/dashboard";
       } else {
         const error = await response.json();
-        alert(error.error || "Login failed");
+        setModal({ open: true, title: 'Login Failed', message: error.error || 'Login failed', type: 'error' });
       }
     } catch (error) {
-      alert("Network error");
+      setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -70,6 +79,21 @@ export default function AdminPage() {
           </form>
         </CardContent>
       </Card>
+      
+      {/* Error Modal */}
+      <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{modal.title}</DialogTitle>
+            <DialogDescription>
+              {modal.message}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
