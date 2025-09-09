@@ -30,8 +30,7 @@ services:
     image: redis:7-alpine
     container_name: the-draw-redis
     restart: unless-stopped
-    ports:
-      - "6380:6379"
+    # No exposed ports - Redis is only accessible within Docker network
     volumes:
       - redis-data:/data
     networks:
@@ -49,14 +48,16 @@ services:
       dockerfile: Dockerfile
     container_name: the-draw-backend
     restart: unless-stopped
+    ports:
+      - "3001:3001"
     environment:
       - NODE_ENV=production
       - PORT=3001
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
-      - CORS_ORIGIN=http://localhost:8090
       - ADMIN_DEFAULT_USER=${ADMIN_DEFAULT_USER:-admin}
       - ADMIN_DEFAULT_PASSWORD=${ADMIN_DEFAULT_PASSWORD:-admin}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:8090}
     depends_on:
       redis:
         condition: service_healthy
