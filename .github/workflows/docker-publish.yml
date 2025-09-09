@@ -41,7 +41,9 @@ jobs:
           yarn workspace @the-draw/frontend lint
 
       - name: Run TypeScript build
-        run: yarn build
+        run: |
+          yarn workspace @the-draw/backend build
+          yarn workspace @the-draw/frontend build
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
