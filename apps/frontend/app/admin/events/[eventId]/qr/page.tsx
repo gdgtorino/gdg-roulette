@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useSocket } from "@/hooks/useSocket";
+import { useTranslation } from "@/hooks/useTranslation";
+import DarkModeToggle from "@/components/DarkModeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface Event {
   id: string;
@@ -24,6 +27,8 @@ interface Participant {
 }
 
 export default function EventQRPage(): JSX.Element {
+  const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
   const params = useParams();
   const eventId = params.eventId as string;
   
@@ -139,41 +144,47 @@ export default function EventQRPage(): JSX.Element {
   });
 
   useEffect(() => {
+    setMounted(true);
     void fetchEventData();
   }, [eventId]);
 
-  if (loading) {
+  if (!mounted || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div>Loading event...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-900 dark:text-gray-100">{t('common.loading')}</div>
       </div>
     );
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div>Event not found</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-900 dark:text-gray-100">{t('common.eventNotFound')}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
         <div className="mx-auto max-w-4xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{event.name}</h1>
-              <p className="text-gray-600">Event QR Code & Registration</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{event.name}</h1>
+              <p className="text-gray-600 dark:text-gray-400">{t('admin.eventQRRegistration')}</p>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => window.location.href = '/admin/dashboard'}
-            >
-              Back to Dashboard
-            </Button>
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
+              <DarkModeToggle />
+              <Button
+                variant="outline"
+                onClick={() => window.location.href = '/admin/dashboard'}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                {t('admin.backToDashboard')}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -181,11 +192,11 @@ export default function EventQRPage(): JSX.Element {
       <div className="mx-auto max-w-4xl px-6 py-6">
         <div className="grid gap-6 lg:grid-cols-2">
           {/* QR Code Card */}
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>Registration QR Code</CardTitle>
-              <CardDescription>
-                Participants scan this QR code to register for the lottery
+              <CardTitle className="dark:text-white">{t('admin.registrationQR')}</CardTitle>
+              <CardDescription className="dark:text-gray-300">
+                {t('admin.scanToRegister')}
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
@@ -200,13 +211,13 @@ export default function EventQRPage(): JSX.Element {
               
               {/* Registration Link */}
               <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-2">Registration Link:</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t('admin.registrationLink')}:</p>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 p-2 bg-gray-100 rounded text-sm break-all">
+                  <code className="flex-1 p-2 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded text-sm break-all">
                     {registrationUrl}
                   </code>
                   <Button size="sm" onClick={copyLink}>
-                    Copy
+                    {t('admin.copy')}
                   </Button>
                 </div>
               </div>

@@ -81,10 +81,10 @@ export default function ManageAdminPage(): JSX.Element {
         setModal({ open: true, title: t('common.success'), message: t('admin.adminCreated'), type: 'success' });
       } else {
         const error = await response.json() as { error: string };
-        setModal({ open: true, title: 'Error', message: error.error || 'Failed to create admin', type: 'error' });
+        setModal({ open: true, title: t('common.error'), message: error.error || t('admin.failedToCreate'), type: 'error' });
       }
     } catch (error) {
-      setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
+      setModal({ open: true, title: t('common.error'), message: t('common.networkError'), type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -109,13 +109,13 @@ export default function ManageAdminPage(): JSX.Element {
 
       if (response.ok) {
         await fetchAdmins();
-        setModal({ open: true, title: 'Success', message: 'Admin deleted successfully', type: 'success' });
+        setModal({ open: true, title: t('common.success'), message: t('admin.adminDeleted'), type: 'success' });
       } else {
         const error = await response.json() as { error: string };
-        setModal({ open: true, title: 'Error', message: error.error || 'Failed to delete admin', type: 'error' });
+        setModal({ open: true, title: t('common.error'), message: error.error || t('admin.failedToDelete'), type: 'error' });
       }
     } catch (error) {
-      setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
+      setModal({ open: true, title: t('common.error'), message: t('common.networkError'), type: 'error' });
     } finally {
       setDeleteLoading(null);
     }
