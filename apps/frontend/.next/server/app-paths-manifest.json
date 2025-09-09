@@ -1,0 +1,12 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/admin/events/[eventId]/draw/page": "app/admin/events/[eventId]/draw/page.js",
+  "/admin/events/[eventId]/qr/page": "app/admin/events/[eventId]/qr/page.js",
+  "/admin/events/[eventId]/results/page": "app/admin/events/[eventId]/results/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/page": "app/page.js",
+  "/admin/manage/page": "app/admin/manage/page.js",
+  "/register/[eventId]/page": "app/register/[eventId]/page.js",
+  "/waiting/[eventId]/[participantId]/page": "app/waiting/[eventId]/[participantId]/page.js"
+}
