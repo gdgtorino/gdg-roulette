@@ -5,6 +5,24 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Event {
   id: string;
@@ -26,6 +44,8 @@ export default function AdminDashboard(): JSX.Element {
   const [eventName, setEventName] = useState("");
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [modal, setModal] = useState<{open: boolean; title: string; message: string; type: 'success' | 'error';}>({ open: false, title: '', message: '', type: 'success' });
+  const [deleteDialog, setDeleteDialog] = useState<{open: boolean; event: Event | null;}>({ open: false, event: null });
 
   const fetchEvents = async (): Promise<void> => {
     try {
@@ -71,40 +91,41 @@ export default function AdminDashboard(): JSX.Element {
         window.location.href = `/admin/events/${newEvent.id}/qr`;
       } else {
         const error = await response.json() as { error: string };
-        alert(error.error || "Failed to create event");
+        setModal({ open: true, title: 'Error', message: error.error || 'Failed to create event', type: 'error' });
       }
     } catch (error) {
-      alert("Network error");
+      setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteEvent = async (eventId: string): Promise<void> => {
-    const eventToDelete = events.find(e => e.id === eventId);
-    if (!eventToDelete) return;
+  const openDeleteDialog = (event: Event): void => {
+    setDeleteDialog({ open: true, event });
+  };
 
-    if (!confirm(`Are you sure you want to delete event "${eventToDelete.name}"? This will also delete all participants and winners.`)) {
-      return;
-    }
+  const confirmDeleteEvent = async (): Promise<void> => {
+    const event = deleteDialog.event;
+    if (!event) return;
 
-    setDeleteLoading(eventId);
+    setDeleteDialog({ open: false, event: null });
+    setDeleteLoading(event.id);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/events/${eventId}`, {
+      const response = await fetch(`/api/events/${event.id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
         await fetchEvents();
-        alert("Event deleted successfully");
+        setModal({ open: true, title: 'Success', message: 'Event deleted successfully', type: 'success' });
       } else {
         const error = await response.json() as { error: string };
-        alert(error.error || "Failed to delete event");
+        setModal({ open: true, title: 'Error', message: error.error || 'Failed to delete event', type: 'error' });
       }
     } catch (error) {
-      alert("Network error");
+      setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
     } finally {
       setDeleteLoading(null);
     }
@@ -246,7 +267,7 @@ export default function AdminDashboard(): JSX.Element {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => void deleteEvent(event.id)}
+                        onClick={() => openDeleteDialog(event)}
                         disabled={deleteLoading === event.id}
                       >
                         {deleteLoading === event.id ? "..." : "Delete"}
@@ -293,7 +314,7 @@ export default function AdminDashboard(): JSX.Element {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => void deleteEvent(event.id)}
+                        onClick={() => openDeleteDialog(event)}
                         disabled={deleteLoading === event.id}
                       >
                         {deleteLoading === event.id ? "..." : "Delete"}
@@ -311,6 +332,37 @@ export default function AdminDashboard(): JSX.Element {
           </Card>
         </div>
       </div>
+
+      {/* Success/Error Modal */}
+      <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{modal.title}</DialogTitle>
+            <DialogDescription>
+              {modal.message}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete event "{deleteDialog.event?.name}"? This will also delete all participants and winners. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void confirmDeleteEvent()}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

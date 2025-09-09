@@ -4,6 +4,24 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Admin {
   id: string;
@@ -17,6 +35,8 @@ export default function ManageAdminPage(): JSX.Element {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [modal, setModal] = useState<{open: boolean; title: string; message: string; type: 'success' | 'error';}>({ open: false, title: '', message: '', type: 'success' });
+  const [deleteDialog, setDeleteDialog] = useState<{open: boolean; admin: Admin | null;}>({ open: false, admin: null });
 
   const fetchAdmins = async (): Promise<void> => {
     try {
@@ -53,40 +73,44 @@ export default function ManageAdminPage(): JSX.Element {
         setUsername("");
         setPassword("");
         await fetchAdmins();
-        alert("Admin created successfully");
+        setModal({ open: true, title: 'Success', message: 'Admin created successfully', type: 'success' });
       } else {
         const error = await response.json() as { error: string };
-        alert(error.error || "Failed to create admin");
+        setModal({ open: true, title: 'Error', message: error.error || 'Failed to create admin', type: 'error' });
       }
     } catch (error) {
-      alert("Network error");
+      setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteAdmin = async (adminUsername: string): Promise<void> => {
-    if (!confirm(`Are you sure you want to delete admin "${adminUsername}"?`)) {
-      return;
-    }
+  const openDeleteDialog = (admin: Admin): void => {
+    setDeleteDialog({ open: true, admin });
+  };
 
-    setDeleteLoading(adminUsername);
+  const confirmDeleteAdmin = async (): Promise<void> => {
+    const admin = deleteDialog.admin;
+    if (!admin) return;
+
+    setDeleteDialog({ open: false, admin: null });
+    setDeleteLoading(admin.username);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/admin/${adminUsername}`, {
+      const response = await fetch(`/api/admin/${admin.username}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
         await fetchAdmins();
-        alert("Admin deleted successfully");
+        setModal({ open: true, title: 'Success', message: 'Admin deleted successfully', type: 'success' });
       } else {
         const error = await response.json() as { error: string };
-        alert(error.error || "Failed to delete admin");
+        setModal({ open: true, title: 'Error', message: error.error || 'Failed to delete admin', type: 'error' });
       }
     } catch (error) {
-      alert("Network error");
+      setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
     } finally {
       setDeleteLoading(null);
     }
@@ -162,7 +186,7 @@ export default function ManageAdminPage(): JSX.Element {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => void deleteAdmin(admin.username)}
+                      onClick={() => openDeleteDialog(admin)}
                       disabled={deleteLoading === admin.username}
                     >
                       {deleteLoading === admin.username ? "Deleting..." : "Delete"}
@@ -188,6 +212,37 @@ export default function ManageAdminPage(): JSX.Element {
           </Button>
         </div>
       </div>
+
+      {/* Success/Error Modal */}
+      <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{modal.title}</DialogTitle>
+            <DialogDescription>
+              {modal.message}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Admin</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete admin "{deleteDialog.admin?.username}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void confirmDeleteAdmin()}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
