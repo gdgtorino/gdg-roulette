@@ -31,7 +31,9 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: yarn install --mode=update-lockfile
+        run: |
+          yarn install || yarn install --mode=update-lockfile
+          yarn install
 
       - name: Run linting
         run: |
