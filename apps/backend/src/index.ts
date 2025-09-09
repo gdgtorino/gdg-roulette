@@ -37,12 +37,12 @@ app.use('/api/events', eventRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req, res): void => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Socket.io connection handling
-io.on('connection', (socket) => {
+io.on('connection', (socket): void => {
   console.log('User connected:', socket.id);
   
   // Join event room
@@ -57,23 +57,23 @@ io.on('connection', (socket) => {
     console.log(`User ${socket.id} left event ${eventId}`);
   });
   
-  socket.on('disconnect', () => {
+  socket.on('disconnect', (): void => {
     console.log('User disconnected:', socket.id);
   });
 });
 
 // Error handling middleware
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction): void => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
 // 404 handler
-app.use((req: express.Request, res: express.Response) => {
+app.use((req: express.Request, res: express.Response): void => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-async function startServer() {
+async function startServer(): Promise<void> {
   try {
     // Connect to Redis
     await redisService.connect();

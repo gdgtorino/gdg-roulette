@@ -1,13 +1,13 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, Application } from 'express';
 import { verifyToken } from '../utils/auth';
 import type { JWTPayload } from '../types';
 
 export interface AuthRequest extends Request {
   admin?: JWTPayload;
-  app?: Express.Application;
+  app?: Application;
 }
 
-export function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {
+export function authenticateToken(req: AuthRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
