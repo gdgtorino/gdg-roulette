@@ -5,6 +5,10 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/useTranslation";
+import DarkModeToggle from "@/components/DarkModeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import Link from "next/link";
 
 interface Event {
   id: string;
@@ -13,6 +17,8 @@ interface Event {
 }
 
 export default function RegisterPage(): JSX.Element {
+  const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
   const params = useParams();
   const eventId = params.eventId as string;
   
@@ -41,11 +47,11 @@ export default function RegisterPage(): JSX.Element {
         const eventData = await response.json() as Event;
         setEvent(eventData);
       } else {
-        setError("Event not found");
+        setError(t('registration.notFound'));
       }
     } catch (error) {
       console.error("Failed to fetch event:", error);
-      setError("Failed to load event");
+      setError(t('common.error'));
     }
   };
 
@@ -157,7 +163,7 @@ export default function RegisterPage(): JSX.Element {
         window.location.href = `/waiting/${eventId}/${participant.id}`;
       } else {
         const error = await response.json() as { error: string };
-        setError(error.error || "Registration failed");
+        setError(error.error || t('registration.error'));
       }
     } catch (error) {
       setError("Network error. Please try again.");
@@ -167,6 +173,7 @@ export default function RegisterPage(): JSX.Element {
   };
 
   useEffect(() => {
+    setMounted(true);
     void fetchEvent();
   }, [eventId]);
 
@@ -189,23 +196,42 @@ export default function RegisterPage(): JSX.Element {
     };
   }, [name]);
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+        <div className="text-gray-900 dark:text-white">{t('common.loading')}</div>
+      </div>
+    );
+  }
+
   if (!event && !error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div>Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4 flex gap-2">
+          <LanguageSwitcher />
+          <DarkModeToggle />
+        </div>
+        <div className="text-gray-900 dark:text-white">{t('common.loading')}</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4 flex gap-2">
+          <LanguageSwitcher />
+          <DarkModeToggle />
+        </div>
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <CardTitle className="text-red-600">Error</CardTitle>
+            <CardTitle className="text-red-600 dark:text-red-400">{t('registration.error')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-gray-600">{error}</p>
+            <p className="text-center text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+            <Link href="/">
+              <Button className="w-full">{t('registration.backToHome')}</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -213,30 +239,36 @@ export default function RegisterPage(): JSX.Element {
   }
 
   if (!event) {
-    return <div>Loading...</div>;
+    return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
+      <div className="text-gray-900 dark:text-white">{t('common.loading')}</div>
+    </div>;
   }
 
   if (registered) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900 dark:to-emerald-900 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4 flex gap-2">
+          <LanguageSwitcher />
+          <DarkModeToggle />
+        </div>
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <CardTitle className="text-green-600">🎉 Registration Successful!</CardTitle>
-            <CardDescription>You're all set for the lottery</CardDescription>
+            <CardTitle className="text-green-600 dark:text-green-400">🎉 {t('registration.alreadyRegistered')}</CardTitle>
+            <CardDescription className="dark:text-gray-300">{t('lottery.description')}</CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <div className="mb-4">
-              <p className="text-lg font-semibold text-gray-900">Event: {event.name}</p>
-              <p className="text-gray-600">Your name: <span className="font-medium">{name}</span></p>
+              <p className="text-lg font-semibold text-gray-900 dark:text-white">Event: {event.name}</p>
+              <p className="text-gray-600 dark:text-gray-300">{t('registration.yourName')}: <span className="font-medium">{name}</span></p>
             </div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-yellow-800">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
                 <strong>Important:</strong> Keep this page open or screenshot it. 
                 The draw will happen when the organizer is ready.
               </p>
             </div>
-            <p className="text-sm text-gray-500">
-              Good luck! 🍀
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('waiting.goodLuck')}
             </p>
           </CardContent>
         </Card>
@@ -246,16 +278,23 @@ export default function RegisterPage(): JSX.Element {
 
   if (!event.registrationOpen) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-rose-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-900 dark:to-rose-900 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4 flex gap-2">
+          <LanguageSwitcher />
+          <DarkModeToggle />
+        </div>
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <CardTitle className="text-red-600">Registration Closed</CardTitle>
-            <CardDescription>{event.name}</CardDescription>
+            <CardTitle className="text-red-600 dark:text-red-400">{t('registration.closed')}</CardTitle>
+            <CardDescription className="dark:text-gray-300">{event.name}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-gray-600">
-              Sorry, registration for this event has been closed.
+            <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
+              {t('registration.closedMessage')}
             </p>
+            <Link href="/">
+              <Button className="w-full">{t('registration.backToHome')}</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -263,16 +302,20 @@ export default function RegisterPage(): JSX.Element {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="absolute top-4 right-4 flex gap-2">
+        <LanguageSwitcher />
+        <DarkModeToggle />
+      </div>
+      <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-900">Join the Lottery</CardTitle>
-          <CardDescription className="text-lg">{event.name}</CardDescription>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">{t('registration.title')}</CardTitle>
+          <CardDescription className="text-lg dark:text-gray-300">{event.name}</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm">{error}</p>
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
             </div>
           )}
           
@@ -281,11 +324,11 @@ export default function RegisterPage(): JSX.Element {
               <div className="relative">
                 <Input
                   type="text"
-                  placeholder="Enter your name (optional - we'll generate one for you)"
+                  placeholder={t('registration.namePlaceholder')}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   maxLength={50}
-                  className={`text-center ${
+                  className={`text-center dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 ${
                     nameValidation.isAvailable === false 
                       ? 'border-red-500 focus:border-red-500' 
                       : nameValidation.isAvailable === true 
@@ -299,12 +342,12 @@ export default function RegisterPage(): JSX.Element {
                   </div>
                 )}
                 {!nameValidation.isChecking && nameValidation.isAvailable === true && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-600">
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-600 dark:text-green-400">
                     ✓
                   </div>
                 )}
                 {!nameValidation.isChecking && nameValidation.isAvailable === false && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-600">
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-600 dark:text-red-400">
                     ✗
                   </div>
                 )}
@@ -313,17 +356,17 @@ export default function RegisterPage(): JSX.Element {
               {nameValidation.message && (
                 <p className={`text-xs mt-1 text-center ${
                   nameValidation.isAvailable === true 
-                    ? 'text-green-600' 
+                    ? 'text-green-600 dark:text-green-400' 
                     : nameValidation.isAvailable === false 
-                      ? 'text-red-600' 
-                      : 'text-gray-600'
+                      ? 'text-red-600 dark:text-red-400' 
+                      : 'text-gray-600 dark:text-gray-400'
                 }`}>
                   {nameValidation.message}
                 </p>
               )}
               
-              <p className="text-xs text-gray-500 mt-1 text-center">
-                Leave empty for a fun auto-generated name!
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+                {t('registration.optional')}
               </p>
             </div>
             
@@ -333,15 +376,15 @@ export default function RegisterPage(): JSX.Element {
               size="lg" 
               disabled={loading || (name.trim() && nameValidation.isAvailable === false) || nameValidation.isChecking}
             >
-              {loading ? "Registering..." : 
+              {loading ? t('registration.registering') : 
                nameValidation.isChecking ? "Checking name..." :
                (name.trim() && nameValidation.isAvailable === false) ? "Name not available" :
-               "Join Lottery 🎯"}
+               t('registration.register') + " 🎯"}
             </Button>
           </form>
           
           <div className="mt-4 text-center">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               By joining, you confirm you're eligible to participate
             </p>
           </div>

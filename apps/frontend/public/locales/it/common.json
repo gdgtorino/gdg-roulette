@@ -89,7 +89,17 @@
     "readyToDraw": "Pronto per Estrarre",
     "closeButton": "Chiudi Estrazione",
     "extractionClosed": "Estrazione Chiusa",
-    "extractionClosedMessage": "L'estrazione è stata chiusa. I partecipanti che non hanno vinto riceveranno la notifica."
+    "extractionClosedMessage": "L'estrazione è stata chiusa. I partecipanti che non hanno vinto riceveranno la notifica.",
+    "registrationStillOpen": "La registrazione è ancora aperta",
+    "closeRegistrationFirst": "Chiudi prima la registrazione per iniziare l'estrazione",
+    "goBackToQR": "Torna alla Pagina QR",
+    "closeDraw": "Chiudi Estrazione",
+    "backToDashboard": "Torna al Dashboard",
+    "winnerNumber": "Vincitore #",
+    "allParticipantsDrawn": "Tutti i partecipanti sono stati estratti!",
+    "winnersDrawnSoFar": "vincitori estratti finora",
+    "drawn": "Estratto",
+    "participantsNotDrawnYet": "Partecipanti che non sono ancora stati estratti"
   },
   "common": {
     "loading": "Caricamento...",

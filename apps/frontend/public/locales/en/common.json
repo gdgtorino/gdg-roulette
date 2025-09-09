@@ -89,7 +89,17 @@
     "readyToDraw": "Ready to Draw",
     "closeButton": "Close Draw",
     "extractionClosed": "Draw Closed",
-    "extractionClosedMessage": "The draw has been closed. Participants who didn't win will receive the notification."
+    "extractionClosedMessage": "The draw has been closed. Participants who didn't win will receive the notification.",
+    "registrationStillOpen": "Registration is still open",
+    "closeRegistrationFirst": "Please close registration before starting the draw",
+    "goBackToQR": "Go Back to QR Page",
+    "closeDraw": "Close Draw",
+    "backToDashboard": "Back to Dashboard",
+    "winnerNumber": "Winner #",
+    "allParticipantsDrawn": "All participants have been drawn!",
+    "winnersDrawnSoFar": "winners drawn so far",
+    "drawn": "Drawn",
+    "participantsNotDrawnYet": "Participants who haven't been drawn yet"
   },
   "common": {
     "loading": "Loading...",

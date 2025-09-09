@@ -231,12 +231,16 @@ export default function WaitingPage(): JSX.Element {
 
   if (isWinner && winnerDetails) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-gold-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md border-4 border-yellow-400 shadow-2xl">
-          <CardHeader className="text-center bg-gradient-to-r from-yellow-400 to-yellow-500 text-white rounded-t-lg">
-            <CardTitle className="text-4xl font-bold">🎉 YOU WON! 🎉</CardTitle>
-            <CardDescription className="text-yellow-100 text-lg">
-              Congratulations!
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-gold-100 dark:from-yellow-900 dark:to-yellow-800 flex items-center justify-center p-4">
+        <div className="absolute top-4 right-4 flex gap-2">
+          <LanguageSwitcher />
+          <DarkModeToggle />
+        </div>
+        <Card className="w-full max-w-md border-4 border-yellow-400 dark:border-yellow-500 shadow-2xl dark:bg-gray-800">
+          <CardHeader className="text-center bg-gradient-to-r from-yellow-400 to-yellow-500 dark:from-yellow-600 dark:to-yellow-700 text-white rounded-t-lg">
+            <CardTitle className="text-4xl font-bold">🎉 {t('winner.youWon')} 🎉</CardTitle>
+            <CardDescription className="text-yellow-100 dark:text-yellow-200 text-lg">
+              {t('winner.congratulations')}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-8 text-center">
@@ -246,28 +250,28 @@ export default function WaitingPage(): JSX.Element {
                  winnerDetails.drawOrder === 2 ? '🥈' : 
                  winnerDetails.drawOrder === 3 ? '🥉' : '🏆'}
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 {participant?.name || winnerDetails.participantName}
               </h2>
-              <p className="text-lg text-gray-700 mb-2">
-                <strong>Position #{winnerDetails.drawOrder}</strong>
+              <p className="text-lg text-gray-700 dark:text-gray-300 mb-2">
+                <strong>{t('winner.position')} #{winnerDetails.drawOrder}</strong>
               </p>
-              <p className="text-lg font-semibold text-yellow-700">
+              <p className="text-lg font-semibold text-yellow-700 dark:text-yellow-300">
                 {event.name}
               </p>
             </div>
             
-            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-yellow-800 font-medium">
-                🎊 You have won the lottery! 🎊
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-700 rounded-lg p-4 mb-4">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+                🎊 {t('winner.lotteryWon')} 🎊
               </p>
-              <p className="text-xs text-yellow-700 mt-1">
-                Contact the organizer to claim your prize
+              <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                {t('winner.contactOrganizer')}
               </p>
             </div>
 
-            <p className="text-xs text-gray-500">
-              Drawn at: {new Date(winnerDetails.drawnAt).toLocaleString()}
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t('winner.drawnAt')}: {new Date(winnerDetails.drawnAt).toLocaleString()}
             </p>
           </CardContent>
         </Card>
@@ -276,54 +280,58 @@ export default function WaitingPage(): JSX.Element {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="absolute top-4 right-4 flex gap-2">
+        <LanguageSwitcher />
+        <DarkModeToggle />
+      </div>
+      <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-900">
-            {registrationOpen ? "Registration Confirmed!" : "Waiting for Draw..."}
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            {registrationOpen ? t('waiting.registrationConfirmed') : t('waiting.waitingForDraw')}
           </CardTitle>
-          <CardDescription className="text-lg">{event.name}</CardDescription>
+          <CardDescription className="text-lg dark:text-gray-300">{event.name}</CardDescription>
         </CardHeader>
         <CardContent className="text-center">
           <div className="mb-6">
             <div className="text-4xl mb-4">
               {registrationOpen ? "✅" : "⏳"}
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
-              {participant?.name || "Participant"}
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              {participant?.name || t('waiting.participant')}
             </h2>
-            <p className="text-gray-600">
-              You're registered for this lottery!
+            <p className="text-gray-600 dark:text-gray-300">
+              {t('waiting.registered')}
             </p>
           </div>
 
           {registrationOpen ? (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-green-800">
-                <strong>✨ Registration is still open</strong>
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
+              <p className="text-sm text-green-800 dark:text-green-200">
+                <strong>✨ {t('waiting.registrationOpen')}</strong>
               </p>
-              <p className="text-xs text-green-700 mt-1">
-                More people can still join. The draw will start when registration closes.
+              <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                {t('waiting.moreCanJoin')}
               </p>
             </div>
           ) : (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-blue-800">
-                <strong>🎲 Registration closed - Draw in progress!</strong>
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                <strong>🎲 {t('waiting.drawInProgress')}</strong>
               </p>
-              <p className="text-xs text-blue-700 mt-1">
-                Stay on this page. You'll be notified instantly if you win!
+              <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                {t('waiting.stayOnPage')}
               </p>
             </div>
           )}
 
-          <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+          <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
             <div className={`w-3 h-3 rounded-full animate-pulse ${registrationOpen ? 'bg-green-500' : 'bg-blue-500'}`}></div>
-            <span>Live updates active</span>
+            <span>{t('waiting.liveUpdates')}</span>
           </div>
 
-          <div className="mt-6 text-xs text-gray-500">
-            <p>🍀 Good luck! Keep this page open to get instant results.</p>
+          <div className="mt-6 text-xs text-gray-500 dark:text-gray-400">
+            <p>🍀 {t('waiting.goodLuck')}</p>
           </div>
         </CardContent>
       </Card>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslation } from "@/hooks/useTranslation";
+import DarkModeToggle from "@/components/DarkModeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function AdminPage() {
+  const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState<{open: boolean; title: string; message: string; type: 'success' | 'error';}>({ open: false, title: '', message: '', type: 'success' });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,44 +46,63 @@ export default function AdminPage() {
         window.location.href = "/admin/dashboard";
       } else {
         const error = await response.json();
-        setModal({ open: true, title: 'Login Failed', message: error.error || 'Login failed', type: 'error' });
+        setModal({ open: true, title: t('admin.loginFailed'), message: error.error || t('admin.loginFailed'), type: 'error' });
       }
     } catch (error) {
-      setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
+      setModal({ open: true, title: t('common.error'), message: t('common.networkError'), type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Admin Login</CardTitle>
+            <CardDescription className="dark:text-gray-300">Loading...</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="absolute top-4 right-4 flex gap-2">
+        <LanguageSwitcher />
+        <DarkModeToggle />
+      </div>
+      <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
-          <CardDescription>Sign in to manage lottery events</CardDescription>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">{t('admin.loginTitle')}</CardTitle>
+          <CardDescription className="dark:text-gray-300">{t('admin.loginDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Input
                 type="text"
-                placeholder="Username"
+                placeholder={t('admin.username')}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
               />
             </div>
             <div>
               <Input
                 type="password"
-                placeholder="Password"
+                placeholder={t('admin.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? t('admin.signingIn') : t('admin.signIn')}
             </Button>
           </form>
         </CardContent>
@@ -82,15 +110,17 @@ export default function AdminPage() {
       
       {/* Error Modal */}
       <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
-        <DialogContent>
+        <DialogContent className="dark:bg-gray-800 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>{modal.title}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-white">{modal.title}</DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-300">
               {modal.message}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>OK</Button>
+            <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>
+              {t('common.ok')}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

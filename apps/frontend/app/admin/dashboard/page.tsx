@@ -5,6 +5,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/useTranslation";
+import DarkModeToggle from "@/components/DarkModeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import {
   Dialog,
   DialogContent,
@@ -39,8 +42,10 @@ interface Admin {
 }
 
 export default function AdminDashboard(): JSX.Element {
+  const { t } = useTranslation();
   const [events, setEvents] = useState<Event[]>([]);
   const [admin, setAdmin] = useState<Admin | null>(null);
+  const [mounted, setMounted] = useState(false);
   const [eventName, setEventName] = useState("");
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
@@ -91,10 +96,10 @@ export default function AdminDashboard(): JSX.Element {
         window.location.href = `/admin/events/${newEvent.id}/qr`;
       } else {
         const error = await response.json() as { error: string };
-        setModal({ open: true, title: 'Error', message: error.error || 'Failed to create event', type: 'error' });
+        setModal({ open: true, title: t('common.error'), message: error.error || 'Failed to create event', type: 'error' });
       }
     } catch (error) {
-      setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
+      setModal({ open: true, title: t('common.error'), message: 'Network error', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -119,13 +124,13 @@ export default function AdminDashboard(): JSX.Element {
 
       if (response.ok) {
         await fetchEvents();
-        setModal({ open: true, title: 'Success', message: 'Event deleted successfully', type: 'success' });
+        setModal({ open: true, title: t('common.success'), message: 'Event deleted successfully', type: 'success' });
       } else {
         const error = await response.json() as { error: string };
-        setModal({ open: true, title: 'Error', message: error.error || 'Failed to delete event', type: 'error' });
+        setModal({ open: true, title: t('common.error'), message: error.error || 'Failed to delete event', type: 'error' });
       }
     } catch (error) {
-      setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
+      setModal({ open: true, title: t('common.error'), message: 'Network error', type: 'error' });
     } finally {
       setDeleteLoading(null);
     }
@@ -138,6 +143,7 @@ export default function AdminDashboard(): JSX.Element {
   };
 
   useEffect(() => {
+    setMounted(true);
     // Check if logged in
     const token = localStorage.getItem("token");
     const adminData = localStorage.getItem("admin");
@@ -157,8 +163,10 @@ export default function AdminDashboard(): JSX.Element {
     void fetchEvents();
   }, []);
 
-  if (!admin) {
-    return <div>Loading...</div>;
+  if (!mounted || !admin) {
+    return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
+      <div className="text-gray-900 dark:text-white">{t('common.loading')}</div>
+    </div>;
   }
 
   // Separate events into current and old
@@ -174,21 +182,23 @@ export default function AdminDashboard(): JSX.Element {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
         <div className="mx-auto max-w-7xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">The Draw - Admin Dashboard</h1>
-              <p className="text-gray-600">Welcome, {admin.username}</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('admin.title')} - {t('admin.dashboard')}</h1>
+              <p className="text-gray-600 dark:text-gray-300">{t('lottery.welcome')}, {admin.username}</p>
             </div>
             <div className="flex items-center space-x-3">
+              <LanguageSwitcher />
+              <DarkModeToggle />
               <Link href="/admin/manage">
-                <Button variant="outline">Manage Admins</Button>
+                <Button variant="outline">{t('admin.manageAdmins')}</Button>
               </Link>
               <Button variant="outline" onClick={logout}>
-                Logout
+                {t('admin.logout')}
               </Button>
             </div>
           </div>
@@ -197,27 +207,27 @@ export default function AdminDashboard(): JSX.Element {
 
       <div className="mx-auto max-w-7xl px-6 py-6">
         {/* Create Event Card */}
-        <Card className="mb-8">
+        <Card className="mb-8 dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle>Create New Event</CardTitle>
-            <CardDescription>
-              Create a lottery event and get a QR code for participant registration
+            <CardTitle className="dark:text-white">{t('admin.createEvent')}</CardTitle>
+            <CardDescription className="dark:text-gray-300">
+              {t('lottery.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={createEvent} className="flex gap-4">
               <Input
                 type="text"
-                placeholder="Event name (e.g., 'Christmas Lottery 2024')"
+                placeholder={t('admin.eventName')}
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
                 required
-                className="flex-1"
+                className="flex-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 minLength={3}
                 maxLength={100}
               />
               <Button type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Create Event"}
+                {loading ? t('common.loading') : t('admin.createButton')}
               </Button>
             </form>
           </CardContent>
@@ -225,11 +235,11 @@ export default function AdminDashboard(): JSX.Element {
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Current Events */}
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>Current Events</CardTitle>
-              <CardDescription>
-                Events created in the last 24 hours
+              <CardTitle className="dark:text-white">{t('admin.events')}</CardTitle>
+              <CardDescription className="dark:text-gray-300">
+                {t('admin.registrationOpen')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -237,30 +247,30 @@ export default function AdminDashboard(): JSX.Element {
                 {currentEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="flex items-center justify-between rounded-lg border p-4"
+                    className="flex items-center justify-between rounded-lg border dark:border-gray-700 dark:bg-gray-700 p-4"
                   >
                     <div className="flex-1">
-                      <div className="font-medium">{event.name}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="font-medium dark:text-white">{event.name}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
                         Created: {new Date(event.createdAt).toLocaleString()}
                       </div>
-                      <div className="text-sm">
+                      <div className="text-sm dark:text-gray-300">
                         Registration: 
-                        <span className={event.registrationOpen ? "text-green-600 ml-1" : "text-red-600 ml-1"}>
-                          {event.registrationOpen ? "Open" : "Closed"}
+                        <span className={event.registrationOpen ? "text-green-600 dark:text-green-400 ml-1" : "text-red-600 dark:text-red-400 ml-1"}>
+                          {event.registrationOpen ? t('admin.registrationOpen') : t('admin.registrationClosed')}
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Link href={`/admin/events/${event.id}/qr`}>
                         <Button size="sm" variant="outline">
-                          QR Code
+                          {t('admin.viewQR')}
                         </Button>
                       </Link>
                       {!event.registrationOpen && (
                         <Link href={`/admin/events/${event.id}/draw`}>
                           <Button size="sm">
-                            Draw
+                            {t('admin.startDraw')}
                           </Button>
                         </Link>
                       )}
@@ -270,13 +280,13 @@ export default function AdminDashboard(): JSX.Element {
                         onClick={() => openDeleteDialog(event)}
                         disabled={deleteLoading === event.id}
                       >
-                        {deleteLoading === event.id ? "..." : "Delete"}
+                        {deleteLoading === event.id ? "..." : t('admin.deleteEvent')}
                       </Button>
                     </div>
                   </div>
                 ))}
                 {currentEvents.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     No current events. Create one to get started!
                   </div>
                 )}
@@ -285,10 +295,10 @@ export default function AdminDashboard(): JSX.Element {
           </Card>
 
           {/* Old Events */}
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>Previous Events</CardTitle>
-              <CardDescription>
+              <CardTitle className="dark:text-white">Previous Events</CardTitle>
+              <CardDescription className="dark:text-gray-300">
                 Events older than 24 hours
               </CardDescription>
             </CardHeader>
@@ -297,18 +307,18 @@ export default function AdminDashboard(): JSX.Element {
                 {oldEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="flex items-center justify-between rounded-lg border p-4 bg-gray-50"
+                    className="flex items-center justify-between rounded-lg border dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-700"
                   >
                     <div className="flex-1">
-                      <div className="font-medium text-gray-700">{event.name}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="font-medium text-gray-700 dark:text-gray-200">{event.name}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
                         Created: {new Date(event.createdAt).toLocaleString()}
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Link href={`/admin/events/${event.id}/results`}>
                         <Button size="sm" variant="outline">
-                          View Results
+                          {t('admin.viewResults')}
                         </Button>
                       </Link>
                       <Button
@@ -317,13 +327,13 @@ export default function AdminDashboard(): JSX.Element {
                         onClick={() => openDeleteDialog(event)}
                         disabled={deleteLoading === event.id}
                       >
-                        {deleteLoading === event.id ? "..." : "Delete"}
+                        {deleteLoading === event.id ? "..." : t('admin.deleteEvent')}
                       </Button>
                     </div>
                   </div>
                 ))}
                 {oldEvents.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     No previous events
                   </div>
                 )}
@@ -335,31 +345,31 @@ export default function AdminDashboard(): JSX.Element {
 
       {/* Success/Error Modal */}
       <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
-        <DialogContent>
+        <DialogContent className="dark:bg-gray-800 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>{modal.title}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="dark:text-white">{modal.title}</DialogTitle>
+            <DialogDescription className="dark:text-gray-300">
               {modal.message}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>OK</Button>
+            <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>{t('common.ok')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}>
-        <AlertDialogContent>
+        <AlertDialogContent className="dark:bg-gray-800 dark:border-gray-700">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Event</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="dark:text-white">{t('admin.deleteEvent')}</AlertDialogTitle>
+            <AlertDialogDescription className="dark:text-gray-300">
               Are you sure you want to delete event "{deleteDialog.event?.name}"? This will also delete all participants and winners. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => void confirmDeleteEvent()}>Delete</AlertDialogAction>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void confirmDeleteEvent()}>{t('admin.deleteEvent')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

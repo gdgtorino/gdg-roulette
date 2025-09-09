@@ -13,6 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import DarkModeToggle from "@/components/DarkModeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useSocket } from "@/hooks/useSocket";
 
 interface Event {
@@ -37,8 +40,10 @@ interface Winner {
 }
 
 export default function DrawPage(): JSX.Element {
+  const { t } = useTranslation();
   const params = useParams();
   const eventId = params.eventId as string;
+  const [mounted, setMounted] = useState(false);
   
   const [event, setEvent] = useState<Event | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -49,6 +54,10 @@ export default function DrawPage(): JSX.Element {
   const [rouletteSpinning, setRouletteSpinning] = useState(false);
   const [showWinner, setShowWinner] = useState(false);
   const [modal, setModal] = useState<{open: boolean; title: string; message: string; type: 'success' | 'error';}>({ open: false, title: '', message: '', type: 'success' });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchEventData = async (): Promise<void> => {
     try {
@@ -94,7 +103,7 @@ export default function DrawPage(): JSX.Element {
 
   const drawWinner = async (): Promise<void> => {
     if (availableParticipants.length === 0) {
-      setModal({ open: true, title: 'No Participants', message: 'No participants available to draw!', type: 'error' });
+      setModal({ open: true, title: t('draw.noParticipants'), message: t('draw.noParticipantsMessage'), type: 'error' });
       return;
     }
 
@@ -126,11 +135,11 @@ export default function DrawPage(): JSX.Element {
           
         } else {
           const error = await response.json() as { error: string };
-          setModal({ open: true, title: 'Draw Failed', message: error.error || 'Failed to draw winner', type: 'error' });
+          setModal({ open: true, title: t('draw.drawFailed'), message: error.error || t('draw.failedToDrawWinner'), type: 'error' });
           setRouletteSpinning(false);
         }
       } catch (error) {
-        setModal({ open: true, title: 'Error', message: 'Network error', type: 'error' });
+        setModal({ open: true, title: t('common.error'), message: t('common.networkError'), type: 'error' });
         setRouletteSpinning(false);
       } finally {
         setDrawing(false);
@@ -205,8 +214,8 @@ export default function DrawPage(): JSX.Element {
       if (response.ok) {
         setModal({
           open: true,
-          title: 'Estrazione Chiusa',
-          message: 'L\'estrazione è stata chiusa. I partecipanti che non hanno vinto riceveranno la notifica.',
+          title: t('draw.drawClosed'),
+          message: t('draw.drawClosedMessage'),
           type: 'success'
         });
         await fetchEventData();
@@ -214,16 +223,16 @@ export default function DrawPage(): JSX.Element {
         const error = await response.json() as { error: string };
         setModal({
           open: true,
-          title: 'Errore',
-          message: error.error || "Errore nella chiusura dell'estrazione",
+          title: t('common.error'),
+          message: error.error || t('draw.closeError'),
           type: 'error'
         });
       }
     } catch (error) {
       setModal({
         open: true,
-        title: 'Errore',
-        message: "Errore di rete",
+        title: t('common.error'),
+        message: t('common.networkError'),
         type: 'error'
       });
     }
@@ -253,30 +262,38 @@ export default function DrawPage(): JSX.Element {
     updateAvailableParticipants();
   }, [participants, winners]);
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-900 dark:text-gray-100">{t('common.loading')}</div>
+      </div>
+    );
+  }
+
   if (!event) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div>Loading...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-900 dark:text-gray-100">{t('common.loading')}</div>
       </div>
     );
   }
 
   if (event.registrationOpen) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader className="text-center">
-            <CardTitle className="text-yellow-600">Registration Still Open</CardTitle>
+            <CardTitle className="text-yellow-600 dark:text-yellow-400">{t('draw.registrationStillOpen')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-gray-600 mb-4">
-              Please close registration before starting the draw.
+            <p className="text-center text-gray-600 dark:text-gray-400 mb-4">
+              {t('draw.closeRegistrationFirst')}
             </p>
             <Button 
               onClick={() => window.location.href = `/admin/events/${eventId}/qr`}
               className="w-full"
             >
-              Go Back to QR Page
+              {t('draw.goBackToQR')}
             </Button>
           </CardContent>
         </Card>
@@ -285,29 +302,32 @@ export default function DrawPage(): JSX.Element {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="mx-auto max-w-6xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{event.name}</h1>
-              <p className="text-gray-600">Lottery Draw</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{event.name}</h1>
+              <p className="text-gray-600 dark:text-gray-400">{t('draw.title')}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
+              <DarkModeToggle />
               {event && !event.closed && winners.length > 0 && (
                 <Button
                   variant="destructive"
                   onClick={closeEvent}
                 >
-                  Chiudi Estrazione
+                  {t('draw.closeDraw')}
                 </Button>
               )}
               <Button
                 variant="outline"
                 onClick={() => window.location.href = '/admin/dashboard'}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                Back to Dashboard
+                {t('draw.backToDashboard')}
               </Button>
             </div>
           </div>
@@ -317,17 +337,17 @@ export default function DrawPage(): JSX.Element {
       <div className="mx-auto max-w-6xl px-6 py-6">
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Roulette & Draw Section */}
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>🎰 Draw Winner</CardTitle>
-              <CardDescription>
-                {availableParticipants.length} participants available
+              <CardTitle className="text-gray-900 dark:text-gray-100">🎰 {t('draw.drawWinner')}</CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
+                {t('draw.participantsAvailable', { count: availableParticipants.length })}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {/* Roulette Visual */}
               <div className="mb-6 flex justify-center">
-                <div className={`w-64 h-64 border-8 border-blue-500 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 ${
+                <div className={`w-64 h-64 border-8 border-blue-500 dark:border-blue-400 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 ${
                   rouletteSpinning ? 'animate-spin' : ''
                 }`} style={{
                   animationDuration: rouletteSpinning ? '0.1s' : undefined
@@ -335,22 +355,22 @@ export default function DrawPage(): JSX.Element {
                   {showWinner && currentWinner ? (
                     <div className="text-center">
                       <div className="text-4xl mb-2">🎉</div>
-                      <div className="font-bold text-lg text-gray-900">
+                      <div className="font-bold text-lg text-gray-900 dark:text-gray-100">
                         {currentWinner.participantName}
                       </div>
-                      <div className="text-sm text-gray-600">
-                        Winner #{currentWinner.drawOrder}
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {t('draw.winnerNumber', { number: currentWinner.drawOrder })}
                       </div>
                     </div>
                   ) : rouletteSpinning ? (
                     <div className="text-center">
                       <div className="text-4xl animate-bounce">🎯</div>
-                      <div className="font-bold text-lg">Drawing...</div>
+                      <div className="font-bold text-lg text-gray-900 dark:text-gray-100">{t('draw.drawing')}</div>
                     </div>
                   ) : (
                     <div className="text-center">
                       <div className="text-4xl">🎲</div>
-                      <div className="font-bold text-lg">Ready to Draw</div>
+                      <div className="font-bold text-lg text-gray-900 dark:text-gray-100">{t('draw.readyToDraw')}</div>
                     </div>
                   )}
                 </div>
@@ -364,7 +384,7 @@ export default function DrawPage(): JSX.Element {
                   size="lg"
                   className="mb-4"
                 >
-                  {drawing ? "Drawing..." : "🎰 Draw Next Winner"}
+                  {drawing ? t('draw.drawing') : `🎰 ${t('draw.drawNextWinner')}`}
                 </Button>
 
                 {currentWinner && showWinner && (
@@ -373,15 +393,16 @@ export default function DrawPage(): JSX.Element {
                       variant="outline"
                       onClick={resetCurrentWinner}
                       size="sm"
+                      className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
-                      Clear Winner Display
+                      {t('draw.clearWinnerDisplay')}
                     </Button>
                   </div>
                 )}
 
                 {availableParticipants.length === 0 && (
-                  <p className="text-gray-500 text-sm">
-                    All participants have been drawn!
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    {t('draw.allParticipantsDrawn')}
                   </p>
                 )}
               </div>
@@ -389,11 +410,11 @@ export default function DrawPage(): JSX.Element {
           </Card>
 
           {/* Winners List */}
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>🏆 Winners</CardTitle>
-              <CardDescription>
-                {winners.length} winners drawn so far
+              <CardTitle className="text-gray-900 dark:text-gray-100">🏆 {t('draw.winners')}</CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
+                {t('draw.winnersDrawnSoFar', { count: winners.length })}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -401,14 +422,14 @@ export default function DrawPage(): JSX.Element {
                 {winners.map((winner) => (
                   <div
                     key={winner.id}
-                    className="flex items-center justify-between p-4 border rounded-lg bg-yellow-50 border-yellow-200"
+                    className="flex items-center justify-between p-4 border rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
                   >
                     <div>
-                      <div className="font-bold text-lg text-yellow-800">
+                      <div className="font-bold text-lg text-yellow-800 dark:text-yellow-200">
                         #{winner.drawOrder} {winner.participantName}
                       </div>
-                      <div className="text-sm text-yellow-600">
-                        Drawn: {new Date(winner.drawnAt).toLocaleString()}
+                      <div className="text-sm text-yellow-600 dark:text-yellow-400">
+                        {t('draw.drawn')}: {new Date(winner.drawnAt).toLocaleString()}
                       </div>
                     </div>
                     <div className="text-2xl">
@@ -417,8 +438,8 @@ export default function DrawPage(): JSX.Element {
                   </div>
                 ))}
                 {winners.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    No winners yet. Start drawing!
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    {t('draw.noWinnersYet')}
                   </div>
                 )}
               </div>
@@ -428,11 +449,11 @@ export default function DrawPage(): JSX.Element {
 
         {/* Remaining Participants */}
         {availableParticipants.length > 0 && (
-          <Card className="mt-6">
+          <Card className="mt-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>📋 Remaining Participants</CardTitle>
-              <CardDescription>
-                Participants who haven't been drawn yet
+              <CardTitle className="text-gray-900 dark:text-gray-100">📋 {t('draw.remainingParticipants')}</CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
+                {t('draw.participantsNotDrawnYet')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -440,10 +461,10 @@ export default function DrawPage(): JSX.Element {
                 {availableParticipants.map((participant, index) => (
                   <div
                     key={participant.id}
-                    className="p-3 border rounded-lg bg-gray-50 text-center"
+                    className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-center"
                   >
-                    <div className="font-medium">{participant.name}</div>
-                    <div className="text-xs text-gray-500">#{index + 1}</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{participant.name}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">#{index + 1}</div>
                   </div>
                 ))}
               </div>
@@ -454,15 +475,17 @@ export default function DrawPage(): JSX.Element {
       
       {/* Error Modal */}
       <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>{modal.title}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-gray-100">{modal.title}</DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               {modal.message}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>OK</Button>
+            <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>
+              {t('common.ok')}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
