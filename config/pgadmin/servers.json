@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "The Draw PostgreSQL",
+      "Group": "Development",
+      "Port": 5432,
+      "Username": "postgres",
+      "Host": "postgres",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "the_draw",
+      "PassFile": "/tmp/pgpassfile"
+    }
+  }
+}

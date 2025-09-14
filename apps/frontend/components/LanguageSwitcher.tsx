@@ -1,24 +1,22 @@
 "use client";
 
 import { useRouter, usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 
 export default function LanguageSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
-  const [currentLang, setCurrentLang] = useState('it');
-
-  useEffect(() => {
-    const savedLang = localStorage.getItem('language') || 'it';
-    setCurrentLang(savedLang);
-  }, []);
+  const locale = useLocale();
 
   const toggleLanguage = () => {
-    const newLang = currentLang === 'it' ? 'en' : 'it';
-    setCurrentLang(newLang);
-    localStorage.setItem('language', newLang);
-    // Reload page to apply new language
-    window.location.reload();
+    const newLocale = locale === 'it' ? 'en' : 'it';
+
+    // Replace the locale in the current pathname
+    const segments = pathname.split('/');
+    segments[1] = newLocale; // Replace the locale segment
+    const newPath = segments.join('/');
+
+    router.push(newPath);
   };
 
   return (
@@ -28,10 +26,10 @@ export default function LanguageSwitcher() {
       aria-label="Switch language"
     >
       <span className="text-lg">
-        {currentLang === 'it' ? '🇮🇹' : '🇬🇧'}
+        {locale === 'it' ? '🇮🇹' : '🇬🇧'}
       </span>
       <span className="text-sm font-medium dark:text-white">
-        {currentLang === 'it' ? 'IT' : 'EN'}
+        {locale === 'it' ? 'IT' : 'EN'}
       </span>
     </button>
   );

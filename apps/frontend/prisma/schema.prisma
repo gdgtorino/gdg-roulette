@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Lottery System Models
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  events    Event[]
+}
+
+model Event {
+  id               String        @id @default(cuid())
+  name             String
+  createdBy        String
+  createdAt        DateTime      @default(now())
+  registrationOpen Boolean       @default(true)
+  closed           Boolean       @default(false)
+  qrCode           String
+  admin            Admin         @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  participants     Participant[]
+  winners          Winner[]
+}
+
+model Participant {
+  id           String   @id @default(cuid())
+  eventId      String
+  name         String
+  registeredAt DateTime @default(now())
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  Winner       Winner[]
+
+  @@unique([eventId, name])
+}
+
+model Winner {
+  id              String      @id @default(cuid())
+  eventId         String
+  participantId   String
+  participantName String
+  drawOrder       Int
+  drawnAt         DateTime    @default(now())
+  event           Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  participant     Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, drawOrder])
+}

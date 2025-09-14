@@ -1,0 +1,36 @@
+# Development override for docker-compose.yml
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"  # Expose PostgreSQL in development
+    environment:
+      POSTGRES_PASSWORD: postgres  # Simple password for dev
+
+  redis:
+    ports:
+      - "6379:6379"  # Expose Redis in development
+
+  pgadmin:
+    ports:
+      - "8092:80"  # Expose PgAdmin in development
+
+  backend:
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/the_draw
+    volumes:
+      - ./apps/backend:/app
+      - /app/node_modules
+    command: yarn dev  # Hot reload in development
+
+  frontend:
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8090/api
+    volumes:
+      - ./apps/frontend:/app
+      - /app/node_modules
+      - /app/.next
+    command: yarn dev  # Hot reload in development

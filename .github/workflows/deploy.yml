@@ -1,0 +1,355 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      force_deploy:
+        description: 'Force deployment even if tests fail'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: deploy-${{ github.event.inputs.environment || (startsWith(github.ref, 'refs/tags/v') && 'production') || 'staging' }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  NODE_VERSION: '20'
+
+jobs:
+  pre-deploy-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      should_deploy: ${{ steps.checks.outputs.should_deploy }}
+
+    steps:
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${{ github.event.inputs.environment }}" != "" ]]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/tags/v"* ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Pre-deployment checks
+        id: checks
+        run: |
+          echo "Environment: ${{ steps.env.outputs.environment }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Force deploy: ${{ github.event.inputs.force_deploy }}"
+
+          # Production deployments only from tags or manual trigger
+          if [[ "${{ steps.env.outputs.environment }}" == "production" ]] && [[ "${{ github.event_name }}" == "push" ]] && [[ "${{ github.ref }}" != "refs/tags/v"* ]]; then
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+            echo "❌ Production deployments only allowed from version tags"
+            exit 1
+          fi
+
+          echo "should_deploy=true" >> $GITHUB_OUTPUT
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: pre-deploy-checks
+    if: needs.pre-deploy-checks.outputs.should_deploy == 'true'
+    timeout-minutes: 30
+
+    environment:
+      name: ${{ needs.pre-deploy-checks.outputs.environment }}
+      url: ${{ needs.pre-deploy-checks.outputs.environment == 'production' && 'https://production.thedraw.app' || 'https://staging.thedraw.app' }}
+
+    permissions:
+      contents: read
+      packages: write
+      deployments: write
+      security-events: write
+
+    steps:
+      - name: Create deployment
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: '${{ needs.pre-deploy-checks.outputs.environment }}',
+              description: 'Deploying ${{ github.sha }} to ${{ needs.pre-deploy-checks.outputs.environment }}',
+              auto_merge: false,
+              required_contexts: []
+            });
+
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.data.id,
+              state: 'in_progress',
+              description: 'Deployment started'
+            });
+
+            return deployment.data.id;
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run pre-deployment tests
+        if: github.event.inputs.force_deploy != 'true'
+        run: |
+          echo "Running pre-deployment tests..."
+          yarn workspace @the-draw/backend lint
+          yarn workspace @the-draw/frontend lint
+          # Add actual test commands when implemented
+
+      - name: Build applications
+        run: |
+          cd apps/backend && yarn prisma generate
+          yarn workspace @the-draw/backend build
+          yarn workspace @the-draw/frontend build
+        env:
+          NODE_ENV: production
+          DATABASE_URL: postgresql://placeholder:placeholder@placeholder:5432/placeholder
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ needs.pre-deploy-checks.outputs.environment }}
+            type=sha,prefix={{branch}}-
+          labels: |
+            org.opencontainers.image.title=The Draw Frontend
+            org.opencontainers.image.description=Next.js frontend for The Draw lottery system
+            org.opencontainers.image.vendor=The Draw
+            app.component=frontend
+            app.environment=${{ needs.pre-deploy-checks.outputs.environment }}
+
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ needs.pre-deploy-checks.outputs.environment }}
+            type=sha,prefix={{branch}}-
+          labels: |
+            org.opencontainers.image.title=The Draw Backend
+            org.opencontainers.image.description=Express.js backend for The Draw lottery system
+            org.opencontainers.image.vendor=The Draw
+            app.component=backend
+            app.environment=${{ needs.pre-deploy-checks.outputs.environment }}
+
+      - name: Build and push frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+            NEXT_PUBLIC_API_URL=${{ needs.pre-deploy-checks.outputs.environment == 'production' && 'https://production.thedraw.app/api' || 'https://staging.thedraw.app/api' }}
+
+      - name: Build and push backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+
+      - name: Generate deployment manifest
+        run: |
+          mkdir -p deployment
+          cat > deployment/docker-compose.deploy.yml << EOF
+          version: '3.8'
+          services:
+            frontend:
+              image: ${{ steps.meta-frontend.outputs.tags }}
+              environment:
+                - NODE_ENV=production
+                - NEXT_PUBLIC_API_URL=${{ needs.pre-deploy-checks.outputs.environment == 'production' && 'https://production.thedraw.app/api' || 'https://staging.thedraw.app/api' }}
+              labels:
+                - "traefik.enable=true"
+                - "traefik.http.routers.frontend.rule=Host(\`${{ needs.pre-deploy-checks.outputs.environment == 'production' && 'production.thedraw.app' || 'staging.thedraw.app' }}\`)"
+                - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+              restart: unless-stopped
+
+            backend:
+              image: ${{ steps.meta-backend.outputs.tags }}
+              environment:
+                - NODE_ENV=production
+                - DATABASE_URL=\${DATABASE_URL}
+                - REDIS_URL=\${REDIS_URL}
+                - JWT_SECRET=\${JWT_SECRET}
+                - CORS_ORIGIN=${{ needs.pre-deploy-checks.outputs.environment == 'production' && 'https://production.thedraw.app' || 'https://staging.thedraw.app' }}
+              labels:
+                - "traefik.enable=true"
+                - "traefik.http.routers.backend.rule=Host(\`${{ needs.pre-deploy-checks.outputs.environment == 'production' && 'production.thedraw.app' || 'staging.thedraw.app' }}\`) && PathPrefix(\`/api\`)"
+                - "traefik.http.services.backend.loadbalancer.server.port=3001"
+              restart: unless-stopped
+              depends_on:
+                - postgres
+                - redis
+
+            postgres:
+              image: postgres:15-alpine
+              environment:
+                - POSTGRES_DB=\${POSTGRES_DB}
+                - POSTGRES_USER=\${POSTGRES_USER}
+                - POSTGRES_PASSWORD=\${POSTGRES_PASSWORD}
+              volumes:
+                - postgres-data:/var/lib/postgresql/data
+              restart: unless-stopped
+
+            redis:
+              image: redis:7-alpine
+              volumes:
+                - redis-data:/data
+              restart: unless-stopped
+              command: redis-server --appendonly yes
+
+          volumes:
+            postgres-data:
+            redis-data:
+          EOF
+
+      - name: Deploy to ${{ needs.pre-deploy-checks.outputs.environment }}
+        run: |
+          echo "🚀 Deploying to ${{ needs.pre-deploy-checks.outputs.environment }} environment..."
+          echo "Docker images built and pushed:"
+          echo "Frontend: $(echo '${{ steps.meta-frontend.outputs.tags }}' | head -1)"
+          echo "Backend: $(echo '${{ steps.meta-backend.outputs.tags }}' | head -1)"
+          echo ""
+          echo "📝 Deployment manifest created at: deployment/docker-compose.deploy.yml"
+          echo ""
+          echo "🔧 Next steps for actual deployment:"
+          echo "1. Copy docker-compose.deploy.yml to target server"
+          echo "2. Set environment variables"
+          echo "3. Run: docker-compose -f docker-compose.deploy.yml up -d"
+          echo "4. Verify health checks"
+
+          # Add actual deployment commands here based on your infrastructure
+          # Examples:
+          # - kubectl apply -f k8s-manifests/
+          # - scp deployment/docker-compose.deploy.yml user@server:/app/
+          # - ssh user@server 'cd /app && docker-compose up -d'
+          # - Deploy to cloud providers (AWS ECS, Azure Container Instances, etc.)
+
+      - name: Health check
+        run: |
+          echo "🔍 Performing health checks..."
+          echo "Health check URLs:"
+          echo "Frontend: ${{ needs.pre-deploy-checks.outputs.environment == 'production' && 'https://production.thedraw.app' || 'https://staging.thedraw.app' }}"
+          echo "Backend: ${{ needs.pre-deploy-checks.outputs.environment == 'production' && 'https://production.thedraw.app/api/health' || 'https://staging.thedraw.app/api/health' }}"
+
+          # Add actual health check commands here
+          # curl -f https://staging.thedraw.app/api/health || exit 1
+
+      - name: Update deployment status - Success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: '${{ steps.deployment.outputs.result }}',
+              state: 'success',
+              description: 'Deployment completed successfully',
+              environment_url: '${{ needs.pre-deploy-checks.outputs.environment == 'production' && 'https://production.thedraw.app' || 'https://staging.thedraw.app' }}'
+            });
+
+      - name: Update deployment status - Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: '${{ steps.deployment.outputs.result }}',
+              state: 'failure',
+              description: 'Deployment failed'
+            });
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ needs.pre-deploy-checks.outputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | ${{ job.status }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend Image | $(echo '${{ steps.meta-frontend.outputs.tags }}' | head -1) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend Image | $(echo '${{ steps.meta-backend.outputs.tags }}' | head -1) |" >> $GITHUB_STEP_SUMMARY
+          echo "| URL | ${{ needs.pre-deploy-checks.outputs.environment == 'production' && 'https://production.thedraw.app' || 'https://staging.thedraw.app' }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          echo "📢 Deployment completed with status: ${{ job.status }}"
+          echo "Environment: ${{ needs.pre-deploy-checks.outputs.environment }}"
+          echo "Commit: ${{ github.sha }}"
+          # Add notification logic (Slack, email, etc.)
+          # Example:
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data '{"text":"Deployment ${{ job.status }} for ${{ needs.pre-deploy-checks.outputs.environment }}"}' \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }}

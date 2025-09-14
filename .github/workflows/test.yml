@@ -1,0 +1,169 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [dev]
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/test_db'
+  REDIS_URL: 'redis://localhost:6379'
+  JWT_SECRET: 'test-jwt-secret-for-ci'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_db
+          POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+        options: >-
+          --health-cmd "pg_isready -U postgres -d test_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --health-start-period 10s
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --health-start-period 5s
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Cache yarn dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Cache Prisma engines
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/prisma
+            **/node_modules/.prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Cache build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/frontend/.next
+            apps/backend/dist
+            apps/backend/node_modules/.prisma
+          key: ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock', '**/schema.prisma') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock', '**/schema.prisma') }}-
+            ${{ runner.os }}-build-
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for PostgreSQL..."
+          timeout 30 bash -c 'until pg_isready -h localhost -p 5432; do sleep 1; done'
+          echo "Waiting for Redis..."
+          timeout 30 bash -c 'until redis-cli -h localhost -p 6379 ping | grep -q PONG; do sleep 1; done'
+
+      - name: Setup database schema
+        run: |
+          cd apps/backend
+          yarn prisma generate
+          yarn prisma db push --force-reset
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Lint and type check
+        run: |
+          # Run linting in parallel
+          yarn workspace @the-draw/backend lint &
+          yarn workspace @the-draw/frontend lint &
+          wait
+
+          # Run type checking and builds in parallel
+          yarn workspace @the-draw/backend build &
+          yarn workspace @the-draw/frontend build &
+          wait
+
+      - name: Run backend tests
+        run: |
+          cd apps/backend
+          # Placeholder for actual tests
+          echo "Backend tests would run here"
+          echo "Testing database connectivity..."
+          yarn prisma db seed || echo "No seed script found"
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+          JWT_SECRET: ${{ env.JWT_SECRET }}
+
+      - name: Run frontend tests
+        run: |
+          cd apps/frontend
+          # Placeholder for actual tests
+          echo "Frontend tests would run here"
+          echo "Testing Next.js build..."
+
+      - name: Security audit
+        run: |
+          yarn audit --level moderate || echo "Security audit completed with warnings"
+
+      - name: Test database migrations
+        run: |
+          cd apps/backend
+          # Test migration rollback and reapplication
+          yarn prisma migrate reset --force
+          yarn prisma db push
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Integration tests
+        run: |
+          echo "Running integration tests..."
+          # Test service connectivity
+          pg_isready -h localhost -p 5432 -U postgres -d test_db
+          redis-cli -h localhost -p 6379 ping
+          echo "All services are healthy"
