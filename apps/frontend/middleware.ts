@@ -1,7 +1,35 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Check authentication for admin routes
+  if (pathname.startsWith('/(admin)') || pathname.startsWith('/admin')) {
+    const token = await getToken({ req: request });
+
+    if (!token || !token.isAdmin) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  // Check session for protected API routes
+  if (pathname.startsWith('/api/admin') || pathname.startsWith('/api/events/') && request.method !== 'GET') {
+    const token = await getToken({ req: request });
+
+    if (pathname.includes('/execute') || pathname.includes('/delete')) {
+      if (!token || !token.isAdmin) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
+    }
+  }
+
   // Handle CORS
   const response = NextResponse.next();
 
