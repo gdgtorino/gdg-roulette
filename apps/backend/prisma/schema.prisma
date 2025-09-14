@@ -11,114 +11,113 @@ datasource db {
   directUrl = env("DATABASE_DIRECT_URL")
 }
 
-// Admin/User model for authentication
-model User {
-  id        String   @id @default(cuid())
-  username  String   @unique
-  password  String
-  role      UserRole @default(ADMIN)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// Admin model for authentication and management
+model Admin {
+  id          String       @id @default(cuid())
+  username    String       @unique
+  password    String
+  permissions AdminRole[]  @default([ADMIN])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   // Relations
-  draws    Draw[]
+  events   Event[]
   sessions Session[]
 
-  @@map("users")
+  @@map("admins")
 }
 
-enum UserRole {
+enum AdminRole {
   ADMIN
   OPERATOR
+  VIEWER
+}
+
+// Event States Enum
+enum EventState {
+  INIT
+  REGISTRATION
+  DRAW
+  CLOSED
 }
 
 // Session management for database-based sessions
 model Session {
   id        String   @id @default(cuid())
-  sessionId String   @unique
   userId    String
-  data      Json
+  token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  admin Admin @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([sessionId])
+  @@index([token])
   @@index([expiresAt])
   @@map("sessions")
 }
 
-// Draw/Event model for lottery events
-model Draw {
-  id               String    @id @default(cuid())
+// Event model for lottery events
+model Event {
+  id               String      @id @default(cuid())
   name             String
-  description      String?
-  createdBy        String
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  registrationOpen Boolean   @default(true)
-  closed           Boolean   @default(false)
-  qrCode           String?
-  drawDate         DateTime?
+  state            EventState  @default(INIT)
   maxParticipants  Int?
-  prizeDescription String?
+  registrationLink String?
+  qrCode           String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  createdBy        String
 
   // Relations
-  createdByUser User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  tickets       Ticket[]
-  winners       Winner[]
+  admin        Admin         @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  participants Participant[]
+  winners      Winner[]
 
   @@index([createdBy])
-  @@index([registrationOpen])
-  @@index([closed])
-  @@index([drawDate])
-  @@map("draws")
+  @@index([state])
+  @@index([createdAt])
+  @@map("events")
 }
 
-// Ticket/Participant model for lottery participants
-model Ticket {
+// Participant model for event participants
+model Participant {
   id           String   @id @default(cuid())
-  drawId       String
   name         String
-  email        String?
-  phone        String?
+  eventId      String
+  userId       String?
   registeredAt DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  metadata     Json?
 
   // Relations
-  draw   Draw     @relation(fields: [drawId], references: [id], onDelete: Cascade)
+  event  Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   winner Winner?
 
-  @@unique([drawId, name])
-  @@index([drawId])
+  @@unique([eventId, name])
+  @@index([eventId])
   @@index([name])
   @@index([registeredAt])
-  @@map("tickets")
+  @@map("participants")
 }
 
-// Winner model for lottery winners
+// Winner model for event winners
 model Winner {
   id            String   @id @default(cuid())
-  drawId        String
-  ticketId      String   @unique
-  drawOrder     Int
+  participantId String   @unique
+  eventId       String
+  position      Int
   drawnAt       DateTime @default(now())
-  prize         String?
-  claimed       Boolean  @default(false)
-  claimedAt     DateTime?
-  notes         String?
+  updatedAt     DateTime @updatedAt
 
   // Relations
-  draw   Draw   @relation(fields: [drawId], references: [id], onDelete: Cascade)
-  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
-  @@unique([drawId, drawOrder])
-  @@index([drawId])
+  @@unique([eventId, position])
+  @@index([eventId])
   @@index([drawnAt])
-  @@index([claimed])
+  @@index([position])
   @@map("winners")
 }
 

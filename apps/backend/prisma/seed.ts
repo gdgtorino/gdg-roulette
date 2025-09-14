@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaClient, AdminRole, EventState } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -6,23 +6,23 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting seed...');
 
-  // Clear existing data
+  // Clear existing data in correct order due to foreign key constraints
   await prisma.winner.deleteMany();
-  await prisma.ticket.deleteMany();
-  await prisma.draw.deleteMany();
+  await prisma.participant.deleteMany();
+  await prisma.event.deleteMany();
   await prisma.session.deleteMany();
   await prisma.cache.deleteMany();
-  await prisma.user.deleteMany();
+  await prisma.admin.deleteMany();
 
   console.log('🧹 Cleared existing data');
 
   // Create admin user
   const hashedPassword = await bcrypt.hash('admin', 10);
-  const adminUser = await prisma.user.create({
+  const adminUser = await prisma.admin.create({
     data: {
       username: 'admin',
       password: hashedPassword,
-      role: UserRole.ADMIN,
+      permissions: [AdminRole.ADMIN],
     },
   });
 
@@ -30,159 +30,190 @@ async function main() {
 
   // Create operator user
   const operatorPassword = await bcrypt.hash('operator123', 10);
-  const operatorUser = await prisma.user.create({
+  const operatorUser = await prisma.admin.create({
     data: {
       username: 'operator',
       password: operatorPassword,
-      role: UserRole.OPERATOR,
+      permissions: [AdminRole.OPERATOR],
     },
   });
 
   console.log('👤 Created operator user:', operatorUser.username);
 
-  // Create sample draws
-  const sampleDraw1 = await prisma.draw.create({
+  // Create viewer user
+  const viewerPassword = await bcrypt.hash('viewer123', 10);
+  const viewerUser = await prisma.admin.create({
     data: {
-      name: 'Summer Raffle 2024',
-      description: 'Grand summer prize raffle with amazing prizes',
-      createdBy: adminUser.id,
-      registrationOpen: true,
-      closed: false,
-      qrCode: 'QR_SUMMER_2024',
-      drawDate: new Date('2024-12-25'),
+      username: 'viewer',
+      password: viewerPassword,
+      permissions: [AdminRole.VIEWER],
+    },
+  });
+
+  console.log('👤 Created viewer user:', viewerUser.username);
+
+  // Create sample events in different states
+  const initEvent = await prisma.event.create({
+    data: {
+      name: 'Summer Tech Raffle 2024',
+      state: EventState.INIT,
       maxParticipants: 100,
-      prizeDescription: 'MacBook Pro, iPad, AirPods, and more!',
-    },
-  });
-
-  const sampleDraw2 = await prisma.draw.create({
-    data: {
-      name: 'Holiday Giveaway',
-      description: 'Special holiday season giveaway',
-      createdBy: operatorUser.id,
-      registrationOpen: true,
-      closed: false,
-      qrCode: 'QR_HOLIDAY_2024',
-      drawDate: new Date('2024-12-31'),
-      maxParticipants: 50,
-      prizeDescription: 'Gift cards and holiday packages',
-    },
-  });
-
-  const completedDraw = await prisma.draw.create({
-    data: {
-      name: 'Spring Contest 2024',
-      description: 'Completed spring contest with winners',
+      registrationLink: 'https://the-draw.app/register/summer-tech-2024',
+      qrCode: 'QR_SUMMER_TECH_2024',
       createdBy: adminUser.id,
-      registrationOpen: false,
-      closed: true,
-      qrCode: 'QR_SPRING_2024',
-      drawDate: new Date('2024-04-15'),
-      maxParticipants: 30,
-      prizeDescription: 'Spring cleaning supplies and garden tools',
     },
   });
 
-  console.log('🎟️ Created sample draws');
+  const registrationEvent = await prisma.event.create({
+    data: {
+      name: 'Holiday Gaming Giveaway',
+      state: EventState.REGISTRATION,
+      maxParticipants: 50,
+      registrationLink: 'https://the-draw.app/register/holiday-gaming-2024',
+      qrCode: 'QR_HOLIDAY_GAMING_2024',
+      createdBy: operatorUser.id,
+    },
+  });
 
-  // Create sample tickets for active draws
-  const participants = [
-    { name: 'Alice Johnson', email: 'alice@example.com', phone: '+1234567890' },
-    { name: 'Bob Smith', email: 'bob@example.com', phone: '+1234567891' },
-    { name: 'Charlie Brown', email: 'charlie@example.com', phone: '+1234567892' },
-    { name: 'Diana Prince', email: 'diana@example.com', phone: '+1234567893' },
-    { name: 'Eve Adams', email: 'eve@example.com', phone: '+1234567894' },
-    { name: 'Frank Wilson', email: 'frank@example.com', phone: '+1234567895' },
-    { name: 'Grace Lee', email: 'grace@example.com', phone: '+1234567896' },
-    { name: 'Henry Garcia', email: 'henry@example.com', phone: '+1234567897' },
-    { name: 'Ivy Martinez', email: 'ivy@example.com', phone: '+1234567898' },
-    { name: 'Jack Davis', email: 'jack@example.com', phone: '+1234567899' },
+  const drawEvent = await prisma.event.create({
+    data: {
+      name: 'Spring Conference Prizes',
+      state: EventState.DRAW,
+      maxParticipants: 30,
+      registrationLink: 'https://the-draw.app/register/spring-conference-2024',
+      qrCode: 'QR_SPRING_CONF_2024',
+      createdBy: adminUser.id,
+    },
+  });
+
+  const closedEvent = await prisma.event.create({
+    data: {
+      name: 'Winter Charity Raffle',
+      state: EventState.CLOSED,
+      maxParticipants: 75,
+      registrationLink: 'https://the-draw.app/register/winter-charity-2024',
+      qrCode: 'QR_WINTER_CHARITY_2024',
+      createdBy: adminUser.id,
+    },
+  });
+
+  console.log('🎪 Created sample events in different states');
+
+  // Create sample participants
+  const participantNames = [
+    'Alice Johnson',
+    'Bob Smith',
+    'Charlie Brown',
+    'Diana Prince',
+    'Eve Adams',
+    'Frank Wilson',
+    'Grace Lee',
+    'Henry Garcia',
+    'Ivy Martinez',
+    'Jack Davis',
+    'Kate Miller',
+    'Liam Thompson',
+    'Maya Patel',
+    'Noah Chen',
+    'Olivia Rodriguez',
+    'Paul Kim',
+    'Quinn Foster',
+    'Rachel Green',
+    'Sam Taylor',
+    'Tina Wang',
   ];
 
-  // Add participants to summer raffle
-  const summerTickets = [];
+  // Add participants to registration event
+  const registrationParticipants = [];
   for (let i = 0; i < 8; i++) {
-    const participant = participants[i];
-    const ticket = await prisma.ticket.create({
+    const participant = await prisma.participant.create({
       data: {
-        drawId: sampleDraw1.id,
-        name: participant.name,
-        email: participant.email,
-        phone: participant.phone,
-        metadata: {
-          source: 'web',
-          referral: i % 2 === 0 ? 'social_media' : 'word_of_mouth',
-        },
+        name: participantNames[i],
+        eventId: registrationEvent.id,
+        userId: `user_${i + 1}`,
       },
     });
-    summerTickets.push(ticket);
+    registrationParticipants.push(participant);
   }
 
-  // Add participants to holiday giveaway
-  for (let i = 0; i < 5; i++) {
-    const participant = participants[i + 3];
-    await prisma.ticket.create({
+  // Add participants to draw event
+  const drawParticipants = [];
+  for (let i = 0; i < 12; i++) {
+    const participant = await prisma.participant.create({
       data: {
-        drawId: sampleDraw2.id,
-        name: participant.name,
-        email: participant.email,
-        phone: participant.phone,
-        metadata: {
-          source: 'qr_code',
-          location: 'event_booth',
-        },
+        name: participantNames[i + 5],
+        eventId: drawEvent.id,
+        userId: `user_${i + 6}`,
       },
     });
+    drawParticipants.push(participant);
   }
 
-  // Add participants and winners to completed draw
-  const completedTickets = [];
-  for (let i = 0; i < 6; i++) {
-    const participant = participants[i + 2];
-    const ticket = await prisma.ticket.create({
+  // Add participants to closed event
+  const closedParticipants = [];
+  for (let i = 0; i < 15; i++) {
+    const participant = await prisma.participant.create({
       data: {
-        drawId: completedDraw.id,
-        name: participant.name,
-        email: participant.email,
-        phone: participant.phone,
-        registeredAt: new Date(2024, 2, 10 + i), // March dates
+        name: participantNames[i % participantNames.length],
+        eventId: closedEvent.id,
+        userId: `user_${i + 21}`,
+        registeredAt: new Date(2024, 1, 10 + i), // February dates
       },
     });
-    completedTickets.push(ticket);
+    closedParticipants.push(participant);
   }
 
-  // Create winners for completed draw
-  const winners = [
-    { ticket: completedTickets[2], prize: '1st Prize - Garden Set', order: 1 },
-    { ticket: completedTickets[0], prize: '2nd Prize - Tool Kit', order: 2 },
-    { ticket: completedTickets[4], prize: '3rd Prize - Gift Card', order: 3 },
+  console.log('🎫 Created sample participants');
+
+  // Create winners for draw event (3 winners)
+  const drawWinners = [
+    { participant: drawParticipants[3], position: 1 },
+    { participant: drawParticipants[7], position: 2 },
+    { participant: drawParticipants[1], position: 3 },
   ];
 
-  for (const winner of winners) {
+  for (const winner of drawWinners) {
     await prisma.winner.create({
       data: {
-        drawId: completedDraw.id,
-        ticketId: winner.ticket.id,
-        drawOrder: winner.order,
-        prize: winner.prize,
-        drawnAt: new Date('2024-04-15T15:30:00'),
-        claimed: winner.order <= 2, // First two prizes claimed
-        claimedAt: winner.order <= 2 ? new Date('2024-04-16T10:00:00') : null,
-        notes: winner.order <= 2 ? 'Prize claimed successfully' : 'Awaiting claim',
+        participantId: winner.participant.id,
+        eventId: drawEvent.id,
+        position: winner.position,
+        drawnAt: new Date('2024-03-15T14:30:00'),
       },
     });
   }
 
-  console.log('🎫 Created sample tickets and winners');
+  // Create winners for closed event (5 winners)
+  const closedWinners = [
+    { participant: closedParticipants[8], position: 1 },
+    { participant: closedParticipants[2], position: 2 },
+    { participant: closedParticipants[11], position: 3 },
+    { participant: closedParticipants[5], position: 4 },
+    { participant: closedParticipants[14], position: 5 },
+  ];
 
-  // Create some cache entries
+  for (const winner of closedWinners) {
+    await prisma.winner.create({
+      data: {
+        participantId: winner.participant.id,
+        eventId: closedEvent.id,
+        position: winner.position,
+        drawnAt: new Date('2024-02-28T16:00:00'),
+      },
+    });
+  }
+
+  console.log('🏆 Created sample winners');
+
+  // Create cache entries for system configuration
   await prisma.cache.create({
     data: {
       key: 'system:stats',
       value: {
-        totalDraws: 3,
-        totalParticipants: 19,
-        totalWinners: 3,
+        totalEvents: 4,
+        totalParticipants: 35,
+        totalWinners: 8,
+        activeEvents: 2,
         lastUpdated: new Date().toISOString(),
       },
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
@@ -191,21 +222,69 @@ async function main() {
 
   await prisma.cache.create({
     data: {
-      key: 'config:max_participants_default',
+      key: 'config:default_max_participants',
       value: { value: 100 },
       expiresAt: null, // No expiration
     },
   });
 
+  await prisma.cache.create({
+    data: {
+      key: 'config:registration_timeout_hours',
+      value: { value: 72 },
+      expiresAt: null,
+    },
+  });
+
   console.log('💾 Created cache entries');
+
+  // Create sample sessions (for testing)
+  const sessionToken1 = 'session_token_admin_test_123';
+  const sessionToken2 = 'session_token_operator_test_456';
+
+  await prisma.session.create({
+    data: {
+      token: sessionToken1,
+      userId: adminUser.id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    },
+  });
+
+  await prisma.session.create({
+    data: {
+      token: sessionToken2,
+      userId: operatorUser.id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    },
+  });
+
+  console.log('🔐 Created sample sessions');
 
   console.log('✅ Seed completed successfully!');
   console.log('\n📊 Summary:');
-  console.log(`- Users: ${await prisma.user.count()}`);
-  console.log(`- Draws: ${await prisma.draw.count()}`);
-  console.log(`- Tickets: ${await prisma.ticket.count()}`);
+  console.log(`- Admins: ${await prisma.admin.count()}`);
+  console.log(`- Events: ${await prisma.event.count()}`);
+  console.log(`- Participants: ${await prisma.participant.count()}`);
   console.log(`- Winners: ${await prisma.winner.count()}`);
+  console.log(`- Sessions: ${await prisma.session.count()}`);
   console.log(`- Cache entries: ${await prisma.cache.count()}`);
+
+  console.log('\n🎯 Event States:');
+  const eventStates = await prisma.event.groupBy({
+    by: ['state'],
+    _count: { state: true },
+  });
+  eventStates.forEach(state => {
+    console.log(`- ${state.state}: ${state._count.state} events`);
+  });
+
+  console.log('\n👥 Admin Permissions:');
+  const adminPerms = await prisma.admin.findMany({
+    select: { username: true, permissions: true },
+  });
+  adminPerms.forEach(admin => {
+    console.log(`- ${admin.username}: ${admin.permissions.join(', ')}`);
+  });
 }
 
 main()
