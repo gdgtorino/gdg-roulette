@@ -68,8 +68,9 @@ export async function POST(
 
     await redisService.addWinner(winner);
 
-    // TODO: Emit real-time update using Server-Sent Events
-    // This will be implemented when we set up SSE
+    // Emit real-time update using Server-Sent Events
+    const { emitWinnerDrawn } = await import('@/lib/sse');
+    emitWinnerDrawn(params.eventId, winner);
 
     return NextResponse.json(winner);
   } catch (error) {

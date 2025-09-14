@@ -91,8 +91,9 @@ export async function POST(
 
     await redisService.addParticipant(participant);
 
-    // TODO: Emit real-time update using Server-Sent Events
-    // This will be implemented when we set up SSE
+    // Emit real-time update using Server-Sent Events
+    const { emitParticipantRegistered } = await import('@/lib/sse');
+    emitParticipantRegistered(params.eventId, participant);
 
     return NextResponse.json(participant, { status: 201 });
   } catch (error) {

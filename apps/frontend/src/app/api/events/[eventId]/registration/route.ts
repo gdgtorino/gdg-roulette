@@ -32,8 +32,9 @@ export async function PATCH(
     const newStatus = !event.registrationOpen;
     await redisService.updateEventRegistration(params.eventId, newStatus);
 
-    // TODO: Emit real-time update using Server-Sent Events
-    // This will be implemented when we set up SSE
+    // Emit real-time update using Server-Sent Events
+    const { emitRegistrationToggled } = await import('@/lib/sse');
+    emitRegistrationToggled(params.eventId, newStatus);
 
     return NextResponse.json({ registrationOpen: newStatus });
   } catch (error) {
