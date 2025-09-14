@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_DIRECT_URL")
+}
+
+// Admin/User model for authentication
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  role      UserRole @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  draws    Draw[]
+  sessions Session[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+}
+
+// Session management for database-based sessions
+model Session {
+  id        String   @id @default(cuid())
+  sessionId String   @unique
+  userId    String
+  data      Json
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// Draw/Event model for lottery events
+model Draw {
+  id               String    @id @default(cuid())
+  name             String
+  description      String?
+  createdBy        String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  registrationOpen Boolean   @default(true)
+  closed           Boolean   @default(false)
+  qrCode           String?
+  drawDate         DateTime?
+  maxParticipants  Int?
+  prizeDescription String?
+
+  // Relations
+  createdByUser User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  tickets       Ticket[]
+  winners       Winner[]
+
+  @@index([createdBy])
+  @@index([registrationOpen])
+  @@index([closed])
+  @@index([drawDate])
+  @@map("draws")
+}
+
+// Ticket/Participant model for lottery participants
+model Ticket {
+  id           String   @id @default(cuid())
+  drawId       String
+  name         String
+  email        String?
+  phone        String?
+  registeredAt DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  metadata     Json?
+
+  // Relations
+  draw   Draw     @relation(fields: [drawId], references: [id], onDelete: Cascade)
+  winner Winner?
+
+  @@unique([drawId, name])
+  @@index([drawId])
+  @@index([name])
+  @@index([registeredAt])
+  @@map("tickets")
+}
+
+// Winner model for lottery winners
+model Winner {
+  id            String   @id @default(cuid())
+  drawId        String
+  ticketId      String   @unique
+  drawOrder     Int
+  drawnAt       DateTime @default(now())
+  prize         String?
+  claimed       Boolean  @default(false)
+  claimedAt     DateTime?
+  notes         String?
+
+  // Relations
+  draw   Draw   @relation(fields: [drawId], references: [id], onDelete: Cascade)
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@unique([drawId, drawOrder])
+  @@index([drawId])
+  @@index([drawnAt])
+  @@index([claimed])
+  @@map("winners")
+}
+
+// Cache model for application caching
+model Cache {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([expiresAt])
+  @@map("cache")
+}

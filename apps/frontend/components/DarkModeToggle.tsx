@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/components/ThemeProvider';
 
 export default function DarkModeToggle() {
   const { theme, toggleTheme } = useTheme();

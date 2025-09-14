@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
-import { redisService } from '../services/redis';
-import type { Admin, JWTPayload } from '../types';
+import { databaseService } from '../services/database';
+import type { JWTPayload } from '../types';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-me';
 const SALT_ROUNDS = 10;
@@ -26,22 +26,20 @@ export function verifyToken(token: string): JWTPayload {
 export async function createDefaultAdmin(): Promise<void> {
   const username = process.env.ADMIN_DEFAULT_USER || 'admin';
   const password = process.env.ADMIN_DEFAULT_PASSWORD || 'admin';
-  
-  const existingAdmin = await redisService.getAdmin(username);
+
+  const existingAdmin = await databaseService.getAdmin(username);
   if (existingAdmin) {
-    // Ensure default admin is in the admins set
-    await redisService.client.sAdd('admins', username);
     return;
   }
-  
+
   const hashedPassword = await hashPassword(password);
-  const admin: Admin = {
+  const admin = {
     id: uuidv4(),
     username,
     password: hashedPassword,
     createdAt: new Date()
   };
-  
-  await redisService.createAdmin(admin);
+
+  await databaseService.createAdmin(admin);
   console.log(`Default admin created: ${username}`);
 }
