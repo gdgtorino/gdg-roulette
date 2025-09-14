@@ -18,3 +18,16 @@ apps/backend/build/
 # Temporary files
 *.tmp
 *.temp
+
+# Test outputs
+coverage/
+test-results/
+playwright-report/
+*.lcov
+junit.xml
+*.spec.js.map
+.nyc_output/
+
+# Test databases
+test_*.db
+*.test.db

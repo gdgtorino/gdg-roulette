@@ -12,7 +12,15 @@
     "build": "yarn workspaces foreach -t run build",
     "start": "yarn workspaces foreach -p run start",
     "clean": "yarn workspaces foreach run clean",
-    "test": "yarn workspaces foreach run test",
+    "test": "yarn test:unit && yarn test:integration",
+    "test:unit": "jest",
+    "test:integration": "vitest run",
+    "test:e2e": "playwright test",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "yarn test:unit --ci --coverage --passWithNoTests && yarn test:integration --run && yarn test:e2e",
+    "test:db": "NODE_ENV=test vitest run database/",
+    "test:setup": "node -r ts-node/register database/test-setup.ts",
     "lint": "yarn workspaces foreach run lint",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d",
@@ -33,8 +41,25 @@
     "logs:frontend": "docker-compose logs -f frontend"
   },
   "devDependencies": {
+    "@jest/globals": "^30.1.2",
+    "@playwright/test": "^1.55.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.1.3",
+    "jest-environment-jsdom": "^30.1.2",
+    "jest-junit": "^16.0.0",
+    "msw": "^2.11.2",
+    "playwright": "^1.55.0",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.4"
   },
   "packageManager": "yarn@4.0.0"
 }
