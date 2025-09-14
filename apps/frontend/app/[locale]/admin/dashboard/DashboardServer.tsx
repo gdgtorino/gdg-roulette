@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getEvents, getCurrentAdmin } from '@/lib/actions/events';
 import { logout } from '@/lib/actions/auth';
@@ -51,7 +51,7 @@ async function EventsData() {
 
 async function AdminHeader() {
   const admin = await getCurrentAdmin();
-  const t = useTranslations();
+  const t = await getTranslations();
 
   if (!admin) {
     return null;

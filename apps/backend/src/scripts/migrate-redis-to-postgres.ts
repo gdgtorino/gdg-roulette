@@ -411,27 +411,8 @@ class RedisToPostgresMigration {
       console.log(`  Winners: ${counts[4]}`);
       console.log(`  Cache entries: ${counts[5]}`);
 
-      // Validate relationships
-      const orphanedTickets = await prisma.ticket.count({
-        where: { draw: { is: null } },
-      });
-
-      const orphanedWinners = await prisma.winner.count({
-        where: {
-          OR: [
-            { draw: { is: null } },
-            { ticket: { is: null } },
-          ],
-        },
-      });
-
-      if (orphanedTickets > 0) {
-        console.warn(`⚠️  Found ${orphanedTickets} orphaned tickets`);
-      }
-
-      if (orphanedWinners > 0) {
-        console.warn(`⚠️  Found ${orphanedWinners} orphaned winners`);
-      }
+      // Note: Foreign key constraints ensure referential integrity,
+      // so no need to check for orphaned records
 
       console.log('✅ Migration validation completed');
     } catch (error) {

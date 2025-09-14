@@ -14,9 +14,9 @@ const databaseConfig = {
     },
   },
   // Enable query logging in development
-  log: process.env.NODE_ENV === 'development'
-    ? ['query', 'info', 'warn', 'error'] as const
-    : ['error'] as const,
+  log: (process.env.NODE_ENV === 'development'
+    ? ['query', 'info', 'warn', 'error']
+    : ['error']) as any,
   // Error formatting
   errorFormat: 'pretty' as const,
 };
@@ -69,7 +69,7 @@ export const withTransaction = async <T>(
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await prisma.$transaction(operation, {
+      return await prisma.$transaction(operation as any, {
         maxWait: 5000, // 5 seconds
         timeout: 30000, // 30 seconds
       });
@@ -204,7 +204,7 @@ export const sessionManager = {
     }
 
     return {
-      ...session.data,
+      ...(session.data as object),
       user: session.user,
     };
   },

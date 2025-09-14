@@ -6,6 +6,14 @@ import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/hooks/useTranslation";
 import { login } from '@/lib/actions/auth';
 
+// Wrapper action for useFormState
+async function loginWithState(
+  prevState: { success: boolean; error: string } | null,
+  formData: FormData
+) {
+  return login(formData);
+}
+
 function SubmitButton() {
   const { t } = useTranslation();
   const { pending } = useFormStatus();
@@ -19,7 +27,7 @@ function SubmitButton() {
 
 export function LoginForm() {
   const { t } = useTranslation();
-  const [state, formAction] = useFormState(login, null);
+  const [state, formAction] = useFormState(loginWithState, null);
 
   return (
     <form action={formAction} className="space-y-4">
