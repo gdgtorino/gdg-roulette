@@ -1,5 +1,4 @@
 import { Winner, Participant } from '../types';
-import { DatabaseConnection } from '../db/connection';
 
 export interface WinnerCreateData {
   eventId: string;
@@ -10,7 +9,7 @@ export interface WinnerCreateData {
 }
 
 export class WinnerService {
-  constructor(private db: DatabaseConnection = new DatabaseConnection()) {}
+  constructor() {}
 
   /**
    * Record a lottery winner

@@ -1,5 +1,4 @@
 import { Session, Admin, Participant } from '../types';
-import { DatabaseConnection } from '../db/connection';
 
 export interface SessionData {
   userId: string;
@@ -19,7 +18,7 @@ export class SessionService {
   private static readonly DEFAULT_SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
   private static readonly CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
 
-  constructor(private db: DatabaseConnection = new DatabaseConnection()) {
+  constructor() {
     // Start cleanup timer
     this.startCleanupTimer();
   }
