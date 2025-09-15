@@ -19,7 +19,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" className="w-full" disabled={pending}>
+    <Button type="submit" className="w-full" disabled={pending} data-testid="login-button">
       {pending ? t('admin.signingIn') : t('admin.signIn')}
     </Button>
   );
@@ -37,6 +37,7 @@ export function LoginForm() {
           name="username"
           placeholder={t('admin.username')}
           required
+          data-testid="username-input"
           className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
         />
       </div>
@@ -46,6 +47,7 @@ export function LoginForm() {
           name="password"
           placeholder={t('admin.password')}
           required
+          data-testid="password-input"
           className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
         />
       </div>
