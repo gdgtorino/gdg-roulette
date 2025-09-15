@@ -104,9 +104,16 @@ export class UserExperienceService {
                 winner = await this.checkWinnerStatus(eventId, participant.id);
               }
             } else {
-              // Session expired, clear stored state
-              this.userStateManager.clearUserState(eventId);
-              storedState = null;
+              // Session expired - we still have participant ID from stored state
+              if (storedState.participantId) {
+                try {
+                  participant = await this.participantService.findById(storedState.participantId);
+                } catch (error) {
+                  console.warn('Failed to recover participant for expired session:', error);
+                }
+              }
+              // Don't clear stored state yet - let determineUserState handle the expired session
+              session = null; // Mark session as invalid
             }
           }
         } catch (error) {
@@ -118,23 +125,23 @@ export class UserExperienceService {
       }
 
       // Determine current user state
+      const sessionWasProvided = !!(storedState?.sessionId || options?.sessionId);
       const userState = await this.userStateManager.determineUserState(
         eventId,
         event,
         participant,
         session,
         winner,
+        sessionWasProvided,
       );
 
       // Handle session expiration
       if (userState.status === 'SESSION_EXPIRED') {
-        this.userStateManager.clearUserState(eventId);
-        if (storedState) {
-          // Clear localStorage for expired sessions
-          if (typeof window !== 'undefined' && window.localStorage) {
-            window.localStorage.removeItem(`userState_${eventId}`);
-          }
+        // Clear localStorage for expired sessions
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.removeItem(`userState_${eventId}`);
         }
+        this.userStateManager.clearUserState(eventId);
       }
 
       return {
@@ -150,6 +157,7 @@ export class UserExperienceService {
           error.message.includes('fetch') ||
           error.message.includes('connection') ||
           error.name === 'NetworkError');
+
 
       return {
         success: false,
@@ -273,7 +281,7 @@ export class UserExperienceService {
     try {
       const socket = await this.notificationService.connectToLiveUpdates(eventId, participantId);
 
-      if (socket && socket.readyState === WebSocket.OPEN) {
+      if (socket && socket.readyState === 1) { // WebSocket.OPEN
         this.setupLiveUpdateHandlers(socket, options || {});
         return {
           connected: true,
@@ -333,7 +341,8 @@ export class UserExperienceService {
 
       if (result.connected) {
         if (options.onReconnection) {
-          options.onReconnection({ attempt, success: true });
+          // attempt represents the reconnection attempt number, but total attempts = attempt + 1 (initial attempt)
+          options.onReconnection({ attempt: attempt + 1, success: true });
         }
       } else {
         // Try again

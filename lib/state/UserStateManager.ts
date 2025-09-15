@@ -70,6 +70,7 @@ export class UserStateManager {
     participant?: any,
     session?: any,
     winner?: any,
+    sessionWasProvided?: boolean,
   ): Promise<UserState> {
     try {
       // Handle event not found
@@ -108,7 +109,7 @@ export class UserStateManager {
       }
 
       // Handle session expiration
-      if (participant && (!session || !session.valid)) {
+      if ((participant && (!session || !session.valid)) || (sessionWasProvided && !session)) {
         return {
           status: 'SESSION_EXPIRED',
           screen: 'REGISTRATION',

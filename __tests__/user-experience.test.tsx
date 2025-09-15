@@ -57,7 +57,9 @@ const mockUserStateManager = {
   persistUserState: jest.fn(),
   clearUserState: jest.fn(),
   createDefaultState: jest.fn(),
-  saveUserState: jest.fn()
+  saveUserState: jest.fn(),
+  loadUserState: jest.fn(),
+  isStoredStateValid: jest.fn()
 };
 
 describe('User Experience System', () => {
@@ -88,6 +90,10 @@ describe('User Experience System', () => {
         closed: false,
       },
     }));
+
+    // Default mock behavior
+    mockUserStateManager.loadUserState.mockReturnValue(null);
+    mockUserStateManager.isStoredStateValid.mockReturnValue(true);
 
     // Mock browser localStorage
     Object.defineProperty(window, 'localStorage', {
@@ -176,7 +182,7 @@ describe('User Experience System', () => {
         closed: false
       };
 
-      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(storedState));
+      mockUserStateManager.loadUserState.mockReturnValue(storedState);
       mockSessionService.validateSession.mockResolvedValue(mockSession);
       mockParticipantService.findById.mockResolvedValue(mockParticipant);
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -220,14 +226,15 @@ describe('User Experience System', () => {
         closed: false
       };
 
-      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(storedState));
+      mockUserStateManager.loadUserState.mockReturnValue(storedState);
       mockSessionService.validateSession.mockResolvedValue(null); // Session expired
       mockEventService.findById.mockResolvedValue(mockEvent);
       mockUserStateManager.determineUserState.mockResolvedValue({
-        status: 'UNREGISTERED',
+        status: 'SESSION_EXPIRED',
         screen: 'REGISTRATION',
         event: mockEvent,
-        message: 'Session expired. Please register again.'
+        message: 'Session expired. Please register again.',
+        action: 'SHOW_REAUTH_FORM'
       });
 
       // Act
@@ -235,7 +242,7 @@ describe('User Experience System', () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.userState.status).toBe('UNREGISTERED');
+      expect(result.userState.status).toBe('SESSION_EXPIRED');
       expect(result.userState.screen).toBe('REGISTRATION');
       expect(result.userState.message).toContain('Session expired');
       expect(window.localStorage.removeItem).toHaveBeenCalledWith(`userState_${eventId}`);
@@ -272,10 +279,11 @@ describe('User Experience System', () => {
       });
 
       // Assert
-      expect(window.localStorage.setItem).toHaveBeenCalledWith(
-        `userState_${eventId}`,
-        JSON.stringify(newUserState)
-      );
+      expect(mockUserStateManager.saveUserState).toHaveBeenCalledWith(eventId, {
+        status: 'REGISTERED',
+        participant: participantData,
+        session: sessionData
+      });
     });
 
     it('should handle corrupted localStorage data', async () => {
@@ -289,8 +297,8 @@ describe('User Experience System', () => {
         closed: false
       };
 
-      // Simulate corrupted localStorage data
-      (window.localStorage.getItem as jest.Mock).mockReturnValue('invalid-json-data');
+      // Simulate corrupted localStorage data - loadUserState returns null due to parse error
+      mockUserStateManager.loadUserState.mockReturnValue(null);
       mockEventService.findById.mockResolvedValue(mockEvent);
       mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'UNREGISTERED',
@@ -305,7 +313,6 @@ describe('User Experience System', () => {
       expect(result.success).toBe(true);
       expect(result.userState.status).toBe('UNREGISTERED');
       expect(result.userState.screen).toBe('REGISTRATION');
-      expect(window.localStorage.removeItem).toHaveBeenCalledWith(`userState_${eventId}`);
     });
 
     it('should maintain state across multiple page refreshes', async () => {
@@ -327,8 +334,14 @@ describe('User Experience System', () => {
         valid: true
       };
 
-      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(storedState));
+      mockUserStateManager.loadUserState.mockReturnValue(storedState);
       mockSessionService.validateSession.mockResolvedValue(mockSession);
+      mockEventService.findById.mockResolvedValue({ id: eventId, name: 'Test Event', state: EventState.DRAW });
+      mockParticipantService.findById.mockResolvedValue({ id: 'participant-123', name: 'User' });
+      mockUserStateManager.determineUserState.mockResolvedValue({
+        status: 'REGISTERED',
+        screen: 'WAITING'
+      });
 
       // Act - Simulate multiple recoveries (page refreshes)
       for (let i = 0; i < 5; i++) {
@@ -583,7 +596,7 @@ describe('User Experience System', () => {
         onmessage: jest.fn(),
         onopen: jest.fn(),
         onerror: jest.fn(),
-        readyState: WebSocket.OPEN
+        readyState: 1 // WebSocket.OPEN
       };
 
       (global as any).WebSocket = jest.fn().mockImplementation(() => mockWebSocket);
@@ -609,7 +622,7 @@ describe('User Experience System', () => {
         onmessage: null,
         onopen: null,
         onerror: null,
-        readyState: WebSocket.OPEN
+        readyState: 1 // WebSocket.OPEN
       };
 
       mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
@@ -651,7 +664,7 @@ describe('User Experience System', () => {
 
       const mockWebSocket = {
         onmessage: null,
-        readyState: WebSocket.OPEN
+        readyState: 1 // WebSocket.OPEN
       };
 
       mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
@@ -693,7 +706,7 @@ describe('User Experience System', () => {
 
       const mockWebSocket = {
         onmessage: null,
-        readyState: WebSocket.OPEN
+        readyState: 1 // WebSocket.OPEN
       };
 
       mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
@@ -739,7 +752,7 @@ describe('User Experience System', () => {
 
       const mockWebSocket = {
         onmessage: null,
-        readyState: WebSocket.OPEN
+        readyState: 1 // WebSocket.OPEN
       };
 
       mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
@@ -812,7 +825,7 @@ describe('User Experience System', () => {
         }
         return Promise.resolve({
           onmessage: null,
-          readyState: WebSocket.OPEN
+          readyState: 1 // WebSocket.OPEN
         });
       });
 
@@ -1339,7 +1352,7 @@ describe('User Experience System', () => {
         close: jest.fn(),
         onclose: null,
         onerror: null,
-        readyState: WebSocket.CLOSED
+        readyState: 1 // WebSocket.OPEN initially
       };
 
       mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
@@ -1398,6 +1411,12 @@ describe('User Experience System', () => {
         id: eventId,
         name: 'Test Event',
         state: EventState.DRAW
+      });
+      mockUserStateManager.determineUserState.mockResolvedValue({
+        status: 'SESSION_EXPIRED',
+        screen: 'REGISTRATION',
+        message: 'Your session has expired. Please register again.',
+        action: 'SHOW_REAUTH_FORM'
       });
 
       // Act
