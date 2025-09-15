@@ -9,12 +9,14 @@ export interface DrawResult {
   success: boolean;
   winner?: Winner;
   error?: string;
+  warning?: string;
 }
 
 export interface DrawBatchResult {
   success: boolean;
   winners: Winner[];
   error?: string;
+  eventClosed?: boolean;
 }
 
 export class LotteryService {
@@ -47,11 +49,19 @@ export class LotteryService {
         };
       }
 
+      // Check if event is in DRAW state
+      if (event.state !== 'DRAW') {
+        return {
+          success: false,
+          error: 'Cannot draw winners - event is not in DRAW state'
+        };
+      }
+
       // Verify admin owns the event (if createdBy is set)
       if (event.createdBy && event.createdBy !== adminId) {
         return {
           success: false,
-          error: 'Only event creator can perform draw'
+          error: 'Only event creator can draw winners'
         };
       }
 
@@ -66,16 +76,25 @@ export class LotteryService {
 
       // Check if event has reached maximum draws
       const currentWinnerCount = await this.winnerService.getWinnerCount(eventId);
-      const maxParticipants = event.maxParticipants || availableParticipants.length;
-      if (currentWinnerCount >= maxParticipants) {
+      const totalParticipants = await this.participantService.getTotalParticipants(eventId);
+      if (currentWinnerCount >= totalParticipants) {
         return {
           success: false,
-          error: 'All participants have been drawn'
+          error: 'All participants have already been drawn'
         };
       }
 
       // Use random service to select winner
       const selectedParticipant = await this.randomService.selectRandomParticipant(availableParticipants);
+
+      // Check if selected participant is already a winner (additional safety check)
+      const isAlreadyWinner = await this.winnerService.isParticipantWinner(eventId, selectedParticipant.id);
+      if (isAlreadyWinner) {
+        return {
+          success: false,
+          error: 'Selected participant is already a winner'
+        };
+      }
 
       // Create winner record
       const winner = await this.winnerService.createWinner({
@@ -86,19 +105,38 @@ export class LotteryService {
       });
 
       // Notify winner and broadcast update
+      let warning: string | undefined;
       try {
         await this.notificationService.notifyWinner(winner);
         await this.notificationService.broadcastDrawUpdate(eventId, winner);
       } catch (notificationError) {
         // Log error but don't fail the draw
         console.error('Notification failed:', notificationError);
+        warning = 'Winner selected but notification failed';
       }
 
       return {
         success: true,
-        winner
+        winner,
+        warning
       };
     } catch (error) {
+      // Handle specific error types
+      if (error instanceof Error) {
+        if (error.message.includes('Database') || error.message.includes('database')) {
+          return {
+            success: false,
+            error: 'Failed to create winner record'
+          };
+        }
+        if (error.message.includes('Random') || error.message.includes('random')) {
+          return {
+            success: false,
+            error: 'Failed to select random winner'
+          };
+        }
+      }
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error during draw'
@@ -212,15 +250,138 @@ export class LotteryService {
   /**
    * Draw all remaining participants
    */
-  async drawAllRemaining(eventId: string): Promise<DrawBatchResult> {
+  async drawAllRemaining(eventId: string, adminId: string): Promise<DrawBatchResult> {
     try {
-      const undrawenCount = await this.participantRepository.getUndrawenCount(eventId);
-      return await this.drawMultipleWinners(eventId, undrawenCount);
+      // Check if event exists and is in the correct state
+      const event = await this.eventService.findById(eventId);
+      if (!event) {
+        return {
+          success: false,
+          winners: [],
+          error: 'Event not found'
+        };
+      }
+
+      // Verify admin owns the event (if createdBy is set)
+      if (event.createdBy && event.createdBy !== adminId) {
+        return {
+          success: false,
+          winners: [],
+          error: 'Only event creator can draw winners'
+        };
+      }
+
+      // Get all participants for this event
+      const allParticipants = await this.participantService.getAllParticipants(eventId);
+      const currentWinnerCount = await this.winnerService.getWinnerCount(eventId);
+
+      const remainingCount = allParticipants.length - currentWinnerCount;
+      if (remainingCount <= 0) {
+        return {
+          success: false,
+          winners: [],
+          error: 'All participants have already been drawn'
+        };
+      }
+
+      const winners: Winner[] = [];
+      let drawOrder = currentWinnerCount;
+
+      // Draw remaining participants sequentially
+      for (let i = 0; i < remainingCount; i++) {
+        const availableParticipants = await this.participantService.getAvailableParticipants(eventId);
+
+        if (availableParticipants.length === 0) {
+          break; // No more participants available
+        }
+
+        // Select random participant
+        const selectedParticipant = await this.randomService.selectRandomParticipant(availableParticipants);
+
+        drawOrder++;
+
+        // Create winner record
+        const winner = await this.winnerService.createWinner({
+          eventId,
+          participantId: selectedParticipant.id,
+          participantName: selectedParticipant.name,
+          drawOrder
+        });
+
+        winners.push(winner);
+
+        // Notify winner
+        try {
+          await this.notificationService.notifyWinner(winner);
+          await this.notificationService.broadcastDrawUpdate(eventId, {
+            type: 'WINNER_DRAWN',
+            winner,
+            drawOrder,
+            timestamp: new Date()
+          });
+        } catch (notificationError) {
+          console.error('Notification failed:', notificationError);
+        }
+      }
+
+      // Auto-close event if all participants have been drawn
+      const totalParticipants = await this.participantService.getTotalParticipants(eventId);
+      let eventClosed = false;
+      if (winners.length + currentWinnerCount >= totalParticipants) {
+        try {
+          await this.eventService.autoCloseEvent(eventId);
+          eventClosed = true;
+        } catch (error) {
+          console.warn('Failed to auto-close event:', error);
+        }
+      }
+
+      return {
+        success: true,
+        winners,
+        eventClosed
+      };
     } catch (error) {
       return {
         success: false,
         winners: [],
-        error: `Draw all failed: ${error}`
+        error: `Draw all failed: ${error instanceof Error ? error.message : error}`
+      };
+    }
+  }
+
+  /**
+   * Draw with limit - draw up to specified number of winners
+   */
+  async drawWithLimit(eventId: string, adminId: string, limit: number): Promise<DrawBatchResult> {
+    try {
+      const winners: Winner[] = [];
+      const errors: string[] = [];
+
+      for (let i = 0; i < limit; i++) {
+        const result = await this.drawSingleWinner(eventId, adminId);
+        if (result.success && result.winner) {
+          winners.push(result.winner);
+        } else {
+          if (result.error === 'All participants have already been drawn' ||
+              result.error === 'No participants available for drawing') {
+            break; // Stop when no more participants available
+          }
+          errors.push(result.error || 'Unknown error');
+          break; // Stop on other errors
+        }
+      }
+
+      return {
+        success: winners.length > 0,
+        winners,
+        error: errors.length > 0 ? errors.join('; ') : undefined
+      };
+    } catch (error) {
+      return {
+        success: false,
+        winners: [],
+        error: `Limited draw failed: ${error instanceof Error ? error.message : error}`
       };
     }
   }
