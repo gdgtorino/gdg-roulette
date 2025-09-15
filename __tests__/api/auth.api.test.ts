@@ -10,14 +10,22 @@ import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import request from 'supertest';
 import { createMocks } from 'node-mocks-http';
 import { NextRequest, NextResponse } from 'next/server';
-import { POST as loginHandler } from '../../app/api/auth/login/route';
+import { POST as loginHandler, setTestAuthServices } from '../../app/api/auth/login/route';
 import { POST as logoutHandler } from '../../app/api/auth/logout/route';
-import { AuthService } from '../../lib/services/AuthService';
-import { SessionManager } from '../../lib/services/SessionManager';
 
 // Mock services
-jest.mock('../../lib/services/AuthService');
-jest.mock('../../lib/services/SessionManager');
+const mockAuthService = {
+  login: jest.fn(),
+  logout: jest.fn(),
+  validateSession: jest.fn(),
+  changePassword: jest.fn()
+};
+
+const mockSessionManager = {
+  createAdminSession: jest.fn(),
+  validateSession: jest.fn(),
+  invalidateSession: jest.fn()
+};
 
 // Helper function to create mock NextRequest
 function createMockRequest(data: any, headers: Record<string, string> = {}): NextRequest {
@@ -37,16 +45,15 @@ function createMockRequest(data: any, headers: Record<string, string> = {}): Nex
 }
 
 describe('/api/auth/* API Routes', () => {
-  let authService: jest.Mocked<AuthService>;
-  let sessionManager: jest.Mocked<SessionManager>;
-
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
 
-    // Create mocked instances
-    authService = new AuthService() as jest.Mocked<AuthService>;
-    sessionManager = new SessionManager() as jest.Mocked<SessionManager>;
+    // Inject mock services into the API route
+    setTestAuthServices({
+      mockAuthService: mockAuthService as any,
+      mockSessionManager: mockSessionManager as any
+    });
   });
 
   afterEach(() => {
@@ -63,7 +70,6 @@ describe('/api/auth/* API Routes', () => {
 
       const mockLoginResult = {
         success: true,
-        sessionToken: 'session-token-123',
         admin: {
           id: 'admin-123',
           username: 'admin1',
@@ -72,7 +78,8 @@ describe('/api/auth/* API Routes', () => {
         }
       };
 
-      authService.login.mockResolvedValue(mockLoginResult);
+      mockAuthService.login.mockResolvedValue(mockLoginResult);
+      mockSessionManager.createAdminSession.mockResolvedValue({ id: 'session-token-123' });
 
       const request = createMockRequest(loginData);
 
@@ -86,7 +93,7 @@ describe('/api/auth/* API Routes', () => {
       expect(responseData.sessionToken).toBe('session-token-123');
       expect(responseData.admin.username).toBe('admin1');
       expect(responseData.admin.role).toBe('ADMIN');
-      expect(authService.login).toHaveBeenCalledWith('admin1', 'SecurePass123!');
+      expect(mockAuthService.login).toHaveBeenCalledWith('admin1', 'SecurePass123!');
 
       // Check for secure cookie setting
       const setCookieHeader = response.headers.get('Set-Cookie');
@@ -108,7 +115,7 @@ describe('/api/auth/* API Routes', () => {
         error: 'Invalid credentials'
       };
 
-      authService.login.mockResolvedValue(mockLoginResult);
+      mockAuthService.login.mockResolvedValue(mockLoginResult);
 
       const request = createMockRequest(loginData);
 
@@ -172,7 +179,7 @@ describe('/api/auth/* API Routes', () => {
         password: 'SecurePass123!'
       };
 
-      authService.login.mockRejectedValue(new Error('Database connection failed'));
+      mockAuthService.login.mockRejectedValue(new Error('Database connection failed'));
 
       const request = createMockRequest(loginData);
 
@@ -198,7 +205,7 @@ describe('/api/auth/* API Routes', () => {
         error: 'Invalid credentials'
       };
 
-      authService.login.mockResolvedValue(mockLoginResult);
+      mockAuthService.login.mockResolvedValue(mockLoginResult);
 
       // Act - Make multiple failed login attempts
       const promises = [];
@@ -232,7 +239,7 @@ describe('/api/auth/* API Routes', () => {
         admin: { id: 'admin-123', username: 'admin1' }
       };
 
-      authService.login.mockResolvedValue(mockLoginResult);
+      mockAuthService.login.mockResolvedValue(mockLoginResult);
 
       const request = createMockRequest(loginData, {
         'Origin': 'http://localhost:3000'
@@ -260,7 +267,7 @@ describe('/api/auth/* API Routes', () => {
         error: 'Invalid credentials'
       };
 
-      authService.login.mockResolvedValue(mockLoginResult);
+      mockAuthService.login.mockResolvedValue(mockLoginResult);
       const securityLogSpy = jest.spyOn(console, 'warn').mockImplementation();
 
       const request = createMockRequest(loginData, {
@@ -295,7 +302,7 @@ describe('/api/auth/* API Routes', () => {
         success: true
       };
 
-      authService.logout.mockResolvedValue(mockLogoutResult);
+      mockAuthService.logout.mockResolvedValue(mockLogoutResult);
 
       const request = createMockRequest({}, {
         'Cookie': `sessionToken=${sessionToken}`
@@ -308,7 +315,7 @@ describe('/api/auth/* API Routes', () => {
       // Assert
       expect(response.status).toBe(200);
       expect(responseData.success).toBe(true);
-      expect(authService.logout).toHaveBeenCalledWith(sessionToken);
+      expect(mockAuthService.logout).toHaveBeenCalledWith(sessionToken);
 
       // Check for cookie clearing
       const setCookieHeader = response.headers.get('Set-Cookie');
@@ -329,14 +336,14 @@ describe('/api/auth/* API Routes', () => {
       expect(response.status).toBe(200); // Still successful
       expect(responseData.success).toBe(true);
       expect(responseData.message).toBe('Already logged out');
-      expect(authService.logout).not.toHaveBeenCalled();
+      expect(mockAuthService.logout).not.toHaveBeenCalled();
     });
 
     it('should handle logout service errors gracefully', async () => {
       // Arrange
       const sessionToken = 'session-token-123';
 
-      authService.logout.mockRejectedValue(new Error('Session service unavailable'));
+      mockAuthService.logout.mockRejectedValue(new Error('Session service unavailable'));
 
       const request = createMockRequest({}, {
         'Cookie': `sessionToken=${sessionToken}`
@@ -360,7 +367,7 @@ describe('/api/auth/* API Routes', () => {
         success: true
       };
 
-      authService.logout.mockResolvedValue(mockLogoutResult);
+      mockAuthService.logout.mockResolvedValue(mockLogoutResult);
 
       const request = createMockRequest({}, {
         'Cookie': `sessionToken=${sessionToken}; adminPrefs=theme-dark; csrfToken=csrf-123`
@@ -392,7 +399,7 @@ describe('/api/auth/* API Routes', () => {
         username: 'admin1'
       };
 
-      authService.logout.mockResolvedValue(mockLogoutResult);
+      mockAuthService.logout.mockResolvedValue(mockLogoutResult);
       const auditLogSpy = jest.spyOn(console, 'info').mockImplementation();
 
       const request = createMockRequest({}, {
@@ -439,17 +446,17 @@ describe('/api/auth/* API Routes', () => {
         session: null
       };
 
-      authService.validateSession
+      mockAuthService.validateSession
         .mockResolvedValueOnce(mockValidSession)
         .mockResolvedValueOnce(mockInvalidSession);
 
       // Test valid token
-      const validResult = await authService.validateSession(validToken);
+      const validResult = await mockAuthService.validateSession(validToken);
       expect(validResult.valid).toBe(true);
       expect(validResult.session.adminId).toBe('admin-123');
 
       // Test invalid token
-      const invalidResult = await authService.validateSession(invalidToken);
+      const invalidResult = await mockAuthService.validateSession(invalidToken);
       expect(invalidResult.valid).toBe(false);
       expect(invalidResult.session).toBeNull();
     });
@@ -464,10 +471,10 @@ describe('/api/auth/* API Routes', () => {
         error: 'Session expired'
       };
 
-      authService.validateSession.mockResolvedValue(mockExpiredSession);
+      mockAuthService.validateSession.mockResolvedValue(mockExpiredSession);
 
       // Act
-      const result = await authService.validateSession(expiredToken);
+      const result = await mockAuthService.validateSession(expiredToken);
 
       // Assert
       expect(result.valid).toBe(false);
@@ -490,17 +497,17 @@ describe('/api/auth/* API Routes', () => {
 
       const mockRefreshedToken = 'refreshed-session-token';
 
-      authService.validateSession.mockResolvedValue(mockNearExpirySession);
-      sessionManager.refreshSession.mockResolvedValue(mockRefreshedToken);
+      mockAuthService.validateSession.mockResolvedValue(mockNearExpirySession);
+      mockSessionManager.refreshSession.mockResolvedValue(mockRefreshedToken);
 
       // Act
-      const result = await authService.validateSession(nearExpiryToken);
+      const result = await mockAuthService.validateSession(nearExpiryToken);
 
       // Assert
       expect(result.valid).toBe(true);
       expect(result.shouldRefresh).toBe(true);
       if (result.shouldRefresh) {
-        const newToken = await sessionManager.refreshSession(nearExpiryToken);
+        const newToken = await mockSessionManager.refreshSession(nearExpiryToken);
         expect(newToken).toBe(mockRefreshedToken);
       }
     });
@@ -520,7 +527,7 @@ describe('/api/auth/* API Routes', () => {
         admin: { id: 'admin-123', username: 'admin1' }
       };
 
-      authService.login.mockResolvedValue(mockLoginResult);
+      mockAuthService.login.mockResolvedValue(mockLoginResult);
 
       const request = createMockRequest(loginData);
 
@@ -594,7 +601,7 @@ describe('/api/auth/* API Routes', () => {
         }
       };
 
-      authService.login.mockResolvedValue(mockLoginResult);
+      mockAuthService.login.mockResolvedValue(mockLoginResult);
 
       const request = createMockRequest(loginData);
 
@@ -625,7 +632,7 @@ describe('/api/auth/* API Routes', () => {
         errorCode: 'INVALID_CREDENTIALS'
       };
 
-      authService.login.mockResolvedValue(mockLoginResult);
+      mockAuthService.login.mockResolvedValue(mockLoginResult);
 
       const request = createMockRequest(loginData);
 
