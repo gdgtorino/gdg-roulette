@@ -19,25 +19,24 @@ const eventRepository = new EventRepository();
 // eslint-disable-next-line prefer-const
 participantService = new ParticipantService(participantRepository, eventRepository);
 // eslint-disable-next-line prefer-const
-eventService = new EventService(eventRepository);
+eventService = new EventService(eventRepository, participantService);
 // eslint-disable-next-line prefer-const
 sessionService = new SessionService();
 // eslint-disable-next-line prefer-const
 notificationService = new NotificationService();
 
 // Allow tests to override services
-// Note: Commented out for build compatibility - re-enable for testing
-// export function setTestServices(services: {
-//   participantService?: ParticipantService;
-//   eventService?: EventService;
-//   sessionService?: SessionService;
-//   notificationService?: NotificationService;
-// }) {
-//   if (services.participantService) participantService = services.participantService;
-//   if (services.eventService) eventService = services.eventService;
-//   if (services.sessionService) sessionService = services.sessionService;
-//   if (services.notificationService) notificationService = services.notificationService;
-// }
+export function setTestServices(services: {
+  participantService?: ParticipantService;
+  eventService?: EventService;
+  sessionService?: SessionService;
+  notificationService?: NotificationService;
+}) {
+  if (services.participantService) participantService = services.participantService;
+  if (services.eventService) eventService = services.eventService;
+  if (services.sessionService) sessionService = services.sessionService;
+  if (services.notificationService) notificationService = services.notificationService;
+}
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {

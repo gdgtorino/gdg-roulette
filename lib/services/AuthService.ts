@@ -86,7 +86,7 @@ export class AuthService {
         sessionToken,
         admin,
       };
-    } catch {
+    } catch (error) {
       throw error;
     }
   }
@@ -101,7 +101,7 @@ export class AuthService {
         valid: session !== null,
         session,
       };
-    } catch {
+    } catch (error) {
       return {
         valid: false,
         session: null,
@@ -118,7 +118,7 @@ export class AuthService {
       return {
         success,
       };
-    } catch {
+    } catch (error) {
       return {
         success: false,
         error: `Logout failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -152,7 +152,7 @@ export class AuthService {
         success: true,
         admin,
       };
-    } catch {
+    } catch (error) {
       return {
         success: false,
         error: `Session recovery failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -211,7 +211,7 @@ export class AuthService {
       return {
         success: true,
       };
-    } catch {
+    } catch (error) {
       return {
         success: false,
         error: `Password change failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -226,7 +226,7 @@ export class AuthService {
     try {
       const admin = await this.adminRepository.findByUsername(username);
       return admin !== null;
-    } catch {
+    } catch (error) {
       return false;
     }
   }
@@ -242,7 +242,7 @@ export class AuthService {
       }
 
       return await this.adminRepository.findById(validationResult.session.adminId);
-    } catch {
+    } catch (error) {
       return null;
     }
   }
@@ -253,7 +253,7 @@ export class AuthService {
   async extendSession(sessionToken: string): Promise<SessionData | null> {
     try {
       return await this.sessionManager.extendSession(sessionToken);
-    } catch {
+    } catch (error) {
       return null;
     }
   }
@@ -264,7 +264,7 @@ export class AuthService {
   async getSessionInfo(sessionToken: string): Promise<SessionData | null> {
     try {
       return await this.sessionManager.getSession(sessionToken);
-    } catch {
+    } catch (error) {
       return null;
     }
   }
@@ -275,7 +275,7 @@ export class AuthService {
   async cleanupExpiredSessions(): Promise<number> {
     try {
       return await this.sessionManager.cleanupExpiredSessions();
-    } catch {
+    } catch (error) {
       return 0;
     }
   }
@@ -312,7 +312,7 @@ export class AuthService {
   async forceLogoutAdmin(adminId: string): Promise<boolean> {
     try {
       return await this.sessionManager.destroyAllSessionsForAdmin(adminId);
-    } catch {
+    } catch (error) {
       return false;
     }
   }

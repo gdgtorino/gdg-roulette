@@ -283,7 +283,7 @@ export class UserExperienceService {
       } else {
         throw new Error('WebSocket connection failed');
       }
-    } catch {
+    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Connection failed';
 
       // Handle auto-reconnection
