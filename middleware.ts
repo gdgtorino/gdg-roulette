@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import createIntlMiddleware from 'next-intl/middleware';
 
 function getAuthToken(request: NextRequest): string | null {
   // Check for auth_token cookie
@@ -17,15 +18,6 @@ function getAuthToken(request: NextRequest): string | null {
 
 function isValidToken(token: string): boolean {
   try {
-    // Handle mock tokens for development/testing
-    if (token.startsWith('mock.')) {
-      const parts = token.split('.');
-      if (parts.length !== 3) return false;
-      const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
-      const now = Math.floor(Date.now() / 1000);
-      return payload.exp && payload.exp > now && payload.adminId;
-    }
-
     // Simple JWT validation - in production you'd use a proper JWT library
     const parts = token.split('.');
     if (parts.length !== 3) return false;
@@ -40,32 +32,31 @@ function isValidToken(token: string): boolean {
   }
 }
 
+// Initialize the intl middleware for non-admin routes
+const handleI18nRouting = createIntlMiddleware({
+  locales: ['en', 'it'],
+  defaultLocale: 'en',
+});
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Handle admin routes redirect for E2E tests
-  if (pathname === '/admin/login') {
-    const loginUrl = new URL('/en/admin', request.url);
-    return NextResponse.redirect(loginUrl);
-  }
+  // Skip i18n for admin routes and API routes
+  if (pathname.startsWith('/admin') || pathname.startsWith('/api')) {
+    // Check authentication for admin routes (except login page)
+    if (pathname.startsWith('/admin') &&
+        !pathname.includes('/admin/login') &&
+        pathname !== '/admin') {
+      const token = getAuthToken(request);
 
-  if (pathname === '/admin/dashboard') {
-    const dashboardUrl = new URL('/en/admin/dashboard', request.url);
-    return NextResponse.redirect(dashboardUrl);
-  }
-
-  // Check authentication for admin routes
-  if (pathname.startsWith('/(admin)') || pathname.startsWith('/admin')) {
-    const token = getAuthToken(request);
-
-    if (!token || !isValidToken(token)) {
-      // Skip redirect if already on login page
-      if (pathname.includes('/admin') && !pathname.includes('dashboard')) {
-        return NextResponse.next();
+      if (!token || !isValidToken(token)) {
+        const loginUrl = new URL('/admin/login', request.url);
+        return NextResponse.redirect(loginUrl);
       }
-      const loginUrl = new URL('/en/admin', request.url);
-      return NextResponse.redirect(loginUrl);
     }
+  } else {
+    // Handle i18n for non-admin routes
+    return handleI18nRouting(request);
   }
 
   // Check session for protected API routes
