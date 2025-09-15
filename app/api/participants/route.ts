@@ -16,14 +16,14 @@ let notificationService: NotificationService;
 // Initialize services
 const participantRepository = new ParticipantRepository();
 const eventRepository = new EventRepository();
-const participantServiceInstance = new ParticipantService(participantRepository, eventRepository);
-const eventServiceInstance = new EventService(eventRepository);
-const sessionServiceInstance = new SessionService();
-const notificationServiceInstance = new NotificationService();
-participantService = participantServiceInstance;
-eventService = eventServiceInstance;
-sessionService = sessionServiceInstance;
-notificationService = notificationServiceInstance;
+// eslint-disable-next-line prefer-const
+participantService = new ParticipantService(participantRepository, eventRepository);
+// eslint-disable-next-line prefer-const
+eventService = new EventService(eventRepository);
+// eslint-disable-next-line prefer-const
+sessionService = new SessionService();
+// eslint-disable-next-line prefer-const
+notificationService = new NotificationService();
 
 // Allow tests to override services
 // Note: Commented out for build compatibility - re-enable for testing

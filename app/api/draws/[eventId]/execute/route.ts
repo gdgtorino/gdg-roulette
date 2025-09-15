@@ -7,10 +7,10 @@ let lotteryService: LotteryService;
 let authService: AuthService;
 
 // Initialize services
-const lotteryServiceInstance = new LotteryService();
-const authServiceInstance = new AuthService();
-lotteryService = lotteryServiceInstance;
-authService = authServiceInstance;
+// eslint-disable-next-line prefer-const
+lotteryService = new LotteryService();
+// eslint-disable-next-line prefer-const
+authService = new AuthService();
 
 // Function to set test services
 // Note: Commented out for build compatibility - re-enable for testing

@@ -10,10 +10,11 @@ let authService: AuthService;
 let sessionManager: SessionManager;
 
 // Initialize services
-const sessionManagerInstance = new SessionManager();
+// eslint-disable-next-line prefer-const
+sessionManager = new SessionManager();
 const passwordService = new PasswordService();
 const adminRepository = new AdminRepository();
-sessionManager = sessionManagerInstance;
+// eslint-disable-next-line prefer-const
 authService = new AuthService(sessionManager, passwordService, adminRepository);
 
 // Allow tests to override services

@@ -26,6 +26,7 @@ export class AdminRepository {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async findByEmail(_email: string): Promise<Admin | null> {
     try {
       // Note: Admin model in schema doesn't have email field,

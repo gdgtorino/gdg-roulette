@@ -15,10 +15,10 @@ let eventService: EventService;
 let authService: AuthService;
 
 // Initialize services
-const eventServiceInstance = new EventService();
-const authServiceInstance = new AuthService();
-eventService = eventServiceInstance;
-authService = authServiceInstance;
+// eslint-disable-next-line prefer-const
+eventService = new EventService();
+// eslint-disable-next-line prefer-const
+authService = new AuthService();
 
 // Function to set test services
 // Note: Commented out for build compatibility - re-enable for testing
