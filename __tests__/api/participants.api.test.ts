@@ -87,7 +87,7 @@ describe('/api/participants API Routes', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       // Act
@@ -143,7 +143,7 @@ describe('/api/participants API Routes', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       // Act
@@ -220,7 +220,7 @@ describe('/api/participants API Routes', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(registrationData))
+          body: JSON.stringify(registrationData)
         });
 
         const response = await registerParticipantHandler(request);
@@ -283,7 +283,7 @@ describe('/api/participants API Routes', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(registrationData))
+          body: JSON.stringify(registrationData)
         });
 
         const response = await registerParticipantHandler(request);
@@ -309,7 +309,7 @@ describe('/api/participants API Routes', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       // Act
@@ -353,7 +353,7 @@ describe('/api/participants API Routes', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(registrationData))
+          body: JSON.stringify(registrationData)
         });
 
         const response = await registerParticipantHandler(request);
@@ -390,7 +390,7 @@ describe('/api/participants API Routes', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       // Act
@@ -436,7 +436,7 @@ describe('/api/participants API Routes', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       // Act
@@ -484,7 +484,7 @@ describe('/api/participants API Routes', () => {
           'Content-Type': 'application/json',
           'X-Rollback-On-Failure': 'true'
         },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       // Act
@@ -538,7 +538,7 @@ describe('/api/participants API Routes', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       // Act
@@ -590,7 +590,7 @@ describe('/api/participants API Routes', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       // Act
@@ -637,13 +637,13 @@ describe('/api/participants API Routes', () => {
       const request1 = new NextRequest(new Request('http://localhost/api/participants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       const request2 = new NextRequest(new Request('http://localhost/api/participants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       // Act
@@ -742,7 +742,7 @@ describe('/api/participants API Routes', () => {
           'X-Forwarded-For': '192.168.1.100',
           'User-Agent': 'Test Browser'
         },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       // Act
@@ -827,7 +827,7 @@ describe('/api/participants API Routes', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(registrationData))
+        body: JSON.stringify(registrationData)
       });
 
       // Act
