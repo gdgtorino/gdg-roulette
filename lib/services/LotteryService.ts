@@ -65,22 +65,22 @@ export class LotteryService {
         };
       }
 
-      // Get available participants (not yet winners)
-      const availableParticipants = await this.participantService.getAvailableParticipants(eventId);
-      if (availableParticipants.length === 0) {
-        return {
-          success: false,
-          error: 'No participants available for drawing'
-        };
-      }
-
-      // Check if event has reached maximum draws
+      // Check if event has reached maximum draws first
       const currentWinnerCount = await this.winnerService.getWinnerCount(eventId);
       const totalParticipants = await this.participantService.getTotalParticipants(eventId);
       if (currentWinnerCount >= totalParticipants) {
         return {
           success: false,
           error: 'All participants have already been drawn'
+        };
+      }
+
+      // Get available participants (not yet winners)
+      const availableParticipants = await this.participantService.getAvailableParticipants(eventId);
+      if (availableParticipants.length === 0) {
+        return {
+          success: false,
+          error: 'No participants available for drawing'
         };
       }
 
