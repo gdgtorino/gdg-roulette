@@ -15,8 +15,8 @@ export class PasswordService {
     try {
       const hashedPassword = await bcrypt.hash(password, this.saltRounds);
       return hashedPassword;
-    } catch (error) {
-      throw new Error(`Password hashing failed: ${error}`);
+    } catch {
+      throw new Error(`Password hashing failed: `);
     }
   }
 
@@ -27,8 +27,8 @@ export class PasswordService {
     try {
       const isValid = await bcrypt.compare(password, hash);
       return isValid;
-    } catch (error) {
-      throw new Error(`Password verification failed: ${error}`);
+    } catch {
+      throw new Error(`Password verification failed: `);
     }
   }
 

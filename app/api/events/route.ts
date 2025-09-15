@@ -143,7 +143,7 @@ async function handleCreateEventTestMode(request: NextRequest): Promise<NextResp
       success: true,
       event: mockEvent,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Invalid JSON format' }, { status: 400 });
   }
 }

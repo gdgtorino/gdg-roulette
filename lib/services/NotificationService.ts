@@ -71,7 +71,7 @@ export class NotificationService extends EventEmitter {
                 timestamp: new Date(),
               }),
             );
-          } catch (error) {
+          } catch {
             clearInterval(heartbeat);
             this.removeConnection(eventId, clientId);
           }
@@ -271,7 +271,7 @@ export class NotificationService extends EventEmitter {
     connections.forEach((connection) => {
       try {
         connection.controller.close();
-      } catch (error) {
+      } catch {
         // Connection might already be closed
       }
     });
@@ -299,7 +299,7 @@ export class NotificationService extends EventEmitter {
       try {
         connection.controller.enqueue(message);
         return true;
-      } catch (error) {
+      } catch {
         return false;
       }
     });
@@ -453,7 +453,7 @@ export class NotificationService extends EventEmitter {
             }),
           );
           return true;
-        } catch (error) {
+        } catch {
           return false;
         }
       });
@@ -484,7 +484,7 @@ export class NotificationService extends EventEmitter {
         registrationUrl: data.registrationUrl,
       });
       return true;
-    } catch (error) {
+    } catch {
       console.error('Failed to send registration confirmation:', error);
       return false;
     }

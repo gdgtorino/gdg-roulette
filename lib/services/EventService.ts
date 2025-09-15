@@ -64,8 +64,8 @@ export class EventService {
       });
 
       return event;
-    } catch (error) {
-      throw new Error(`Failed to create event: ${error}`);
+    } catch {
+      throw new Error(`Failed to create event: `);
     }
   }
 
@@ -84,8 +84,8 @@ export class EventService {
       });
 
       return event;
-    } catch (error) {
-      throw new Error(`Failed to create basic event: ${error}`);
+    } catch {
+      throw new Error(`Failed to create basic event: `);
     }
   }
 
@@ -95,8 +95,8 @@ export class EventService {
   async findById(eventId: string): Promise<Event | null> {
     try {
       return await this.eventRepository.findById(eventId);
-    } catch (error) {
-      throw new Error(`Failed to find event: ${error}`);
+    } catch {
+      throw new Error(`Failed to find event: `);
     }
   }
 
@@ -107,8 +107,8 @@ export class EventService {
     try {
       const event = await this.eventRepository.update(eventId, updateData);
       return event;
-    } catch (error) {
-      throw new Error(`Failed to update event: ${error}`);
+    } catch {
+      throw new Error(`Failed to update event: `);
     }
   }
 
@@ -118,8 +118,8 @@ export class EventService {
   async deleteEvent(eventId: string): Promise<boolean> {
     try {
       return await this.eventRepository.delete(eventId);
-    } catch (error) {
-      throw new Error(`Failed to delete event: ${error}`);
+    } catch {
+      throw new Error(`Failed to delete event: `);
     }
   }
 
@@ -129,8 +129,8 @@ export class EventService {
   async getEventsForAdmin(adminId: string): Promise<Event[]> {
     try {
       return await this.eventRepository.findByAdminId(adminId);
-    } catch (error) {
-      throw new Error(`Failed to get events for admin: ${error}`);
+    } catch {
+      throw new Error(`Failed to get events for admin: `);
     }
   }
 
@@ -140,8 +140,8 @@ export class EventService {
   async getAllEvents(): Promise<Event[]> {
     try {
       return await this.eventRepository.getAll();
-    } catch (error) {
-      throw new Error(`Failed to get all events: ${error}`);
+    } catch {
+      throw new Error(`Failed to get all events: `);
     }
   }
 
@@ -151,8 +151,8 @@ export class EventService {
   async getActiveEvents(): Promise<Event[]> {
     try {
       return await this.eventRepository.findActiveEvents();
-    } catch (error) {
-      throw new Error(`Failed to get active events: ${error}`);
+    } catch {
+      throw new Error(`Failed to get active events: `);
     }
   }
 
@@ -162,8 +162,8 @@ export class EventService {
   async getParticipantCount(eventId: string): Promise<number> {
     try {
       return await this.participantService.getParticipantCount(eventId);
-    } catch (error) {
-      throw new Error(`Failed to get participant count: ${error}`);
+    } catch {
+      throw new Error(`Failed to get participant count: `);
     }
   }
 
@@ -174,7 +174,7 @@ export class EventService {
     try {
       const event = await this.findById(eventId);
       return event !== null;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -186,7 +186,7 @@ export class EventService {
     try {
       const event = await this.findById(eventId);
       return event?.createdBy === adminId;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -205,8 +205,8 @@ export class EventService {
       const qrCode = await this.qrCodeService.generateQRCode(eventUrl);
 
       return await this.eventRepository.updateQRCode(eventId, qrCode);
-    } catch (error) {
-      throw new Error(`Failed to regenerate QR code: ${error}`);
+    } catch {
+      throw new Error(`Failed to regenerate QR code: `);
     }
   }
 
@@ -236,8 +236,8 @@ export class EventService {
         closed: event.closed,
         createdAt: event.createdAt,
       };
-    } catch (error) {
-      throw new Error(`Failed to get event statistics: ${error}`);
+    } catch {
+      throw new Error(`Failed to get event statistics: `);
     }
   }
 
@@ -266,8 +266,8 @@ export class EventService {
         closedEvents: closedEvents.length,
         totalParticipants,
       };
-    } catch (error) {
-      throw new Error(`Failed to get dashboard data: ${error}`);
+    } catch {
+      throw new Error(`Failed to get dashboard data: `);
     }
   }
 
@@ -278,7 +278,7 @@ export class EventService {
     try {
       const event = await this.findById(eventId);
       return event?.registrationOpen === true && event?.closed === false;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -290,7 +290,7 @@ export class EventService {
     try {
       const event = await this.findById(eventId);
       return event?.closed === true;
-    } catch (error) {
+    } catch {
       return true;
     }
   }
@@ -302,8 +302,8 @@ export class EventService {
     try {
       const events = await this.getEventsForAdmin(adminId);
       return events.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, limit);
-    } catch (error) {
-      throw new Error(`Failed to get recent events: ${error}`);
+    } catch {
+      throw new Error(`Failed to get recent events: `);
     }
   }
 
@@ -320,8 +320,8 @@ export class EventService {
       }
 
       return events.filter((event) => event.name.toLowerCase().includes(name.toLowerCase()));
-    } catch (error) {
-      throw new Error(`Failed to search events: ${error}`);
+    } catch {
+      throw new Error(`Failed to search events: `);
     }
   }
 
@@ -365,8 +365,8 @@ export class EventService {
         status,
         createdAt: event.createdAt,
       };
-    } catch (error) {
-      throw new Error(`Failed to get event summary: ${error}`);
+    } catch {
+      throw new Error(`Failed to get event summary: `);
     }
   }
 }

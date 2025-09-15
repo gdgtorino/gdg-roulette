@@ -20,10 +20,10 @@ interface UserState {
 interface UserScreenProps {
   event: Event;
   userState: UserState;
-  onStateChange?: (newState: any) => void;
+  onStateChange?: (newState: UserState) => void;
 }
 
-export const UserScreen: React.FC<UserScreenProps> = ({ event, userState, onStateChange }) => {
+export const UserScreen: React.FC<UserScreenProps> = ({ event, userState }) => {
   // Check for unsupported browser features
   if (typeof WebSocket === 'undefined') {
     return (

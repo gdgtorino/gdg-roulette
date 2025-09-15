@@ -21,7 +21,6 @@ interface LotteryScreenProps {
 
 export const LotteryScreen: React.FC<LotteryScreenProps> = ({
   event,
-  isLive = false,
   currentWinners = [],
   showAnimation = false,
 }) => {

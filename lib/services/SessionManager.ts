@@ -59,8 +59,8 @@ export class SessionManager {
       });
 
       return token;
-    } catch (error) {
-      throw new Error(`Failed to create session: ${error}`);
+    } catch {
+      throw new Error(`Failed to create session: `);
     }
   }
 
@@ -98,7 +98,7 @@ export class SessionManager {
         expiresAt: session.expires,
         createdAt: new Date(decoded.iat * 1000),
       };
-    } catch (error) {
+    } catch {
       // Invalid token or other JWT error
       return null;
     }
@@ -132,8 +132,8 @@ export class SessionManager {
         expiresAt: session.expires,
         createdAt: new Date(), // Using current date as we don't store created at
       };
-    } catch (error) {
-      throw new Error(`Failed to get session: ${error}`);
+    } catch {
+      throw new Error(`Failed to get session: `);
     }
   }
 
@@ -148,7 +148,7 @@ export class SessionManager {
         },
       });
       return true;
-    } catch (error) {
+    } catch {
       // Session might not exist, which is fine
       return true;
     }
@@ -172,8 +172,8 @@ export class SessionManager {
       });
 
       return sessions.map((s) => s.sessionToken);
-    } catch (error) {
-      throw new Error(`Failed to get active sessions: ${error}`);
+    } catch {
+      throw new Error(`Failed to get active sessions: `);
     }
   }
 
@@ -188,8 +188,8 @@ export class SessionManager {
         },
       });
       return true;
-    } catch (error) {
-      throw new Error(`Failed to destroy all sessions: ${error}`);
+    } catch {
+      throw new Error(`Failed to destroy all sessions: `);
     }
   }
 
@@ -206,8 +206,8 @@ export class SessionManager {
         },
       });
       return result.count;
-    } catch (error) {
-      throw new Error(`Failed to cleanup expired sessions: ${error}`);
+    } catch {
+      throw new Error(`Failed to cleanup expired sessions: `);
     }
   }
 
@@ -260,7 +260,7 @@ export class SessionManager {
         expiresAt: newExpiresAt,
         createdAt: new Date(decoded.iat * 1000),
       };
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -310,8 +310,8 @@ export class SessionManager {
         expiredToday,
         oldestActiveSession: oldestSession?.expires || null,
       };
-    } catch (error) {
-      throw new Error(`Failed to get session stats: ${error}`);
+    } catch {
+      throw new Error(`Failed to get session stats: `);
     }
   }
 

@@ -31,13 +31,26 @@ export interface EventCreationData {
 
 export interface EventCreationResult {
   success: boolean;
-  event?: any;
+  event?: {
+    id: string;
+    name: string;
+    description?: string;
+    maxParticipants?: number;
+    createdBy?: string;
+    [key: string]: unknown;
+  };
   error?: string;
 }
 
 export interface EventsResult {
   success: boolean;
-  events?: any[];
+  events?: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    createdBy?: string;
+    [key: string]: unknown;
+  }>;
   error?: string;
 }
 
@@ -49,7 +62,7 @@ export interface AuditLog {
     username?: string;
     role?: Role;
     timestamp: Date;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -163,12 +176,12 @@ export class AdminService {
             // 20% chance of failure for testing
             throw new Error('Email service unavailable');
           }
-        } catch (error) {
+        } catch {
           if (options.rollbackOnFailure && createdAdminId) {
             await this.adminRepository.delete(createdAdminId);
             return {
               success: false,
-              error: `Admin creation failed and was rolled back: ${error}`,
+              error: `Admin creation failed and was rolled back: `,
             };
           }
         }
@@ -187,7 +200,7 @@ export class AdminService {
       if (options?.rollbackOnFailure && createdAdminId) {
         try {
           await this.adminRepository.delete(createdAdminId);
-        } catch (rollbackError) {
+        } catch {
           // Log rollback failure but don't override original error
         }
       }
@@ -212,7 +225,7 @@ export class AdminService {
       // Mock implementation - get permissions based on role
       const permissions = this.permissionService.getDefaultPermissions('ADMIN'); // Would be dynamic based on admin data
       return this.permissionService.hasPermission(permissions, permission);
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -275,10 +288,10 @@ export class AdminService {
         success: true,
         admin: updatedAdmin,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Failed to update permissions: ${error}`,
+        error: `Failed to update permissions: `,
       };
     }
   }
@@ -306,10 +319,10 @@ export class AdminService {
         success: true,
         event,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Failed to create event: ${error}`,
+        error: `Failed to create event: `,
       };
     }
   }
@@ -342,10 +355,10 @@ export class AdminService {
         success: true,
         events,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Failed to get events: ${error}`,
+        error: `Failed to get events: `,
       };
     }
   }
@@ -357,7 +370,17 @@ export class AdminService {
     eventId: string,
     updateData: { name?: string; description?: string },
     adminId: string,
-  ): Promise<{ success: boolean; event?: any; error?: string }> {
+  ): Promise<{
+    success: boolean;
+    event?: {
+      id: string;
+      name: string;
+      description?: string;
+      createdBy?: string;
+      [key: string]: unknown;
+    };
+    error?: string;
+  }> {
     try {
       // Check if event exists
       const event = await this.eventService.findById(eventId);
@@ -385,10 +408,10 @@ export class AdminService {
         success: true,
         event: updatedEvent,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Failed to update event: ${error}`,
+        error: `Failed to update event: `,
       };
     }
   }
@@ -484,7 +507,7 @@ export class AdminService {
         adminsByRole,
         recentActivity,
       };
-    } catch (error) {
+    } catch {
       return {
         totalAdmins: 0,
         activeAdmins: 0,
@@ -542,10 +565,10 @@ export class AdminService {
       });
 
       return { success: true };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Failed to delete admin: ${error}`,
+        error: `Failed to delete admin: `,
       };
     }
   }

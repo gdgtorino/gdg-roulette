@@ -91,11 +91,11 @@ async function handleLogoutTestMode(request: NextRequest): Promise<NextResponse>
 
       addSecurityHeaders(response);
       return response;
-    } catch (serviceError: any) {
+    } catch (serviceError: unknown) {
       // Handle service failures - return error status as expected by tests
       if (
-        serviceError.message?.includes('Session service unavailable') ||
-        serviceError.message?.includes('Database connection')
+        (serviceError as Error)?.message?.includes('Session service unavailable') ||
+        (serviceError as Error)?.message?.includes('Database connection')
       ) {
         const response = NextResponse.json(
           {
@@ -127,7 +127,7 @@ async function handleLogoutTestMode(request: NextRequest): Promise<NextResponse>
       addSecurityHeaders(response);
       return response;
     }
-  } catch (error) {
+  } catch {
     const response = NextResponse.json(
       {
         success: false,

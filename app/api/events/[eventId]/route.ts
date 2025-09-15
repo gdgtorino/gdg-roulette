@@ -155,7 +155,7 @@ async function handleUpdateEventTestMode(
       success: true,
       event: updatedEvent,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Invalid JSON format' }, { status: 400 });
   }
 }

@@ -50,7 +50,7 @@ export class RandomService {
         timestamp,
         hash,
       };
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to generate secure random: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -64,7 +64,7 @@ export class RandomService {
     try {
       const result = await this.generateSecureRandom({ min, max: max + 1, secure: true });
       return Math.floor(result.value);
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to generate secure integer: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -93,7 +93,7 @@ export class RandomService {
       }
 
       return results;
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to generate unique integers: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -113,7 +113,7 @@ export class RandomService {
       }
 
       return shuffled;
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to shuffle array: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -131,7 +131,7 @@ export class RandomService {
 
       const index = await this.generateSecureInteger(0, array.length - 1);
       return array[index];
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to select random element: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -156,7 +156,7 @@ export class RandomService {
 
       const shuffled = await this.shuffleArray(array);
       return shuffled.slice(0, count);
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to select random elements: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -173,7 +173,7 @@ export class RandomService {
       const seedData = Buffer.concat([entropy, Buffer.from(timestamp.toString())]);
 
       return createHash('sha256').update(seedData).digest('hex');
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to generate lottery seed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -190,7 +190,7 @@ export class RandomService {
       const expectedHash = createHash('sha256').update(hashInput).digest('hex');
 
       return result.hash === expectedHash && result.entropy >= RandomService.MIN_ENTROPY_THRESHOLD;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -247,7 +247,7 @@ export class RandomService {
       else quality = 'poor';
 
       return { quality, chi2 };
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to test entropy: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );

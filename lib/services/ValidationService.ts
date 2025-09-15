@@ -393,7 +393,7 @@ export class ValidationService {
       if (process.env.NODE_ENV === 'production' && urlObject.hostname === 'localhost') {
         errors.push('Localhost URLs are not allowed in production');
       }
-    } catch (error) {
+    } catch {
       errors.push('Invalid URL format');
     }
 

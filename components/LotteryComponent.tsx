@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 interface Event {
   id: string;
@@ -18,8 +18,8 @@ interface Winner {
 interface LotteryComponentProps {
   event: Event;
   winners?: Winner[];
-  onDrawWinner?: (eventId: string) => Promise<any>;
-  onDrawAll?: (eventId: string) => Promise<any>;
+  onDrawWinner?: (eventId: string) => Promise<{ success?: boolean; winner?: Winner }>;
+  onDrawAll?: (eventId: string) => Promise<{ success?: boolean }>;
 }
 
 export const LotteryComponent: React.FC<LotteryComponentProps> = ({
@@ -36,8 +36,8 @@ export const LotteryComponent: React.FC<LotteryComponentProps> = ({
 
       if (result?.success && result?.winner) {
         // Trigger confetti if available
-        if (typeof (globalThis as any).confetti === 'function') {
-          (globalThis as any).confetti();
+        if (typeof (globalThis as { confetti?: () => void }).confetti === 'function') {
+          (globalThis as { confetti: () => void }).confetti();
         }
       }
     }

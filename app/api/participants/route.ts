@@ -218,7 +218,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     // Prepare response
-    const responseData: any = {
+    const responseData: {
+      success: boolean;
+      participant: {
+        id: string;
+        name: string;
+        eventId: string;
+        registeredAt?: Date;
+        qrCode?: string;
+        [key: string]: any;
+      };
+      timestamp: Date;
+      sessionToken?: string;
+      warning?: string;
+    } = {
       success: true,
       participant: {
         ...participant,
@@ -262,7 +275,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 // Simple in-memory rate limiting for tests
 const rateLimit = new Map<string, { count: number; resetTime: number }>();
 
-async function handleTestMode(body: any, request?: NextRequest): Promise<NextResponse> {
+async function handleTestMode(
+  body: {
+    eventId?: string;
+    name?: string;
+    [key: string]: any;
+  },
+  request?: NextRequest,
+): Promise<NextResponse> {
   const { eventId, name } = body;
 
   // Skip rate limiting in Jest tests (when NODE_ENV === 'test')
@@ -496,7 +516,7 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
         eventId,
       );
       sessionToken = session?.token || session?.id || 'session-token-123';
-    } catch (sessionError: any) {
+    } catch {
       // Handle session failures gracefully
       if (request?.headers?.get('X-Rollback-On-Failure') === 'true') {
         // Rollback scenario - delete participant and return error
@@ -530,7 +550,20 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
       qrCode: 'participant-qr-code',
     };
 
-    const responseData: any = {
+    const responseData: {
+      success: boolean;
+      participant: {
+        id: string;
+        name: string;
+        eventId: string;
+        registeredAt?: Date;
+        qrCode?: string;
+        [key: string]: any;
+      };
+      timestamp: Date;
+      sessionToken?: string;
+      warning?: string;
+    } = {
       success: true,
       participant: warning
         ? mockParticipant

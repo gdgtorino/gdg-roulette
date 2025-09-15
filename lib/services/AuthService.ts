@@ -101,7 +101,7 @@ export class AuthService {
         valid: session !== null,
         session,
       };
-    } catch (error) {
+    } catch {
       return {
         valid: false,
         session: null,
@@ -121,7 +121,7 @@ export class AuthService {
     } catch (error) {
       return {
         success: false,
-        error: `Logout failed: ${error}`,
+        error: `Logout failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -155,7 +155,7 @@ export class AuthService {
     } catch (error) {
       return {
         success: false,
-        error: `Session recovery failed: ${error}`,
+        error: `Session recovery failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -214,7 +214,7 @@ export class AuthService {
     } catch (error) {
       return {
         success: false,
-        error: `Password change failed: ${error}`,
+        error: `Password change failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }

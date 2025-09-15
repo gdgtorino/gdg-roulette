@@ -48,8 +48,8 @@ export class QRCodeService {
       });
 
       return qrCodeDataURL;
-    } catch (error) {
-      throw new Error(`Failed to generate QR code: ${error}`);
+    } catch {
+      throw new Error(`Failed to generate QR code: `);
     }
   }
 
@@ -69,8 +69,8 @@ export class QRCodeService {
       });
 
       return svgString;
-    } catch (error) {
-      throw new Error(`Failed to generate QR code SVG: ${error}`);
+    } catch {
+      throw new Error(`Failed to generate QR code SVG: `);
     }
   }
 
@@ -90,8 +90,8 @@ export class QRCodeService {
       });
 
       return buffer;
-    } catch (error) {
-      throw new Error(`Failed to generate QR code buffer: ${error}`);
+    } catch {
+      throw new Error(`Failed to generate QR code buffer: `);
     }
   }
 
@@ -111,8 +111,8 @@ export class QRCodeService {
           light: '#ffffff',
         },
       });
-    } catch (error) {
-      throw new Error(`Failed to generate event QR code: ${error}`);
+    } catch {
+      throw new Error(`Failed to generate event QR code: `);
     }
   }
 
@@ -144,8 +144,8 @@ export class QRCodeService {
       // If logo is provided, we would need additional image processing
       // For now, return the basic QR code
       return qrCodeDataURL;
-    } catch (error) {
-      throw new Error(`Failed to generate branded QR code: ${error}`);
+    } catch {
+      throw new Error(`Failed to generate branded QR code: `);
     }
   }
 
@@ -162,11 +162,11 @@ export class QRCodeService {
       try {
         const qrCode = await this.generateQRCode(data, options);
         results.push({ data, qrCode });
-      } catch (error) {
+      } catch {
         results.push({
           data,
           qrCode: '',
-          error: `Failed to generate QR code: ${error}`,
+          error: `Failed to generate QR code: `,
         });
       }
     }
@@ -192,7 +192,7 @@ export class QRCodeService {
     // Check for potentially problematic characters
     try {
       encodeURIComponent(data);
-    } catch (error) {
+    } catch {
       errors.push('Data contains invalid characters');
     }
 
@@ -220,10 +220,10 @@ export class QRCodeService {
         success: true,
         data: qrCode,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `QR code generation failed: ${error}`,
+        error: `QR code generation failed: `,
       };
     }
   }
@@ -305,8 +305,8 @@ export class QRCodeService {
         errorCorrectionLevel: 'M',
         width: 300,
       });
-    } catch (error) {
-      throw new Error(`Failed to generate contact QR code: ${error}`);
+    } catch {
+      throw new Error(`Failed to generate contact QR code: `);
     }
   }
 
@@ -329,8 +329,8 @@ export class QRCodeService {
         errorCorrectionLevel: 'M',
         width: 300,
       });
-    } catch (error) {
-      throw new Error(`Failed to generate WiFi QR code: ${error}`);
+    } catch {
+      throw new Error(`Failed to generate WiFi QR code: `);
     }
   }
 }

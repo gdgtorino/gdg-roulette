@@ -109,7 +109,7 @@ export class UserExperienceService {
               storedState = null;
             }
           }
-        } catch (error) {
+        } catch {
           console.warn('Failed to recover session:', error);
           // Clear corrupted state
           this.userStateManager.clearUserState(eventId);
@@ -135,7 +135,7 @@ export class UserExperienceService {
         success: true,
         userState,
       };
-    } catch (error) {
+    } catch {
       const isNetworkError =
         error instanceof Error &&
         (error.message.includes('Network') ||
@@ -163,7 +163,7 @@ export class UserExperienceService {
   async saveUserState(eventId: string, userState: Partial<UserState>): Promise<void> {
     try {
       this.userStateManager.saveUserState(eventId, userState);
-    } catch (error) {
+    } catch {
       console.warn('Failed to save user state:', error);
     }
   }
@@ -273,7 +273,7 @@ export class UserExperienceService {
       } else {
         throw new Error('WebSocket connection failed');
       }
-    } catch (error) {
+    } catch {
       const errorMessage = error instanceof Error ? error.message : 'Connection failed';
 
       // Handle auto-reconnection
@@ -332,7 +332,7 @@ export class UserExperienceService {
       }
 
       return result;
-    } catch (error) {
+    } catch {
       return await this.attemptReconnection(eventId, participantId, options, attempt + 1);
     }
   }
@@ -379,7 +379,7 @@ export class UserExperienceService {
             }
             break;
         }
-      } catch (error) {
+      } catch {
         console.warn('Failed to parse WebSocket message:', error);
       }
     };
@@ -409,7 +409,7 @@ export class UserExperienceService {
       // This would typically call a WinnerService method
       // For now, return null (no winner found)
       return null;
-    } catch (error) {
+    } catch {
       return null;
     }
   }

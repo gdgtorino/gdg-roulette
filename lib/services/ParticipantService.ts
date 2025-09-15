@@ -99,10 +99,10 @@ export class ParticipantService {
         success: true,
         participant,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Registration failed: ${error}`,
+        error: `Registration failed: `,
       };
     }
   }
@@ -117,10 +117,10 @@ export class ParticipantService {
         success: true,
         participants,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Failed to get participants: ${error}`,
+        error: `Failed to get participants: `,
       };
     }
   }
@@ -131,8 +131,8 @@ export class ParticipantService {
   async getParticipantCount(eventId: string): Promise<number> {
     try {
       return await this.participantRepository.getCount(eventId);
-    } catch (error) {
-      throw new Error(`Failed to get participant count: ${error}`);
+    } catch {
+      throw new Error(`Failed to get participant count: `);
     }
   }
 
@@ -142,8 +142,8 @@ export class ParticipantService {
   async getParticipantById(participantId: string): Promise<Participant | null> {
     try {
       return await this.participantRepository.findById(participantId);
-    } catch (error) {
-      throw new Error(`Failed to get participant: ${error}`);
+    } catch {
+      throw new Error(`Failed to get participant: `);
     }
   }
 
@@ -191,10 +191,10 @@ export class ParticipantService {
         success: true,
         participant: updatedParticipant,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Failed to update participant: ${error}`,
+        error: `Failed to update participant: `,
       };
     }
   }
@@ -239,10 +239,10 @@ export class ParticipantService {
 
       await this.participantRepository.delete(participantId);
       return { success: true };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Failed to remove participant: ${error}`,
+        error: `Failed to remove participant: `,
       };
     }
   }
@@ -253,8 +253,8 @@ export class ParticipantService {
   async getUndrawenParticipants(eventId: string): Promise<Participant[]> {
     try {
       return await this.participantRepository.getAllUndrawn(eventId);
-    } catch (error) {
-      throw new Error(`Failed to get undrawn participants: ${error}`);
+    } catch {
+      throw new Error(`Failed to get undrawn participants: `);
     }
   }
 
@@ -272,8 +272,8 @@ export class ParticipantService {
     try {
       const result = await this.getParticipants(eventId);
       return result.participants || [];
-    } catch (error) {
-      throw new Error(`Failed to get all participants: ${error}`);
+    } catch {
+      throw new Error(`Failed to get all participants: `);
     }
   }
 
@@ -290,8 +290,8 @@ export class ParticipantService {
   async getUndrawenCount(eventId: string): Promise<number> {
     try {
       return await this.participantRepository.getUndrawenCount(eventId);
-    } catch (error) {
-      throw new Error(`Failed to get undrawn count: ${error}`);
+    } catch {
+      throw new Error(`Failed to get undrawn count: `);
     }
   }
 
@@ -320,7 +320,7 @@ export class ParticipantService {
   async findByEventAndName(eventId: string, name: string): Promise<Participant | null> {
     try {
       return await this.participantRepository.findByEventIdAndName(eventId, name);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -332,7 +332,7 @@ export class ParticipantService {
     try {
       const participant = await this.participantRepository.findByEventIdAndName(eventId, name);
       return participant !== null;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -388,10 +388,10 @@ export class ParticipantService {
               error: result.error || 'Registration failed',
             });
           }
-        } catch (error) {
+        } catch {
           failedRegistrations.push({
             name: participantData.name,
-            error: `Registration failed: ${error}`,
+            error: `Registration failed: `,
           });
         }
       }
@@ -401,12 +401,12 @@ export class ParticipantService {
         registeredCount,
         failedRegistrations,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         registeredCount: 0,
         failedRegistrations: [],
-        error: `Bulk registration failed: ${error}`,
+        error: `Bulk registration failed: `,
       };
     }
   }
@@ -438,8 +438,8 @@ export class ParticipantService {
         winnersCount,
         registrationRate: Math.round(registrationRate * 100) / 100,
       };
-    } catch (error) {
-      throw new Error(`Failed to get participant statistics: ${error}`);
+    } catch {
+      throw new Error(`Failed to get participant statistics: `);
     }
   }
 
@@ -474,10 +474,10 @@ export class ParticipantService {
 
       await this.participantRepository.deleteAllByEventId(eventId);
       return { success: true };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Failed to clear participants: ${error}`,
+        error: `Failed to clear participants: `,
       };
     }
   }

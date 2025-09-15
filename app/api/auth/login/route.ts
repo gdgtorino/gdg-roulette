@@ -201,11 +201,11 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       addSecurityHeaders(response);
       addCorsHeaders(response, request);
       return response;
-    } catch (authError: any) {
+    } catch (authError: unknown) {
       // Handle service failures
       if (
-        authError.message?.includes('service error') ||
-        authError.message?.includes('Database connection')
+        (authError as Error)?.message?.includes('service error') ||
+        (authError as Error)?.message?.includes('Database connection')
       ) {
         const response = NextResponse.json(
           {
@@ -234,7 +234,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       addSecurityHeaders(response);
       return response;
     }
-  } catch (error) {
+  } catch {
     const response = NextResponse.json(
       {
         success: false,
@@ -257,7 +257,7 @@ function addSecurityHeaders(response: NextResponse) {
   response.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'");
 }
 
-function addCorsHeaders(response: NextResponse, request: NextRequest) {
+function addCorsHeaders(response: NextResponse) {
   response.headers.set('Access-Control-Allow-Origin', 'http://localhost:3000');
   response.headers.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');

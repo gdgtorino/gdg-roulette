@@ -23,7 +23,6 @@ export const WaitingScreen: React.FC<WaitingScreenProps> = ({
   event,
   participant,
   participantCount = 0,
-  liveUpdates = false,
 }) => {
   return (
     <div>

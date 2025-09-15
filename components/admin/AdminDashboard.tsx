@@ -7,7 +7,7 @@ import { Badge } from '../ui/Badge';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { EventManagement } from './EventManagement';
 import { EventList } from './EventList';
-import { EventStats } from './EventStats';
+// import { EventStats } from './EventStats'; // Removed unused import
 import { AdminNavigation } from './AdminNavigation';
 import { Admin, Event } from '@/lib/types';
 
@@ -32,7 +32,7 @@ interface DashboardData {
 
 interface ParticipantManagementProps {
   eventId?: string;
-  participants?: any[];
+  participants?: Array<{ id: string; name: string }>;
   onParticipantUpdate?: () => void;
 }
 
@@ -45,7 +45,6 @@ interface LotteryControlProps {
 export function ParticipantManagement({
   eventId,
   participants,
-  onParticipantUpdate,
 }: ParticipantManagementProps) {
   return (
     <Card className="p-6">
@@ -60,7 +59,7 @@ export function ParticipantManagement({
   );
 }
 
-export function LotteryControl({ eventId, onDrawStart, onDrawComplete }: LotteryControlProps) {
+export function LotteryControl({ onDrawStart }: LotteryControlProps) {
   const [isDrawing, setIsDrawing] = useState(false);
 
   const handleDrawStart = () => {

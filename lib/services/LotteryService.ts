@@ -124,7 +124,7 @@ export class LotteryService {
         winner,
         warning,
       };
-    } catch (error) {
+    } catch {
       // Handle specific error types
       if (error instanceof Error) {
         if (error.message.includes('Database') || error.message.includes('database')) {
@@ -211,10 +211,10 @@ export class LotteryService {
         success: true,
         winner,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Draw failed: ${error}`,
+        error: `Draw failed: `,
       };
     }
   }
@@ -242,11 +242,11 @@ export class LotteryService {
         winners,
         error: errors.length > 0 ? errors.join('; ') : undefined,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         winners: [],
-        error: `Batch draw failed: ${error}`,
+        error: `Batch draw failed: `,
       };
     }
   }
@@ -337,7 +337,7 @@ export class LotteryService {
         try {
           await this.eventService.autoCloseEvent(eventId);
           eventClosed = true;
-        } catch (error) {
+        } catch {
           console.warn('Failed to auto-close event:', error);
         }
       }
@@ -347,7 +347,7 @@ export class LotteryService {
         winners,
         eventClosed,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         winners: [],
@@ -385,7 +385,7 @@ export class LotteryService {
         winners,
         error: errors.length > 0 ? errors.join('; ') : undefined,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         winners: [],
@@ -400,8 +400,8 @@ export class LotteryService {
   async getWinners(eventId: string): Promise<Winner[]> {
     try {
       return await this.winnerService.getWinnersByEvent(eventId);
-    } catch (error) {
-      throw new Error(`Failed to get winners: ${error}`);
+    } catch {
+      throw new Error(`Failed to get winners: `);
     }
   }
 
@@ -411,8 +411,8 @@ export class LotteryService {
   async getWinnerCount(eventId: string): Promise<number> {
     try {
       return await this.winnerService.getWinnerCount(eventId);
-    } catch (error) {
-      throw new Error(`Failed to get winner count: ${error}`);
+    } catch {
+      throw new Error(`Failed to get winner count: `);
     }
   }
 
@@ -430,8 +430,8 @@ export class LotteryService {
         },
       });
       return winner;
-    } catch (error) {
-      throw new Error(`Failed to get winner by order: ${error}`);
+    } catch {
+      throw new Error(`Failed to get winner by order: `);
     }
   }
 
@@ -447,7 +447,7 @@ export class LotteryService {
 
       // Return the first undrawn participant (could be randomized for preview)
       return undrawenParticipants[0];
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -459,7 +459,7 @@ export class LotteryService {
     try {
       const undrawenCount = await this.participantRepository.getUndrawenCount(eventId);
       return undrawenCount > 0;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -485,8 +485,8 @@ export class LotteryService {
         remainingParticipants,
         drawProgress: Math.round(drawProgress * 100) / 100,
       };
-    } catch (error) {
-      throw new Error(`Failed to get lottery statistics: ${error}`);
+    } catch {
+      throw new Error(`Failed to get lottery statistics: `);
     }
   }
 
@@ -517,10 +517,10 @@ export class LotteryService {
       });
 
       return { success: true };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Failed to reset lottery: ${error}`,
+        error: `Failed to reset lottery: `,
       };
     }
   }
@@ -540,8 +540,8 @@ export class LotteryService {
         orderBy: { drawOrder: 'asc' },
       });
       return winners as Array<Winner & { participant: Participant }>;
-    } catch (error) {
-      throw new Error(`Failed to get winners with details: ${error}`);
+    } catch {
+      throw new Error(`Failed to get winners with details: `);
     }
   }
 
@@ -597,10 +597,10 @@ export class LotteryService {
           },
         },
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
-        error: `Failed to export results: ${error}`,
+        error: `Failed to export results: `,
       };
     }
   }
@@ -643,8 +643,8 @@ export class LotteryService {
         valid: errors.length === 0,
         errors,
       };
-    } catch (error) {
-      errors.push(`Validation failed: ${error}`);
+    } catch {
+      errors.push(`Validation failed: `);
       return { valid: false, errors };
     }
   }
@@ -695,8 +695,8 @@ export class LotteryService {
           timeSinceLastDraw,
         };
       });
-    } catch (error) {
-      throw new Error(`Failed to get draw history: ${error}`);
+    } catch {
+      throw new Error(`Failed to get draw history: `);
     }
   }
 }

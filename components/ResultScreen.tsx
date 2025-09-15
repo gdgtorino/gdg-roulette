@@ -46,7 +46,12 @@ interface ResultScreenProps {
   showTimestamp?: boolean;
   showPosition?: boolean;
   showStats?: boolean;
-  onShare?: (data: any) => void;
+  onShare?: (data: {
+    type: string;
+    participantName: string;
+    eventName: string;
+    drawOrder: number;
+  }) => void;
   onNavigateBack?: (path: string) => void;
 }
 
@@ -68,8 +73,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
 }) => {
   // Trigger confetti for winners
   useEffect(() => {
-    if (isWinner && showConfetti && typeof (globalThis as any).confetti === 'function') {
-      (globalThis as any).confetti();
+      if (isWinner && showConfetti && typeof (globalThis as { confetti?: () => void }).confetti === 'function') {
+      (globalThis as { confetti: () => void }).confetti();
     }
   }, [isWinner, showConfetti]);
 

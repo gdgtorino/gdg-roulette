@@ -9,7 +9,11 @@ interface Event {
 
 interface RegistrationFormProps {
   event: Event;
-  onSubmit?: (data: { eventId: string; name: string }) => Promise<any> | void;
+  onSubmit?: (data: { eventId: string; name: string }) => Promise<{
+    success?: boolean;
+    error?: string;
+    participant?: { name?: string };
+  }> | void;
 }
 
 export const RegistrationForm: React.FC<RegistrationFormProps> = ({ event, onSubmit }) => {
@@ -48,7 +52,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ event, onSub
           setIsError(false);
         }
       }
-    } catch (error) {
+    } catch {
       setMessage('Registration failed');
       setIsError(true);
     } finally {

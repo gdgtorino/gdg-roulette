@@ -319,7 +319,7 @@ export function CreateAdminForm({
                 <label htmlFor={role.value} className="ml-3 flex-1">
                   <div className="flex items-center space-x-2 mb-1">
                     <span className="font-medium text-gray-900">{role.label}</span>
-                    <Badge variant={role.badge as any} className="text-xs">
+                    <Badge variant={role.badge as 'primary' | 'secondary' | 'danger'} className="text-xs">
                       {role.value.replace('_', ' ')}
                     </Badge>
                   </div>

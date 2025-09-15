@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/Badge';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
+// import { LoadingSpinner } from '../ui/LoadingSpinner'; // Removed unused import
 import { LotteryAnimation } from '../ui/LotteryAnimation';
 import { Event, Participant, Winner } from '@/lib/types';
 
@@ -42,16 +42,16 @@ export function LotteryComponent({
     if (autoStart && participants.length > 0) {
       startDraw();
     }
-  }, [autoStart, participants]);
+  }, [autoStart, participants, startDraw]);
 
-  const startDraw = () => {
+  const startDraw = useCallback(() => {
     if (remainingParticipants.length === 0) return;
 
     setDrawStarted(true);
     performDraw();
-  };
+  }, [remainingParticipants.length, performDraw]);
 
-  const performDraw = async () => {
+  const performDraw = useCallback(async () => {
     if (drawComplete || winners.length >= maxWinners || remainingParticipants.length === 0) {
       setDrawComplete(true);
       if (onDrawComplete) {
@@ -116,7 +116,7 @@ export function LotteryComponent({
         }, 2000);
       }
     }, animationDuration);
-  };
+  }, [drawComplete, winners, maxWinners, remainingParticipants, onDrawComplete, onWinnerSelected]);
 
   const resetDraw = () => {
     setWinners([]);

@@ -165,7 +165,7 @@ export class RegistrationService {
           };
         }
       }
-    } catch (error) {
+    } catch {
       return {
         success: false,
         error: 'Registration failed due to system error',
@@ -201,7 +201,7 @@ export class RegistrationService {
         participant,
         session,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         error: 'Failed to recover session',
@@ -220,7 +220,7 @@ export class RegistrationService {
         success: true,
         session,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         error: 'Failed to extend session',
@@ -260,7 +260,7 @@ export class RegistrationService {
         qrCodeData,
         registrationUrl,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         error: 'Failed to generate QR code',

@@ -1,4 +1,4 @@
-import { Winner, Participant } from '../types';
+import { Winner } from '../types';
 
 export interface WinnerCreateData {
   eventId: string;
@@ -6,7 +6,7 @@ export interface WinnerCreateData {
   participantName: string;
   drawOrder: number;
   drawnAt?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class WinnerService {
@@ -26,9 +26,9 @@ export class WinnerService {
       // In a real implementation, this would save to database
       // For now, return the winner object
       return winner;
-    } catch (error) {
+    } catch {
       throw new Error(
-        `Failed to record winner: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to record winner: ${_error instanceof Error ? _error.message : 'Unknown error'}`,
       );
     }
   }
@@ -48,9 +48,9 @@ export class WinnerService {
       // In a real implementation, this would query the database
       // For now, return empty array
       return [];
-    } catch (error) {
+    } catch {
       throw new Error(
-        `Failed to get winners for event: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to get winners for event: _error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -62,9 +62,9 @@ export class WinnerService {
     try {
       const winners = await this.getWinnersByEvent(eventId);
       return winners.length;
-    } catch (error) {
+    } catch {
       throw new Error(
-        `Failed to get winner count: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to get winner count: _error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -72,14 +72,14 @@ export class WinnerService {
   /**
    * Get winner by ID
    */
-  async getWinnerById(winnerId: string): Promise<Winner | null> {
+  async getWinnerById(_winnerId: string): Promise<Winner | null> {
     try {
       // In a real implementation, this would query the database
       // For now, return null
       return null;
-    } catch (error) {
+    } catch {
       throw new Error(
-        `Failed to get winner: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to get winner: _error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -91,9 +91,9 @@ export class WinnerService {
     try {
       const winners = await this.getWinnersByEvent(eventId);
       return winners.find((winner) => winner.position === position) || null;
-    } catch (error) {
+    } catch {
       throw new Error(
-        `Failed to get winner by position: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to get winner by position: _error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -105,9 +105,9 @@ export class WinnerService {
     try {
       const winners = await this.getWinnersByEvent(eventId);
       return winners.some((winner) => winner.participantId === participantId);
-    } catch (error) {
+    } catch {
       throw new Error(
-        `Failed to check winner status: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to check winner status: _error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -122,9 +122,9 @@ export class WinnerService {
         return 1;
       }
       return Math.max(...winners.map((w) => w.position)) + 1;
-    } catch (error) {
+    } catch {
       throw new Error(
-        `Failed to get next position: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to get next position: _error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -132,14 +132,14 @@ export class WinnerService {
   /**
    * Delete winner by ID
    */
-  async deleteWinner(winnerId: string): Promise<boolean> {
+  async deleteWinner(_winnerId: string): Promise<boolean> {
     try {
       // In a real implementation, this would delete from database
       // For now, return true
       return true;
-    } catch (error) {
+    } catch {
       throw new Error(
-        `Failed to delete winner: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to delete winner: _error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -147,14 +147,14 @@ export class WinnerService {
   /**
    * Clear all winners for an event
    */
-  async clearEventWinners(eventId: string): Promise<boolean> {
+  async clearEventWinners(_eventId: string): Promise<boolean> {
     try {
       // In a real implementation, this would delete all winners for the event
       // For now, return true
       return true;
-    } catch (error) {
+    } catch {
       throw new Error(
-        `Failed to clear event winners: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to clear event winners: _error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -163,16 +163,16 @@ export class WinnerService {
    * Update winner metadata
    */
   async updateWinnerMetadata(
-    winnerId: string,
-    metadata: Record<string, any>,
+    _winnerId: string,
+    _metadata: Record<string, unknown>,
   ): Promise<Winner | null> {
     try {
       // In a real implementation, this would update the database
       // For now, return null
       return null;
-    } catch (error) {
+    } catch {
       throw new Error(
-        `Failed to update winner metadata: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to update winner metadata: _error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }

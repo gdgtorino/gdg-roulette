@@ -45,7 +45,7 @@ export class SessionService {
       // In a real implementation, this would save to database
       // For now, return the session object
       return session;
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to create session: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -60,7 +60,7 @@ export class SessionService {
       // In a real implementation, this would query the database
       // For now, return null
       return null;
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to get session: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -106,7 +106,7 @@ export class SessionService {
         session,
         user: undefined, // Would be populated with actual user data
       };
-    } catch (error) {
+    } catch {
       return {
         isValid: false,
         error: `Session validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -132,7 +132,7 @@ export class SessionService {
       session.updatedAt = new Date();
 
       return session;
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to refresh session: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -157,7 +157,7 @@ export class SessionService {
       session.updatedAt = new Date();
 
       return session;
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to update session metadata: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -172,7 +172,7 @@ export class SessionService {
       // In a real implementation, this would update the database
       // For now, return true
       return true;
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to invalidate session: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -187,7 +187,7 @@ export class SessionService {
       // In a real implementation, this would update the database
       // For now, return true
       return true;
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to invalidate user sessions: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -202,7 +202,7 @@ export class SessionService {
       // In a real implementation, this would query the database
       // For now, return empty array
       return [];
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to get user sessions: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -216,7 +216,7 @@ export class SessionService {
     try {
       const sessions = await this.getUserSessions(userId);
       return sessions.length;
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to get session count: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -231,7 +231,7 @@ export class SessionService {
       // In a real implementation, this would delete expired sessions from database
       // For now, return 0
       return 0;
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to cleanup expired sessions: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -257,7 +257,7 @@ export class SessionService {
         adminSessions: 0,
         participantSessions: 0,
       };
-    } catch (error) {
+    } catch {
       throw new Error(
         `Failed to get session stats: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -271,7 +271,7 @@ export class SessionService {
     setInterval(async () => {
       try {
         await this.cleanupExpiredSessions();
-      } catch (error) {
+      } catch {
         console.error('Session cleanup failed:', error);
       }
     }, SessionService.CLEANUP_INTERVAL);
@@ -284,7 +284,7 @@ export class SessionService {
     try {
       // In a real implementation, this would update the database
       // For now, do nothing
-    } catch (error) {
+    } catch {
       // Log error but don't throw to avoid breaking session validation
       console.error('Failed to update session access time:', error);
     }
