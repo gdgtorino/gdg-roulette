@@ -57,7 +57,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest('http://localhost/api/auth/login', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -99,7 +99,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest('http://localhost/api/auth/login', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -135,7 +135,7 @@ describe('/api/auth/* API Routes', () => {
 
       // Act & Assert
       for (const invalidData of invalidRequests) {
-        const request = new NextRequest('http://localhost/api/auth/login', {
+        const request = new NextRequest(new Request('http://localhost/api/auth/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -154,7 +154,7 @@ describe('/api/auth/* API Routes', () => {
 
     it('should handle malformed JSON in request body', async () => {
       // Arrange
-      const request = new NextRequest('http://localhost/api/auth/login', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -181,7 +181,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockRejectedValue(new Error('Database connection failed'));
 
-      const request = new NextRequest('http://localhost/api/auth/login', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -216,7 +216,7 @@ describe('/api/auth/* API Routes', () => {
       // Act - Make multiple failed login attempts
       const promises = [];
       for (let i = 0; i < 6; i++) { // Exceed rate limit of 5 attempts
-        const request = new NextRequest('http://localhost/api/auth/login', {
+        const request = new NextRequest(new Request('http://localhost/api/auth/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -252,7 +252,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest('http://localhost/api/auth/login', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -286,7 +286,7 @@ describe('/api/auth/* API Routes', () => {
       authService.login.mockResolvedValue(mockLoginResult);
       const securityLogSpy = jest.spyOn(console, 'warn').mockImplementation();
 
-      const request = new NextRequest('http://localhost/api/auth/login', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -325,7 +325,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.logout.mockResolvedValue(mockLogoutResult);
 
-      const request = new NextRequest('http://localhost/api/auth/logout', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/logout', {
         method: 'POST',
         headers: {
           'Cookie': `sessionToken=${sessionToken}`
@@ -350,7 +350,7 @@ describe('/api/auth/* API Routes', () => {
 
     it('should handle logout without valid session', async () => {
       // Arrange
-      const request = new NextRequest('http://localhost/api/auth/logout', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/logout', {
         method: 'POST'
         // No session cookie
       });
@@ -372,7 +372,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.logout.mockRejectedValue(new Error('Session service unavailable'));
 
-      const request = new NextRequest('http://localhost/api/auth/logout', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/logout', {
         method: 'POST',
         headers: {
           'Cookie': `sessionToken=${sessionToken}`
@@ -399,7 +399,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.logout.mockResolvedValue(mockLogoutResult);
 
-      const request = new NextRequest('http://localhost/api/auth/logout', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/logout', {
         method: 'POST',
         headers: {
           'Cookie': `sessionToken=${sessionToken}; adminPrefs=theme-dark; csrfToken=csrf-123`
@@ -435,7 +435,7 @@ describe('/api/auth/* API Routes', () => {
       authService.logout.mockResolvedValue(mockLogoutResult);
       const auditLogSpy = jest.spyOn(console, 'info').mockImplementation();
 
-      const request = new NextRequest('http://localhost/api/auth/logout', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/logout', {
         method: 'POST',
         headers: {
           'Cookie': `sessionToken=${sessionToken}`,
@@ -565,7 +565,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest('http://localhost/api/auth/login', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -591,7 +591,7 @@ describe('/api/auth/* API Routes', () => {
         password: 'SecurePass123!'
       };
 
-      const request = new NextRequest('http://localhost/api/auth/login', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -617,7 +617,7 @@ describe('/api/auth/* API Routes', () => {
         password: '<script>alert("xss")</script>'
       };
 
-      const request = new NextRequest('http://localhost/api/auth/login', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -656,7 +656,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest('http://localhost/api/auth/login', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -693,7 +693,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest('http://localhost/api/auth/login', {
+      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

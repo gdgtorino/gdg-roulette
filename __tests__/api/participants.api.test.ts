@@ -88,7 +88,7 @@ describe('/api/participants API Routes', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -144,7 +144,7 @@ describe('/api/participants API Routes', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -310,7 +310,7 @@ describe('/api/participants API Routes', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -391,7 +391,7 @@ describe('/api/participants API Routes', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -437,7 +437,7 @@ describe('/api/participants API Routes', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -539,7 +539,7 @@ describe('/api/participants API Routes', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -591,7 +591,7 @@ describe('/api/participants API Routes', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -687,8 +687,7 @@ describe('/api/participants API Routes', () => {
             'X-Forwarded-For': '192.168.1.1' // Same IP
           },
           body: JSON.stringify({ ...registrationData, name: `User ${i}` })
-      })
-        });
+        }));
         promises.push(registerParticipantHandler(request));
       }
 
@@ -829,7 +828,7 @@ describe('/api/participants API Routes', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       // Act
       const response = await registerParticipantHandler(request);
