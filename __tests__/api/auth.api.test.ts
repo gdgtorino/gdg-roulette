@@ -11,7 +11,7 @@ import request from 'supertest';
 import { createMocks } from 'node-mocks-http';
 import { NextRequest, NextResponse } from 'next/server';
 import { POST as loginHandler, setTestAuthServices } from '../../app/api/auth/login/route';
-import { POST as logoutHandler } from '../../app/api/auth/logout/route';
+import { POST as logoutHandler, setTestLogoutServices } from '../../app/api/auth/logout/route';
 
 // Mock services
 const mockAuthService = {
@@ -49,10 +49,15 @@ describe('/api/auth/* API Routes', () => {
     // Reset all mocks
     jest.clearAllMocks();
 
-    // Inject mock services into the API route
+    // Inject mock services into the API routes
     setTestAuthServices({
-      mockAuthService: mockAuthService as any,
-      mockSessionManager: mockSessionManager as any
+      authService: mockAuthService as any,
+      sessionManager: mockSessionManager as any
+    });
+
+    setTestLogoutServices({
+      authService: mockAuthService as any,
+      sessionManager: mockSessionManager as any
     });
   });
 
