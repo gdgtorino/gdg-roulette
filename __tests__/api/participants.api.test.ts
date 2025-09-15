@@ -452,7 +452,7 @@ describe('/api/participants API Routes', () => {
       mockParticipantService.findByEventAndName.mockResolvedValue(null);
       mockParticipantService.create.mockResolvedValue(mockParticipant);
       mockSessionService.createUserSession.mockRejectedValue(new Error('Critical session failure'));
-      participantService.delete.mockResolvedValue(true);
+      mockParticipantService.delete.mockResolvedValue(true);
 
       const request = createMockRequest(registrationData, {
         'X-Rollback-On-Failure': 'true',
@@ -466,7 +466,7 @@ describe('/api/participants API Routes', () => {
       expect(response.status).toBe(500);
       expect(responseData.success).toBe(false);
       expect(responseData.error).toBe('Registration failed - unable to create session');
-      expect(participantService.delete).toHaveBeenCalledWith('participant-456');
+      expect(mockParticipantService.delete).toHaveBeenCalledWith('participant-456');
     });
 
     it('should send registration confirmation notification', async () => {
