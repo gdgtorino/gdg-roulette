@@ -35,8 +35,8 @@
     "security:audit": "yarn audit --level moderate",
     "monitoring:up": "docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d prometheus grafana",
     "logs": "docker-compose logs -f",
-    "format": "prettier --write '**/*'",
-    "format:check": "prettier --check '**/**' "
+    "format": "prettier --write '**/**.ts|tsx|json|md'",
+    "format:check": "prettier --check '**/**.tsx|ts|json|md'"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",

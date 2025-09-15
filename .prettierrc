@@ -1,13 +1,18 @@
 {
-  "singleQuote": true,
-  "trailingComma": "all",
-  "printWidth": 100,
-  "tabWidth": 2,
-  "semi": true,
-  "bracketSpacing": true,
-  "arrowParens": "always",
-  "endOfLine": "lf",
   "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "options": {
+        "singleQuote": true,
+        "trailingComma": "all",
+        "printWidth": 100,
+        "tabWidth": 2,
+        "semi": true,
+        "bracketSpacing": true,
+        "arrowParens": "always",
+        "endOfLine": "lf"
+      }
+    },
     {
       "files": "*.md",
       "options": {
@@ -16,9 +21,18 @@
         "semi": false,
         "bracketSpacing": false,
         "arrowParens": "avoid",
+        "endOfLine": "lf",
+        "proseWrap": "always"
+      }
+    },
+    {
+      "files": ["*.yaml", "*.yml"],
+      "options": {
+        "printWidth": 80,
+        "tabWidth": 2,
+        "singleQuote": false,
         "endOfLine": "lf"
       }
     }
-  ],
-  "proseWrap": "always"
+  ]
 }
