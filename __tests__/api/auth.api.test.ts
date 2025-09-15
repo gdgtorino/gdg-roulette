@@ -203,13 +203,8 @@ describe('/api/auth/* API Routes', () => {
       // Act - Make multiple failed login attempts
       const promises = [];
       for (let i = 0; i < 6; i++) { // Exceed rate limit of 5 attempts
-        const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Forwarded-For': '192.168.1.1' // Same IP
-          },
-          body: JSON.stringify(loginData)
+        const request = createMockRequest(loginData, {
+          'X-Forwarded-For': '192.168.1.1'
         });
         promises.push(loginHandler(request));
       }
@@ -239,13 +234,8 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Origin': 'http://localhost:3000'
-        },
-        body: JSON.stringify(loginData)
+      const request = createMockRequest(loginData, {
+        'Origin': 'http://localhost:3000'
       });
 
       // Act
@@ -273,14 +263,9 @@ describe('/api/auth/* API Routes', () => {
       authService.login.mockResolvedValue(mockLoginResult);
       const securityLogSpy = jest.spyOn(console, 'warn').mockImplementation();
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Forwarded-For': '192.168.1.100',
-          'User-Agent': 'Mozilla/5.0 Test Browser'
-        },
-        body: JSON.stringify(loginData)
+      const request = createMockRequest(loginData, {
+        'X-Forwarded-For': '192.168.1.100',
+        'User-Agent': 'Mozilla/5.0 Test Browser'
       });
 
       // Act
@@ -312,11 +297,8 @@ describe('/api/auth/* API Routes', () => {
 
       authService.logout.mockResolvedValue(mockLogoutResult);
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Cookie': `sessionToken=${sessionToken}`
-        }
+      const request = createMockRequest({}, {
+        'Cookie': `sessionToken=${sessionToken}`
       });
 
       // Act
@@ -337,10 +319,7 @@ describe('/api/auth/* API Routes', () => {
 
     it('should handle logout without valid session', async () => {
       // Arrange
-      const request = new NextRequest(new Request('http://localhost/api/auth/logout', {
-        method: 'POST'
-        // No session cookie
-      });
+      const request = createMockRequest({});
 
       // Act
       const response = await logoutHandler(request);
@@ -359,11 +338,8 @@ describe('/api/auth/* API Routes', () => {
 
       authService.logout.mockRejectedValue(new Error('Session service unavailable'));
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Cookie': `sessionToken=${sessionToken}`
-        }
+      const request = createMockRequest({}, {
+        'Cookie': `sessionToken=${sessionToken}`
       });
 
       // Act
@@ -386,11 +362,8 @@ describe('/api/auth/* API Routes', () => {
 
       authService.logout.mockResolvedValue(mockLogoutResult);
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Cookie': `sessionToken=${sessionToken}; adminPrefs=theme-dark; csrfToken=csrf-123`
-        }
+      const request = createMockRequest({}, {
+        'Cookie': `sessionToken=${sessionToken}; adminPrefs=theme-dark; csrfToken=csrf-123`
       });
 
       // Act
@@ -422,12 +395,9 @@ describe('/api/auth/* API Routes', () => {
       authService.logout.mockResolvedValue(mockLogoutResult);
       const auditLogSpy = jest.spyOn(console, 'info').mockImplementation();
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Cookie': `sessionToken=${sessionToken}`,
-          'X-Forwarded-For': '192.168.1.100'
-        }
+      const request = createMockRequest({}, {
+        'Cookie': `sessionToken=${sessionToken}`,
+        'X-Forwarded-For': '192.168.1.100'
       });
 
       // Act
@@ -572,13 +542,8 @@ describe('/api/auth/* API Routes', () => {
         password: 'SecurePass123!'
       };
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Origin': 'http://malicious-site.com'
-        },
-        body: JSON.stringify(loginData)
+      const request = createMockRequest(loginData, {
+        'Origin': 'http://malicious-site.com'
       });
 
       // Act
@@ -598,13 +563,7 @@ describe('/api/auth/* API Routes', () => {
         password: '<script>alert("xss")</script>'
       };
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(maliciousLoginData)
-      });
+      const request = createMockRequest(maliciousLoginData);
 
       // Act
       const response = await loginHandler(request);

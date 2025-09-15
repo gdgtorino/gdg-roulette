@@ -16,6 +16,25 @@ import { NotificationService } from '../../lib/services/NotificationService';
 import { EventState } from '../../lib/state/EventStateMachine';
 
 // Mock services
+const mockParticipantService = {
+  findByEventAndName: jest.fn(),
+  create: jest.fn(),
+  delete: jest.fn(),
+  getParticipantCount: jest.fn()
+};
+
+const mockEventService = {
+  findById: jest.fn()
+};
+
+const mockSessionService = {
+  createUserSession: jest.fn()
+};
+
+const mockNotificationService = {
+  sendRegistrationConfirmation: jest.fn()
+};
+
 jest.mock('../../lib/services/ParticipantService');
 jest.mock('../../lib/services/EventService');
 jest.mock('../../lib/services/SessionService');
@@ -34,20 +53,15 @@ function createMockRequest(data: any, headers: Record<string, string> = {}): Nex
 }
 
 describe('/api/participants API Routes', () => {
-  let participantService: jest.Mocked<ParticipantService>;
-  let eventService: jest.Mocked<EventService>;
-  let sessionService: jest.Mocked<SessionService>;
-  let notificationService: jest.Mocked<NotificationService>;
-
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
 
-    // Create mocked instances
-    participantService = new ParticipantService() as jest.Mocked<ParticipantService>;
-    eventService = new EventService() as jest.Mocked<EventService>;
-    sessionService = new SessionService() as jest.Mocked<SessionService>;
-    notificationService = new NotificationService() as jest.Mocked<NotificationService>;
+    // Configure mocked constructors to return our mock instances
+    (ParticipantService as jest.MockedClass<typeof ParticipantService>).mockImplementation(() => mockParticipantService as any);
+    (EventService as jest.MockedClass<typeof EventService>).mockImplementation(() => mockEventService as any);
+    (SessionService as jest.MockedClass<typeof SessionService>).mockImplementation(() => mockSessionService as any);
+    (NotificationService as jest.MockedClass<typeof NotificationService>).mockImplementation(() => mockNotificationService as any);
   });
 
   afterEach(() => {
@@ -88,11 +102,11 @@ describe('/api/participants API Routes', () => {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockResolvedValue(mockParticipant);
-      sessionService.createUserSession.mockResolvedValue(mockSession);
-      notificationService.sendRegistrationConfirmation.mockResolvedValue(true);
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue(mockParticipant);
+      mockSessionService.createUserSession.mockResolvedValue(mockSession);
+      mockNotificationService.sendRegistrationConfirmation.mockResolvedValue(true);
 
       const request = createMockRequest(registrationData);
 
@@ -106,11 +120,11 @@ describe('/api/participants API Routes', () => {
       expect(responseData.participant.name).toBe('John Doe');
       expect(responseData.participant.eventId).toBe('event-123');
       expect(responseData.sessionToken).toBe('session-token-123');
-      expect(participantService.create).toHaveBeenCalledWith({
+      expect(mockParticipantService.create).toHaveBeenCalledWith({
         eventId: 'event-123',
         name: 'John Doe'
       });
-      expect(sessionService.createUserSession).toHaveBeenCalledWith('participant-456', 'event-123');
+      expect(mockSessionService.createUserSession).toHaveBeenCalledWith('participant-456', 'event-123');
 
       // Check for secure session cookie
       const setCookieHeader = response.headers.get('Set-Cookie');
@@ -141,8 +155,8 @@ describe('/api/participants API Routes', () => {
         registeredAt: new Date()
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(existingParticipant);
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockParticipantService.findByEventAndName.mockResolvedValue(existingParticipant);
 
       const request = createMockRequest(registrationData);
 
@@ -155,7 +169,7 @@ describe('/api/participants API Routes', () => {
       expect(responseData.success).toBe(false);
       expect(responseData.error).toBe('Name already registered for this event');
       expect(responseData.existingParticipant).toBeDefined();
-      expect(participantService.create).not.toHaveBeenCalled();
+      expect(mockParticipantService.create).not.toHaveBeenCalled();
     });
 
     it('should validate required registration fields', async () => {
@@ -200,7 +214,7 @@ describe('/api/participants API Routes', () => {
         closed: false
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
+      mockEventService.findById.mockResolvedValue(mockEvent);
 
       // Act & Assert
       for (const invalidName of invalidNames) {
@@ -239,8 +253,8 @@ describe('/api/participants API Routes', () => {
         closed: false
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
 
       // Act & Assert
       for (const validName of validNames) {
@@ -263,8 +277,8 @@ describe('/api/participants API Routes', () => {
           token: `token-${Math.random()}`
         };
 
-        participantService.create.mockResolvedValue(mockParticipant);
-        sessionService.createUserSession.mockResolvedValue(mockSession);
+        mockParticipantService.create.mockResolvedValue(mockParticipant);
+        mockSessionService.createUserSession.mockResolvedValue(mockSession);
 
         const request = createMockRequest(registrationData);
 
@@ -284,7 +298,7 @@ describe('/api/participants API Routes', () => {
         name: 'John Doe'
       };
 
-      eventService.findById.mockResolvedValue(null);
+      mockEventService.findById.mockResolvedValue(null);
 
       const request = createMockRequest(registrationData);
 
@@ -296,7 +310,7 @@ describe('/api/participants API Routes', () => {
       expect(response.status).toBe(404);
       expect(responseData.success).toBe(false);
       expect(responseData.error).toBe('Event not found');
-      expect(participantService.create).not.toHaveBeenCalled();
+      expect(mockParticipantService.create).not.toHaveBeenCalled();
     });
 
     it('should reject registration when event is not in registration state', async () => {
@@ -322,7 +336,7 @@ describe('/api/participants API Routes', () => {
           closed: state === EventState.CLOSED
         };
 
-        eventService.findById.mockResolvedValue(mockEvent);
+        mockEventService.findById.mockResolvedValue(mockEvent);
 
         const request = createMockRequest(registrationData);
 
@@ -352,8 +366,8 @@ describe('/api/participants API Routes', () => {
         currentParticipants: 50
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
-      participantService.getParticipantCount.mockResolvedValue(50);
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockParticipantService.getParticipantCount.mockResolvedValue(50);
 
       const request = createMockRequest(registrationData);
 
@@ -390,10 +404,10 @@ describe('/api/participants API Routes', () => {
         registeredAt: new Date()
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockResolvedValue(mockParticipant);
-      sessionService.createUserSession.mockRejectedValue(new Error('Session service unavailable'));
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue(mockParticipant);
+      mockSessionService.createUserSession.mockRejectedValue(new Error('Session service unavailable'));
 
       const request = createMockRequest(registrationData);
 
@@ -430,10 +444,10 @@ describe('/api/participants API Routes', () => {
         registeredAt: new Date()
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockResolvedValue(mockParticipant);
-      sessionService.createUserSession.mockRejectedValue(new Error('Critical session failure'));
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue(mockParticipant);
+      mockSessionService.createUserSession.mockRejectedValue(new Error('Critical session failure'));
       participantService.delete.mockResolvedValue(true);
 
       const request = createMockRequest(registrationData, {
@@ -480,11 +494,11 @@ describe('/api/participants API Routes', () => {
         token: 'session-token-123'
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockResolvedValue(mockParticipant);
-      sessionService.createUserSession.mockResolvedValue(mockSession);
-      notificationService.sendRegistrationConfirmation.mockResolvedValue(true);
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue(mockParticipant);
+      mockSessionService.createUserSession.mockResolvedValue(mockSession);
+      mockNotificationService.sendRegistrationConfirmation.mockResolvedValue(true);
 
       const request = createMockRequest(registrationData);
 
@@ -493,7 +507,7 @@ describe('/api/participants API Routes', () => {
 
       // Assert
       expect(response.status).toBe(201);
-      expect(notificationService.sendRegistrationConfirmation).toHaveBeenCalledWith({
+      expect(mockNotificationService.sendRegistrationConfirmation).toHaveBeenCalledWith({
         participant: mockParticipant,
         event: mockEvent,
         registrationUrl: expect.stringContaining('event-123')
@@ -527,10 +541,10 @@ describe('/api/participants API Routes', () => {
         token: 'session-token-123'
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockResolvedValue(mockParticipant);
-      sessionService.createUserSession.mockResolvedValue(mockSession);
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue(mockParticipant);
+      mockSessionService.createUserSession.mockResolvedValue(mockSession);
 
       const request = createMockRequest(registrationData);
 
@@ -558,18 +572,18 @@ describe('/api/participants API Routes', () => {
         closed: false
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
+      mockEventService.findById.mockResolvedValue(mockEvent);
 
       // First request succeeds
-      participantService.findByEventAndName.mockResolvedValueOnce(null);
-      participantService.create.mockResolvedValueOnce({
+      mockParticipantService.findByEventAndName.mockResolvedValueOnce(null);
+      mockParticipantService.create.mockResolvedValueOnce({
         id: 'participant-first',
         name: 'Popular Name',
         eventId: 'event-123'
       });
 
       // Second concurrent request fails
-      participantService.findByEventAndName.mockResolvedValueOnce({
+      mockParticipantService.findByEventAndName.mockResolvedValueOnce({
         id: 'participant-first',
         name: 'Popular Name',
         eventId: 'event-123'
@@ -606,8 +620,8 @@ describe('/api/participants API Routes', () => {
         closed: false
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
 
       // Act - Make multiple rapid registration attempts from same IP
       const promises = [];
@@ -656,10 +670,10 @@ describe('/api/participants API Routes', () => {
         token: 'session-token-123'
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockResolvedValue(mockParticipant);
-      sessionService.createUserSession.mockResolvedValue(mockSession);
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue(mockParticipant);
+      mockSessionService.createUserSession.mockResolvedValue(mockSession);
 
       const analyticsLogSpy = jest.spyOn(console, 'info').mockImplementation();
 
@@ -705,7 +719,7 @@ describe('/api/participants API Routes', () => {
       expect(response.status).toBe(400);
       expect(responseData.success).toBe(false);
       expect(responseData.error).toMatch(/invalid.*characters|sanitization|security/i);
-      expect(eventService.findById).not.toHaveBeenCalledWith(maliciousData.eventId);
+      expect(mockEventService.findById).not.toHaveBeenCalledWith(maliciousData.eventId);
     });
 
     it('should return consistent response format', async () => {
@@ -734,10 +748,10 @@ describe('/api/participants API Routes', () => {
         token: 'session-token-123'
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockResolvedValue(mockParticipant);
-      sessionService.createUserSession.mockResolvedValue(mockSession);
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue(mockParticipant);
+      mockSessionService.createUserSession.mockResolvedValue(mockSession);
 
       const request = createMockRequest(registrationData);
 

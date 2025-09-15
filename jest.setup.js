@@ -49,6 +49,20 @@ jest.mock('next/navigation', () => ({
   },
 }))
 
+// Mock Next.js server components (NextResponse)
+jest.mock('next/server', () => ({
+  NextRequest: jest.fn(),
+  NextResponse: {
+    json: jest.fn((data, init) => ({
+      json: async () => data,
+      status: init?.status || 200,
+      headers: new Map(Object.entries(init?.headers || {})),
+    })),
+    redirect: jest.fn(),
+    rewrite: jest.fn(),
+  },
+}))
+
 // Mock Next.js Image component
 jest.mock('next/image', () => {
   const mockReact = require('react');
