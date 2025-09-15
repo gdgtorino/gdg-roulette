@@ -109,7 +109,7 @@ export class UserExperienceService {
               storedState = null;
             }
           }
-        } catch {
+        } catch (error) {
           console.warn('Failed to recover session:', error);
           // Clear corrupted state
           this.userStateManager.clearUserState(eventId);
@@ -129,18 +129,27 @@ export class UserExperienceService {
       // Handle session expiration
       if (userState.status === 'SESSION_EXPIRED') {
         this.userStateManager.clearUserState(eventId);
+        if (storedState) {
+          // Clear localStorage for expired sessions
+          if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.removeItem(`userState_${eventId}`);
+          }
+        }
       }
 
       return {
         success: true,
         userState,
       };
-    } catch {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const isNetworkError =
         error instanceof Error &&
-        (error.message.includes('Network') ||
+        (error.message.includes('Network error') ||
+          error.message.includes('Event service unavailable') ||
           error.message.includes('fetch') ||
-          error.message.includes('connection'));
+          error.message.includes('connection') ||
+          error.name === 'NetworkError');
 
       return {
         success: false,
@@ -163,7 +172,7 @@ export class UserExperienceService {
   async saveUserState(eventId: string, userState: Partial<UserState>): Promise<void> {
     try {
       this.userStateManager.saveUserState(eventId, userState);
-    } catch {
+    } catch (error) {
       console.warn('Failed to save user state:', error);
     }
   }
@@ -273,7 +282,7 @@ export class UserExperienceService {
       } else {
         throw new Error('WebSocket connection failed');
       }
-    } catch {
+    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Connection failed';
 
       // Handle auto-reconnection
@@ -332,7 +341,7 @@ export class UserExperienceService {
       }
 
       return result;
-    } catch {
+    } catch (error) {
       return await this.attemptReconnection(eventId, participantId, options, attempt + 1);
     }
   }
@@ -379,7 +388,7 @@ export class UserExperienceService {
             }
             break;
         }
-      } catch {
+      } catch (error) {
         console.warn('Failed to parse WebSocket message:', error);
       }
     };
@@ -409,7 +418,7 @@ export class UserExperienceService {
       // This would typically call a WinnerService method
       // For now, return null (no winner found)
       return null;
-    } catch {
+    } catch (error) {
       return null;
     }
   }

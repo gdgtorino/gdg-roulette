@@ -103,7 +103,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           <h1>Congratulations!</h1>
           <h2>{winner.participantName}</h2>
 
-          {showPosition && <p>Position: {getPositionText(winner.drawOrder)}</p>}
+          {showPosition && <p>Position {winner.drawOrder} - {getPositionText(winner.drawOrder)}</p>}
 
           {showTimestamp && winner.drawnAt && (
             <div>
@@ -118,6 +118,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                 {winner.drawnAt.toLocaleTimeString('en-US', {
                   hour: 'numeric',
                   minute: '2-digit',
+                  hour12: true,
                 })}
               </p>
             </div>

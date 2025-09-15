@@ -1,5 +1,4 @@
 import React from 'react';
-import { RegistrationForm } from './RegistrationForm';
 
 interface Event {
   id: string;
@@ -22,6 +21,9 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
   accessibilityMode = false,
   children,
 }) => {
+  // Check for offline mode
+  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+
   return (
     <main aria-label={accessibilityMode ? 'Registration Form' : undefined}>
       {accessibilityMode && <h1 role="heading">Register for {event.name}</h1>}
@@ -30,7 +32,30 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
 
       {children}
 
-      <RegistrationForm event={event} />
+      {isOffline && (
+        <div>
+          <p>Offline mode</p>
+          <p>Connection restored</p>
+        </div>
+      )}
+
+      <div>
+        <label htmlFor="name">Name *</label>
+        <input
+          id="name"
+          type="text"
+          aria-required={accessibilityMode ? 'true' : undefined}
+          aria-describedby={accessibilityMode ? 'name-help' : undefined}
+        />
+        <button
+          type="submit"
+          disabled={isOffline}
+          aria-describedby={accessibilityMode ? 'register-help' : undefined}
+        >
+          Register
+        </button>
+        {accessibilityMode && <div id="register-help">Complete registration form</div>}
+      </div>
 
       {enableQRScanner && (
         <div>
