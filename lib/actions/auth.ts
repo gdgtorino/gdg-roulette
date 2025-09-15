@@ -24,11 +24,13 @@ export async function login(
       // Simple mock authentication - accept admin1/SecurePass123!
       if (username === 'admin1' && password === 'SecurePass123!') {
         // Create a simple JWT-like token for testing
-        const mockToken = Buffer.from(JSON.stringify({
-          adminId: 'admin1',
-          username: 'admin1',
-          exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24) // 24 hours
-        })).toString('base64');
+        const mockToken = Buffer.from(
+          JSON.stringify({
+            adminId: 'admin1',
+            username: 'admin1',
+            exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 24 hours
+          }),
+        ).toString('base64');
 
         const cookieStore = cookies();
         cookieStore.set('auth_token', `mock.${mockToken}.signature`, {

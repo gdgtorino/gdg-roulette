@@ -397,7 +397,9 @@ export class EventService {
 
       return updatedEvent;
     } catch (error) {
-      throw new Error(`Failed to auto-close event: ${error instanceof Error ? error.message : error}`);
+      throw new Error(
+        `Failed to auto-close event: ${error instanceof Error ? error.message : error}`,
+      );
     }
   }
 }

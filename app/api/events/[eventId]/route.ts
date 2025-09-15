@@ -21,14 +21,13 @@ eventService = new EventService();
 authService = new AuthService();
 
 // Function to set test services
-// Note: Commented out for build compatibility - re-enable for testing
-// export function setTestServices(services: {
-//   eventService?: EventService;
-//   authService?: AuthService;
-// }) {
-//   if (services.eventService) eventService = services.eventService;
-//   if (services.authService) authService = services.authService;
-// }
+export function setTestServices(services: {
+  eventService?: EventService;
+  authService?: AuthService;
+}) {
+  if (services.eventService) eventService = services.eventService;
+  if (services.authService) authService = services.authService;
+}
 
 interface RouteParams {
   params: {
@@ -43,8 +42,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     try {
       if (request.headers && typeof request.headers.get === 'function') {
         const cookieHeader = request.headers.get('Cookie') || '';
-        sessionToken = cookieHeader.split(';')
-          .find(cookie => cookie.trim().startsWith('sessionToken='))
+        sessionToken = cookieHeader
+          .split(';')
+          .find((cookie) => cookie.trim().startsWith('sessionToken='))
           ?.split('=')[1];
       } else {
         sessionToken = undefined;
@@ -57,10 +57,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const sessionValidation = await authService.validateSession(sessionToken);
 
     if (!sessionValidation.valid || !sessionValidation.session) {
-      return NextResponse.json({
-        success: false,
-        error: 'Authentication required'
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Authentication required',
+        },
+        { status: 401 },
+      );
     }
 
     const adminId = sessionValidation.session.adminId;
@@ -69,24 +72,34 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const result = await eventService.getEventDetails(params.eventId, adminId);
 
     if (!result.success) {
-      const status = result.error === 'Event not found' ? 404 :
-                    result.error === 'Access denied - not event creator' ? 403 : 400;
-      return NextResponse.json({
-        success: false,
-        error: result.error
-      }, { status });
+      const status =
+        result.error === 'Event not found'
+          ? 404
+          : result.error === 'Access denied - not event creator'
+            ? 403
+            : 400;
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error,
+        },
+        { status },
+      );
     }
 
     return NextResponse.json({
       success: true,
-      event: result.event
+      event: result.event,
     });
   } catch (error) {
     console.error('Get event error:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Internal server error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Internal server error',
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -97,8 +110,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     try {
       if (request.headers && typeof request.headers.get === 'function') {
         const cookieHeader = request.headers.get('Cookie') || '';
-        sessionToken = cookieHeader.split(';')
-          .find(cookie => cookie.trim().startsWith('sessionToken='))
+        sessionToken = cookieHeader
+          .split(';')
+          .find((cookie) => cookie.trim().startsWith('sessionToken='))
           ?.split('=')[1];
       } else {
         sessionToken = undefined;
@@ -111,10 +125,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const sessionValidation = await authService.validateSession(sessionToken);
 
     if (!sessionValidation.valid || !sessionValidation.session) {
-      return NextResponse.json({
-        success: false,
-        error: 'Authentication required'
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Authentication required',
+        },
+        { status: 401 },
+      );
     }
 
     const adminId = sessionValidation.session.adminId;
@@ -124,36 +141,51 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid JSON format'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid JSON format',
+        },
+        { status: 400 },
+      );
     }
 
     // Update event using service
     const result = await eventService.updateEvent(params.eventId, body, adminId);
 
     if (!result.success) {
-      const status = result.error === 'Event not found' ? 404 :
-                    result.error === 'Access denied - not event creator' ? 403 :
-                    result.error === 'Cannot modify closed event' ? 400 :
-                    result.error === 'Invalid state transition' ? 400 : 400;
-      return NextResponse.json({
-        success: false,
-        error: result.error
-      }, { status });
+      const status =
+        result.error === 'Event not found'
+          ? 404
+          : result.error === 'Access denied - not event creator'
+            ? 403
+            : result.error === 'Cannot modify closed event'
+              ? 400
+              : result.error === 'Invalid state transition'
+                ? 400
+                : 400;
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error,
+        },
+        { status },
+      );
     }
 
     return NextResponse.json({
       success: true,
-      event: result.event
+      event: result.event,
     });
   } catch (error) {
     console.error('Update event error:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Internal server error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Internal server error',
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -164,8 +196,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     try {
       if (request.headers && typeof request.headers.get === 'function') {
         const cookieHeader = request.headers.get('Cookie') || '';
-        sessionToken = cookieHeader.split(';')
-          .find(cookie => cookie.trim().startsWith('sessionToken='))
+        sessionToken = cookieHeader
+          .split(';')
+          .find((cookie) => cookie.trim().startsWith('sessionToken='))
           ?.split('=')[1];
       } else {
         sessionToken = undefined;
@@ -178,10 +211,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const sessionValidation = await authService.validateSession(sessionToken);
 
     if (!sessionValidation.valid || !sessionValidation.session) {
-      return NextResponse.json({
-        success: false,
-        error: 'Authentication required'
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Authentication required',
+        },
+        { status: 401 },
+      );
     }
 
     const adminId = sessionValidation.session.adminId;
@@ -199,35 +235,48 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     if (!confirmationHeader || confirmationHeader !== 'true') {
-      return NextResponse.json({
-        success: false,
-        error: 'Deletion confirmation required'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Deletion confirmation required',
+        },
+        { status: 400 },
+      );
     }
 
     // Delete event using service
     const result = await eventService.deleteEvent(params.eventId, adminId);
 
     if (!result.success) {
-      const status = result.error === 'Event not found' ? 404 :
-                    result.error === 'Access denied - not event creator' ? 403 :
-                    result.error === 'Cannot delete event with registered participants' ? 400 : 400;
-      return NextResponse.json({
-        success: false,
-        error: result.error
-      }, { status });
+      const status =
+        result.error === 'Event not found'
+          ? 404
+          : result.error === 'Access denied - not event creator'
+            ? 403
+            : result.error === 'Cannot delete event with registered participants'
+              ? 400
+              : 400;
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error,
+        },
+        { status },
+      );
     }
 
     return NextResponse.json({
       success: true,
-      message: result.message || 'Event deleted successfully'
+      message: result.message || 'Event deleted successfully',
     });
   } catch (error) {
     console.error('Delete event error:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Internal server error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Internal server error',
+      },
+      { status: 500 },
+    );
   }
 }
-

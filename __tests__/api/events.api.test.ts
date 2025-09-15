@@ -21,7 +21,7 @@ import {
 } from '../../app/api/events/[eventId]/route';
 import {
   POST as executeDrawHandler,
-  setTestServices as setDrawTestServices
+  setTestServices as setDrawTestServices,
 } from '../../app/api/draws/[eventId]/execute/route';
 import { EventService } from '../../lib/services/EventService';
 import { LotteryService } from '../../lib/services/LotteryService';

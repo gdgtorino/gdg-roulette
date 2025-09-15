@@ -44,9 +44,11 @@ export async function middleware(request: NextRequest) {
   // Skip i18n for admin routes and API routes
   if (pathname.startsWith('/admin') || pathname.startsWith('/api')) {
     // Check authentication for admin routes (except login page)
-    if (pathname.startsWith('/admin') &&
-        !pathname.includes('/admin/login') &&
-        pathname !== '/admin') {
+    if (
+      pathname.startsWith('/admin') &&
+      !pathname.includes('/admin/login') &&
+      pathname !== '/admin'
+    ) {
       const token = getAuthToken(request);
 
       if (!token || !isValidToken(token)) {

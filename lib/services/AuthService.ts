@@ -86,7 +86,7 @@ export class AuthService {
         sessionToken,
         admin,
       };
-    } catch {
+    } catch (error) {
       throw error;
     }
   }

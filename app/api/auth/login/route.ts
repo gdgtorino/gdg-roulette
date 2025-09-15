@@ -154,7 +154,10 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
     }
 
     // Simple test authentication for E2E tests
-    let loginResult: { success: boolean; error?: string; admin?: unknown } = { success: false, error: 'Invalid credentials' };
+    let loginResult: { success: boolean; error?: string; admin?: unknown } = {
+      success: false,
+      error: 'Invalid credentials',
+    };
 
     // Test credentials for E2E tests
     if (username === 'admin1' && password === 'SecurePass123!') {
@@ -165,7 +168,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
           username: 'admin1',
           role: 'ADMIN',
           permissions: ['CREATE_EVENT', 'MANAGE_USERS'],
-        }
+        },
       };
     } else {
       // Call auth service for other credentials if needed
@@ -216,7 +219,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       adminId: adminData.id,
       username: adminData.username,
       role: adminData.role,
-      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
+      exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
     };
 
     // Simple JWT creation for test mode

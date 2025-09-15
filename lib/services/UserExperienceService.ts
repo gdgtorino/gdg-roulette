@@ -148,9 +148,8 @@ export class UserExperienceService {
         success: true,
         userState,
       };
-    } catch {
-      const isNetworkError = false;
-
+    } catch (error) {
+      const isNetworkError = error instanceof Error && error.message.includes('Network error');
 
       return {
         success: false,
@@ -173,7 +172,7 @@ export class UserExperienceService {
   async saveUserState(eventId: string, userState: Partial<UserState>): Promise<void> {
     try {
       this.userStateManager.saveUserState(eventId, userState);
-    } catch {
+    } catch (error) {
       console.warn('Failed to save user state:', error);
     }
   }
@@ -181,7 +180,10 @@ export class UserExperienceService {
   /**
    * Determine which screen to show based on user state
    */
-  async determineUserScreen(eventId: string, context?: Record<string, unknown>): Promise<UserScreenResult> {
+  async determineUserScreen(
+    eventId: string,
+    context?: Record<string, unknown>,
+  ): Promise<UserScreenResult> {
     const recovery = await this.recoverUserState(eventId, context);
     const userState = recovery.userState;
 
@@ -274,7 +276,8 @@ export class UserExperienceService {
     try {
       const socket = await this.notificationService.connectToLiveUpdates(eventId, participantId);
 
-      if (socket && socket.readyState === 1) { // WebSocket.OPEN
+      if (socket && socket.readyState === 1) {
+        // WebSocket.OPEN
         this.setupLiveUpdateHandlers(socket, options || {});
         return {
           connected: true,
@@ -283,7 +286,7 @@ export class UserExperienceService {
       } else {
         throw new Error('WebSocket connection failed');
       }
-    } catch {
+    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Connection failed';
 
       // Handle auto-reconnection
@@ -415,7 +418,10 @@ export class UserExperienceService {
   /**
    * Check if participant is a winner
    */
-  private async checkWinnerStatus(_eventId: string, _participantId: string): Promise<{ isWinner: boolean; drawOrder?: number; drawnAt?: Date }> {
+  private async checkWinnerStatus(
+    _eventId: string,
+    _participantId: string,
+  ): Promise<{ isWinner: boolean; drawOrder?: number; drawnAt?: Date }> {
     try {
       // This would typically call a WinnerService method
       // For now, return false (no winner found)

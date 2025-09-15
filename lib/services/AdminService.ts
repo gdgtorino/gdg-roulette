@@ -97,7 +97,8 @@ export class AdminService {
       }
 
       // Check if creator has permission to create admin accounts
-      const creatorPermissions = creator.permissions || this.permissionService.getDefaultPermissions(creator.role);
+      const creatorPermissions =
+        creator.permissions || this.permissionService.getDefaultPermissions(creator.role);
       if (!this.permissionService.hasPermission(creatorPermissions, 'MANAGE_USERS')) {
         return {
           success: false,
@@ -255,7 +256,8 @@ export class AdminService {
       }
 
       // Get permissions based on admin data
-      const permissions = admin.permissions || this.permissionService.getDefaultPermissions(admin.role);
+      const permissions =
+        admin.permissions || this.permissionService.getDefaultPermissions(admin.role);
       return this.permissionService.hasPermission(permissions, permission);
     } catch {
       return false;
@@ -289,7 +291,8 @@ export class AdminService {
         };
       }
 
-      const modifierPermissions = modifier.permissions || this.permissionService.getDefaultPermissions(modifier.role);
+      const modifierPermissions =
+        modifier.permissions || this.permissionService.getDefaultPermissions(modifier.role);
 
       // Check if modifier can grant these permissions
       for (const permission of newPermissions) {
@@ -370,7 +373,8 @@ export class AdminService {
       }
 
       // Check if admin has permission to view all events (super admin)
-      const permissions = admin.permissions || this.permissionService.getDefaultPermissions(admin.role);
+      const permissions =
+        admin.permissions || this.permissionService.getDefaultPermissions(admin.role);
       const canViewAll = this.permissionService.hasPermission(permissions, '*');
 
       let events;
@@ -428,7 +432,8 @@ export class AdminService {
           error: 'Admin not found',
         };
       }
-      const permissions = admin.permissions || this.permissionService.getDefaultPermissions(admin.role);
+      const permissions =
+        admin.permissions || this.permissionService.getDefaultPermissions(admin.role);
       const canModifyAny = this.permissionService.hasPermission(permissions, '*');
       const canModifyOwn = this.permissionService.hasPermission(permissions, 'MODIFY_EVENT');
 
