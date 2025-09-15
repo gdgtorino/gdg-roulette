@@ -95,16 +95,13 @@ run_tests() {
     cd "$PROJECT_ROOT"
 
     # Run linting
-    yarn workspace @the-draw/backend lint || { log_error "Backend linting failed"; exit 1; }
-    yarn workspace @the-draw/frontend lint || { log_error "Frontend linting failed"; exit 1; }
+    yarn lint || { log_error "Linting failed"; exit 1; }
 
-    # Run type checking
-    yarn workspace @the-draw/backend build || { log_error "Backend build failed"; exit 1; }
-    yarn workspace @the-draw/frontend build || { log_error "Frontend build failed"; exit 1; }
+    # Run type checking and build
+    yarn build || { log_error "Build failed"; exit 1; }
 
     # TODO: Add actual test commands when implemented
-    # yarn workspace @the-draw/backend test
-    # yarn workspace @the-draw/frontend test
+    # yarn test
 
     log_success "Tests passed"
 }

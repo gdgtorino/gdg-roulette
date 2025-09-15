@@ -275,8 +275,7 @@ the-draw/
 4. **Set up process management**
    Use PM2 or systemd to manage Node.js processes:
    ```bash
-   pm2 start apps/backend/dist/index.js --name the-draw-backend
-   pm2 start apps/frontend --name the-draw-frontend
+   pm2 start dist/index.js --name the-draw-app
    ```
 
 ## 🧪 Testing
@@ -339,7 +338,7 @@ docker-compose build --no-cache
 **Frontend Build Failures**
 ```bash
 # Clear Next.js cache
-rm -rf apps/frontend/.next
+rm -rf .next
 # Reinstall dependencies
 yarn install --force
 ```

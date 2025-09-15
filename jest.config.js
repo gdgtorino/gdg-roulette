@@ -2,7 +2,7 @@ const nextJest = require('next/jest')
 
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files
-  dir: './apps/frontend',
+  dir: './',
 })
 
 // Add any custom config to be passed to Jest
@@ -10,31 +10,29 @@ const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
   preset: 'ts-jest',
-  moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/apps/frontend/$1',
-    '^@backend/(.*)$': '<rootDir>/apps/backend/$1',
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1',
+    '^@lib/(.*)$': '<rootDir>/lib/$1',
   },
   testMatch: [
-    '<rootDir>/apps/**/__tests__/**/*.{js,jsx,ts,tsx}',
-    '<rootDir>/apps/**/*.(test|spec).{js,jsx,ts,tsx}',
-    '<rootDir>/__tests__/**/*.{js,jsx,ts,tsx}',
+    '<rootDir>/__tests__/**/*.(test|spec).{js,jsx,ts,tsx}',
+    '<rootDir>/tests/**/*.(test|spec).{js,jsx,ts,tsx}',
     '<rootDir>/**/*.(test|spec).{js,jsx,ts,tsx}'
   ],
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
     '<rootDir>/.next/',
-    '<rootDir>/apps/frontend/.next/',
-    '<rootDir>/apps/backend/dist/',
     '<rootDir>/e2e/'
   ],
   coverageDirectory: '<rootDir>/coverage',
   collectCoverageFrom: [
-    'apps/**/*.{js,jsx,ts,tsx}',
-    '!apps/**/*.d.ts',
-    '!apps/**/node_modules/**',
-    '!apps/**/.next/**',
-    '!apps/**/dist/**',
-    '!apps/**/coverage/**',
+    'app/**/*.{js,jsx,ts,tsx}',
+    'lib/**/*.{js,jsx,ts,tsx}',
+    'components/**/*.{js,jsx,ts,tsx}',
+    '!**/*.d.ts',
+    '!**/node_modules/**',
+    '!**/.next/**',
+    '!**/coverage/**',
     '!**/prisma/**',
     '!**/*.config.{js,ts}',
   ],
@@ -57,7 +55,7 @@ const customJestConfig = {
     'node_modules/(?!(.*\\.mjs$|@testing-library|@radix-ui))',
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
-  roots: ['<rootDir>/apps/', '<rootDir>/__tests__/'],
+  roots: ['<rootDir>/app/', '<rootDir>/lib/', '<rootDir>/components/', '<rootDir>/__tests__/', '<rootDir>/tests/'],
   testTimeout: 10000,
 }
 

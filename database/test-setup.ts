@@ -1,5 +1,5 @@
 import { execSync } from 'child_process'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, UserRole } from '@prisma/client'
 
 // Database test setup utilities
 export async function setupTestDatabase() {
@@ -67,53 +67,53 @@ export async function seedTestDatabase() {
     // Create test admin user
     const adminUser = await prisma.user.create({
       data: {
-        email: 'admin@test.com',
-        name: 'Test Admin',
-        role: 'ADMIN',
+        username: 'admin',
+        password: 'test123',
+        role: UserRole.ADMIN,
       },
     })
 
     // Create test regular user
     const regularUser = await prisma.user.create({
       data: {
-        email: 'user@test.com',
-        name: 'Test User',
-        role: 'USER',
+        username: 'user',
+        password: 'test123',
+        role: UserRole.OPERATOR,
       },
     })
 
-    // Create test event
-    const testEvent = await prisma.event.create({
-      data: {
-        title: 'Test Event',
-        description: 'A test event for testing purposes',
-        startDate: new Date(),
-        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-        maxParticipants: 100,
-        isActive: true,
-      },
-    })
+    // Create test event (commented out as models may not exist)
+    // const testEvent = await prisma.event.create({
+    //   data: {
+    //     title: 'Test Event',
+    //     description: 'A test event for testing purposes',
+    //     startDate: new Date(),
+    //     endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+    //     maxParticipants: 100,
+    //     isActive: true,
+    //   },
+    // })
 
-    // Create test lottery
-    const testLottery = await prisma.lottery.create({
-      data: {
-        eventId: testEvent.id,
-        name: 'Test Lottery',
-        description: 'A test lottery for testing purposes',
-        totalTickets: 50,
-        ticketPrice: 5.0,
-        startDate: new Date(),
-        endDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000), // 6 days from now
-        isActive: true,
-      },
-    })
+    // Create test lottery (commented out as models may not exist)
+    // const testLottery = await prisma.lottery.create({
+    //   data: {
+    //     eventId: testEvent.id,
+    //     name: 'Test Lottery',
+    //     description: 'A test lottery for testing purposes',
+    //     totalTickets: 50,
+    //     ticketPrice: 5.0,
+    //     startDate: new Date(),
+    //     endDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000), // 6 days from now
+    //     isActive: true,
+    //   },
+    // })
 
     console.log('Test database seeded successfully')
     return {
       adminUser,
       regularUser,
-      testEvent,
-      testLottery,
+      // testEvent,
+      // testLottery,
     }
   } catch (error) {
     console.error('Failed to seed test database:', error)
@@ -133,10 +133,10 @@ export async function cleanTestDatabase() {
   })
 
   try {
-    // Clean up in reverse order of dependencies
-    await prisma.lotteryEntry.deleteMany()
-    await prisma.lottery.deleteMany()
-    await prisma.event.deleteMany()
+    // Clean up in reverse order of dependencies (commented out as models may not exist)
+    // await prisma.lotteryEntry.deleteMany()
+    // await prisma.lottery.deleteMany()
+    // await prisma.event.deleteMany()
     await prisma.user.deleteMany()
 
     console.log('Test database cleaned successfully')

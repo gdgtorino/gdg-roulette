@@ -11,9 +11,9 @@ yarn-error.log*
 .vscode/
 
 # Build directories
-apps/frontend/.next/
-apps/backend/dist/
-apps/backend/build/
+.next/
+dist/
+build/
 
 # Temporary files
 *.tmp

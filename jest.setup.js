@@ -97,6 +97,19 @@ global.IntersectionObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }))
 
+// Mock fetch API for tests
+import { TextEncoder, TextDecoder } from 'util'
+global.TextEncoder = TextEncoder
+global.TextDecoder = TextDecoder
+
+// Mock streams for MSW
+global.TransformStream = require('stream/web').TransformStream
+global.ReadableStream = require('stream/web').ReadableStream
+global.WritableStream = require('stream/web').WritableStream
+
+// Mock fetch for MSW
+require('whatwg-fetch')
+
 // Clean up after each test
 afterEach(() => {
   jest.clearAllMocks()

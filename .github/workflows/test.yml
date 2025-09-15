@@ -93,9 +93,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            apps/frontend/.next
-            apps/backend/dist
-            apps/backend/node_modules/.prisma
+            .next
+            dist
+            node_modules/.prisma
           key: ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock', '**/schema.prisma') }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock', '**/schema.prisma') }}-
@@ -110,42 +110,26 @@ jobs:
 
       - name: Setup database schema
         run: |
-          cd apps/backend
-          yarn prisma generate
-          yarn prisma db push --force-reset
+          yarn db:generate
+          yarn db:push --force-reset
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
       - name: Lint and type check
         run: |
-          # Run linting in parallel
-          yarn workspace @the-draw/backend lint &
-          yarn workspace @the-draw/frontend lint &
-          wait
+          yarn lint
+          yarn build
 
-          # Run type checking and builds in parallel
-          yarn workspace @the-draw/backend build &
-          yarn workspace @the-draw/frontend build &
-          wait
-
-      - name: Run backend tests
+      - name: Run tests
         run: |
-          cd apps/backend
           # Placeholder for actual tests
-          echo "Backend tests would run here"
+          echo "Tests would run here"
           echo "Testing database connectivity..."
-          yarn prisma db seed || echo "No seed script found"
+          yarn db:seed || echo "No seed script found"
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           REDIS_URL: ${{ env.REDIS_URL }}
           JWT_SECRET: ${{ env.JWT_SECRET }}
-
-      - name: Run frontend tests
-        run: |
-          cd apps/frontend
-          # Placeholder for actual tests
-          echo "Frontend tests would run here"
-          echo "Testing Next.js build..."
 
       - name: Security audit
         run: |
@@ -153,10 +137,9 @@ jobs:
 
       - name: Test database migrations
         run: |
-          cd apps/backend
           # Test migration rollback and reapplication
-          yarn prisma migrate reset --force
-          yarn prisma db push
+          yarn db:migrate:reset --force
+          yarn db:push
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 

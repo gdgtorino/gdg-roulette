@@ -2,14 +2,14 @@ import { beforeAll, afterAll, beforeEach, afterEach } from 'vitest'
 import { execSync } from 'child_process'
 
 // Test database configuration
-const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL || 'postgresql://test:test@localhost:5432/test_the_draw'
+const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL || 'postgresql://test:test@localhost:5432/test_the_draw';
 
 // Set environment variables for testing
-process.env.NODE_ENV = 'test'
-process.env.DATABASE_URL = TEST_DATABASE_URL
-process.env.REDIS_URL = process.env.TEST_REDIS_URL || 'redis://localhost:6379/1'
-process.env.JWT_SECRET = 'test-jwt-secret'
-process.env.NEXTAUTH_SECRET = 'test-nextauth-secret'
+(process.env as any).NODE_ENV = 'test';
+(process.env as any).DATABASE_URL = TEST_DATABASE_URL;
+(process.env as any).REDIS_URL = process.env.TEST_REDIS_URL || 'redis://localhost:6379/1';
+(process.env as any).JWT_SECRET = 'test-jwt-secret';
+(process.env as any).NEXTAUTH_SECRET = 'test-nextauth-secret';
 
 // Global setup - runs once before all tests
 beforeAll(async () => {

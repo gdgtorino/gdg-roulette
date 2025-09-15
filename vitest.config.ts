@@ -7,10 +7,11 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     setupFiles: ['./vitest.setup.ts'],
-    testMatch: [
+    include: [
       '**/database/**/*.test.{ts,js}',
       '**/integration/**/*.test.{ts,js}',
-      '**/apps/backend/**/*.test.{ts,js}',
+      '**/__tests__/**/*.test.{ts,js}',
+      '**/tests/**/*.test.{ts,js}',
     ],
     exclude: [
       'node_modules',
@@ -45,8 +46,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@backend': path.resolve(__dirname, './apps/backend'),
-      '@': path.resolve(__dirname, './apps/frontend'),
+      '@': path.resolve(__dirname, '.'),
+      '@/components': path.resolve(__dirname, './components'),
+      '@/lib': path.resolve(__dirname, './lib'),
+      '@/database': path.resolve(__dirname, './database'),
     },
   },
 })

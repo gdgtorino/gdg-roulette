@@ -1,0 +1,38 @@
+{
+  "welcome": "Welcome",
+  "loading": "Loading...",
+  "error": "Error",
+  "success": "Success",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "close": "Close",
+  "back": "Back",
+  "next": "Next",
+  "previous": "Previous",
+  "submit": "Submit",
+  "admin": {
+    "dashboard": "Dashboard",
+    "events": "Events",
+    "participants": "Participants",
+    "winners": "Winners",
+    "settings": "Settings"
+  },
+  "event": {
+    "name": "Event Name",
+    "description": "Description",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "maxParticipants": "Max Participants",
+    "registration": "Registration",
+    "draw": "Draw",
+    "results": "Results"
+  },
+  "participant": {
+    "name": "Name",
+    "email": "Email",
+    "registeredAt": "Registered At"
+  }
+}
