@@ -8,10 +8,10 @@ import { EventRepository } from '../../../lib/repositories/EventRepository';
 import { EventState } from '../../../lib/state/EventStateMachine';
 
 // Global service instances that can be overridden in tests
-export let participantService: ParticipantService;
-export let eventService: EventService;
-export let sessionService: SessionService;
-export let notificationService: NotificationService;
+let participantService: ParticipantService;
+let eventService: EventService;
+let sessionService: SessionService;
+let notificationService: NotificationService;
 
 // Initialize services
 const participantRepository = new ParticipantRepository();
@@ -22,17 +22,18 @@ sessionService = new SessionService();
 notificationService = new NotificationService();
 
 // Allow tests to override services
-export function setTestServices(services: {
-  participantService?: ParticipantService;
-  eventService?: EventService;
-  sessionService?: SessionService;
-  notificationService?: NotificationService;
-}) {
-  if (services.participantService) participantService = services.participantService;
-  if (services.eventService) eventService = services.eventService;
-  if (services.sessionService) sessionService = services.sessionService;
-  if (services.notificationService) notificationService = services.notificationService;
-}
+// Note: Commented out for build compatibility - re-enable for testing
+// export function setTestServices(services: {
+//   participantService?: ParticipantService;
+//   eventService?: EventService;
+//   sessionService?: SessionService;
+//   notificationService?: NotificationService;
+// }) {
+//   if (services.participantService) participantService = services.participantService;
+//   if (services.eventService) eventService = services.eventService;
+//   if (services.sessionService) sessionService = services.sessionService;
+//   if (services.notificationService) notificationService = services.notificationService;
+// }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -226,7 +227,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         eventId: string;
         registeredAt?: Date;
         qrCode?: string;
-        [key: string]: any;
+        [key: string]: unknown;
       };
       timestamp: Date;
       sessionToken?: string;
@@ -279,7 +280,7 @@ async function handleTestMode(
   body: {
     eventId?: string;
     name?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   },
   request?: NextRequest,
 ): Promise<NextResponse> {
@@ -558,7 +559,7 @@ async function handleTestMode(
         eventId: string;
         registeredAt?: Date;
         qrCode?: string;
-        [key: string]: any;
+        [key: string]: unknown;
       };
       timestamp: Date;
       sessionToken?: string;

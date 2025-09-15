@@ -2,23 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { signOut } from '@/lib/auth/session';
 import { AuthService } from '../../../../lib/services/AuthService';
 import { SessionManager } from '../../../../lib/services/SessionManager';
+import { PasswordService } from '../../../../lib/services/PasswordService';
+import { AdminRepository } from '../../../../lib/repositories/AdminRepository';
 
 // Global service instances that can be overridden in tests
-export let authService: AuthService;
-export let sessionManager: SessionManager;
+let authService: AuthService;
+let sessionManager: SessionManager;
 
 // Initialize services
-authService = new AuthService();
 sessionManager = new SessionManager();
+const passwordService = new PasswordService();
+const adminRepository = new AdminRepository();
+authService = new AuthService(sessionManager, passwordService, adminRepository);
 
 // Allow tests to override services
-export function setTestLogoutServices(services: {
-  authService?: AuthService;
-  sessionManager?: SessionManager;
-}) {
-  if (services.authService) authService = services.authService;
-  if (services.sessionManager) sessionManager = services.sessionManager;
-}
+// Note: Commented out for build compatibility - re-enable for testing
+// export function setTestLogoutServices(services: {
+//   authService?: AuthService;
+//   sessionManager?: SessionManager;
+// }) {
+//   if (services.authService) authService = services.authService;
+//   if (services.sessionManager) sessionManager = services.sessionManager;
+// }
 
 export async function POST(request: NextRequest) {
   try {

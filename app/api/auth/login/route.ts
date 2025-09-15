@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { validateRequest } from '@/lib/api/validation';
 import { AuthService } from '../../../../lib/services/AuthService';
 import { SessionManager } from '../../../../lib/services/SessionManager';
+import { PasswordService } from '../../../../lib/services/PasswordService';
+import { AdminRepository } from '../../../../lib/repositories/AdminRepository';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -10,21 +12,24 @@ const loginSchema = z.object({
 });
 
 // Global service instances that can be overridden in tests
-export let authService: AuthService;
-export let sessionManager: SessionManager;
+let authService: AuthService;
+let sessionManager: SessionManager;
 
 // Initialize services
-authService = new AuthService();
 sessionManager = new SessionManager();
+const passwordService = new PasswordService();
+const adminRepository = new AdminRepository();
+authService = new AuthService(sessionManager, passwordService, adminRepository);
 
 // Allow tests to override services
-export function setTestAuthServices(services: {
-  authService?: AuthService;
-  sessionManager?: SessionManager;
-}) {
-  if (services.authService) authService = services.authService;
-  if (services.sessionManager) sessionManager = services.sessionManager;
-}
+// Note: Commented out for build compatibility - re-enable for testing
+// export function setTestAuthServices(services: {
+//   authService?: AuthService;
+//   sessionManager?: SessionManager;
+// }) {
+//   if (services.authService) authService = services.authService;
+//   if (services.sessionManager) sessionManager = services.sessionManager;
+// }
 
 export async function POST(request: NextRequest) {
   try {
@@ -147,13 +152,12 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
     }
 
     // Simple test authentication for E2E tests
-    let loginResult = { success: false, error: 'Invalid credentials', admin: null };
+    let loginResult: { success: boolean; error?: string; admin?: any } = { success: false, error: 'Invalid credentials' };
 
     // Test credentials for E2E tests
     if (username === 'admin1' && password === 'SecurePass123!') {
       loginResult = {
         success: true,
-        error: null,
         admin: {
           id: 'admin-123',
           username: 'admin1',
@@ -166,7 +170,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       try {
         const authServiceResult = await authService.login(username, password);
         loginResult = authServiceResult;
-      } catch (error) {
+      } catch {
         // If auth service fails, keep the default failed result
       }
     }
@@ -194,84 +198,51 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       return response;
     }
 
-      // Create session
-      const session = await sessionManager.createAdminSession(loginResult.admin?.id || 'admin-123');
+    // Create session
+    const session = await sessionManager.createSession(loginResult.admin?.id || 'admin-123');
 
-      // Create JWT token for the middleware
-      const adminData = loginResult.admin || {
-        id: 'admin-123',
-        username: username,
-        role: 'ADMIN',
-        permissions: ['CREATE_EVENT', 'MANAGE_USERS'],
-      };
+    // Create JWT token for the middleware
+    const adminData = loginResult.admin || {
+      id: 'admin-123',
+      username: username,
+      role: 'ADMIN',
+      permissions: ['CREATE_EVENT', 'MANAGE_USERS'],
+    };
 
-      const jwtPayload = {
-        adminId: adminData.id,
-        username: adminData.username,
-        role: adminData.role,
-        exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
-      };
+    const jwtPayload = {
+      adminId: adminData.id,
+      username: adminData.username,
+      role: adminData.role,
+      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
+    };
 
-      // Simple JWT creation for test mode
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
-      const payload = Buffer.from(JSON.stringify(jwtPayload)).toString('base64');
-      const signature = Buffer.from('test-signature').toString('base64');
-      const token = `${header}.${payload}.${signature}`;
+    // Simple JWT creation for test mode
+    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
+    const payload = Buffer.from(JSON.stringify(jwtPayload)).toString('base64');
+    const signature = Buffer.from('test-signature').toString('base64');
+    const token = `${header}.${payload}.${signature}`;
 
-      const response = NextResponse.json(
-        {
-          success: true,
-          token: token,
-          sessionToken: session?.id || 'session-token-123',
-          admin: adminData,
-          timestamp: new Date().toISOString(),
-        },
-        { status: 200 },
-      );
+    const response = NextResponse.json(
+      {
+        success: true,
+        token: token,
+        sessionToken: session || 'session-token-123',
+        admin: adminData,
+        timestamp: new Date().toISOString(),
+      },
+      { status: 200 },
+    );
 
-      // Set auth cookie for middleware
-      response.headers.set(
-        'Set-Cookie',
-        `auth_token=${token}; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=86400`,
-      );
+    // Set auth cookie for middleware
+    response.headers.set(
+      'Set-Cookie',
+      `auth_token=${token}; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=86400`,
+    );
 
-      addSecurityHeaders(response);
-      addCorsHeaders(response, request);
-      return response;
-    } catch (authError: unknown) {
-      // Handle service failures
-      if (
-        (authError as Error)?.message?.includes('service error') ||
-        (authError as Error)?.message?.includes('Database connection')
-      ) {
-        const response = NextResponse.json(
-          {
-            success: false,
-            error: 'Internal server error',
-            errorCode: 'SERVICE_ERROR',
-            timestamp: new Date().toISOString(),
-          },
-          { status: 500 },
-        );
-
-        addSecurityHeaders(response);
-        return response;
-      }
-
-      const response = NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid credentials',
-          errorCode: 'AUTH_FAILED',
-          timestamp: new Date().toISOString(),
-        },
-        { status: 401 },
-      );
-
-      addSecurityHeaders(response);
-      return response;
-    }
-  } catch (error) {
+    addSecurityHeaders(response);
+    addCorsHeaders(response);
+    return response;
+  } catch {
     const response = NextResponse.json(
       {
         success: false,

@@ -3,21 +3,22 @@ import { LotteryService } from '../../../../../lib/services/LotteryService';
 import { AuthService } from '../../../../../lib/services/AuthService';
 
 // Global service instances that can be overridden in tests
-export let lotteryService: LotteryService;
-export let authService: AuthService;
+let lotteryService: LotteryService;
+let authService: AuthService;
 
 // Initialize services
 lotteryService = new LotteryService();
 authService = new AuthService();
 
 // Function to set test services
-export function setTestServices(services: {
-  lotteryService?: LotteryService;
-  authService?: AuthService;
-}) {
-  if (services.lotteryService) lotteryService = services.lotteryService;
-  if (services.authService) authService = services.authService;
-}
+// Note: Commented out for build compatibility - re-enable for testing
+// export function setTestServices(services: {
+//   lotteryService?: LotteryService;
+//   authService?: AuthService;
+// }) {
+//   if (services.lotteryService) lotteryService = services.lotteryService;
+//   if (services.authService) authService = services.authService;
+// }
 
 interface RouteParams {
   params: {
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       } else {
         sessionToken = undefined;
       }
-    } catch (headerError) {
+    } catch {
       sessionToken = undefined;
     }
 
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     let body;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch {
       return NextResponse.json({
         success: false,
         error: 'Invalid JSON format'
