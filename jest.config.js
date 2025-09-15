@@ -10,7 +10,7 @@ module.exports = {
     '<rootDir>/__tests__/**/*.(test|spec).{js,jsx,ts,tsx}',
     '<rootDir>/**/*.(test|spec).{js,jsx,ts,tsx}',
   ],
-  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/e2e/'],
+  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/e2e/', '<rootDir>/__tests__/e2e/'],
   coverageDirectory: '<rootDir>/coverage',
   collectCoverageFrom: [
     'app/**/*.{js,jsx,ts,tsx}',

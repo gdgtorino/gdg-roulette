@@ -9,13 +9,15 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-// Global service instances that can be overridden in tests
-export let authService: AuthService;
-export let sessionManager: SessionManager;
+// Service instances for this route
+let authService: AuthService;
+let sessionManager: SessionManager;
 
 // Initialize services
-authService = new AuthService();
 sessionManager = new SessionManager();
+const passwordService = new PasswordService();
+const adminRepository = new AdminRepository();
+authService = new AuthService(sessionManager, passwordService, adminRepository);
 
 // Allow tests to override services
 export function setTestAuthServices(services: {
