@@ -8,11 +8,13 @@
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { NextRequest } from 'next/server';
-import { POST as registerParticipantHandler } from '../../app/api/participants/route';
+import { POST as registerParticipantHandler, participantService } from '../../app/api/participants/route';
 import { ParticipantService } from '../../lib/services/ParticipantService';
 import { EventService } from '../../lib/services/EventService';
 import { SessionService } from '../../lib/services/SessionService';
 import { NotificationService } from '../../lib/services/NotificationService';
+import { ParticipantRepository } from '../../lib/repositories/ParticipantRepository';
+import { EventRepository } from '../../lib/repositories/EventRepository';
 import { EventState } from '../../lib/state/EventStateMachine';
 
 // Mock services
@@ -35,10 +37,15 @@ const mockNotificationService = {
   sendRegistrationConfirmation: jest.fn()
 };
 
+const mockParticipantRepository = {};
+const mockEventRepository = {};
+
 jest.mock('../../lib/services/ParticipantService');
 jest.mock('../../lib/services/EventService');
 jest.mock('../../lib/services/SessionService');
 jest.mock('../../lib/services/NotificationService');
+jest.mock('../../lib/repositories/ParticipantRepository');
+jest.mock('../../lib/repositories/EventRepository');
 
 // Helper function to create mock NextRequest
 function createMockRequest(data: any, headers: Record<string, string> = {}): NextRequest {
@@ -62,6 +69,8 @@ describe('/api/participants API Routes', () => {
     (EventService as jest.MockedClass<typeof EventService>).mockImplementation(() => mockEventService as any);
     (SessionService as jest.MockedClass<typeof SessionService>).mockImplementation(() => mockSessionService as any);
     (NotificationService as jest.MockedClass<typeof NotificationService>).mockImplementation(() => mockNotificationService as any);
+    (ParticipantRepository as jest.MockedClass<typeof ParticipantRepository>).mockImplementation(() => mockParticipantRepository as any);
+    (EventRepository as jest.MockedClass<typeof EventRepository>).mockImplementation(() => mockEventRepository as any);
   });
 
   afterEach(() => {
