@@ -16,7 +16,6 @@ const customJestConfig = {
   },
   testMatch: [
     '<rootDir>/__tests__/**/*.(test|spec).{js,jsx,ts,tsx}',
-    '<rootDir>/tests/**/*.(test|spec).{js,jsx,ts,tsx}',
     '<rootDir>/**/*.(test|spec).{js,jsx,ts,tsx}'
   ],
   testPathIgnorePatterns: [
@@ -55,7 +54,7 @@ const customJestConfig = {
     'node_modules/(?!(.*\\.mjs$|@testing-library|@radix-ui))',
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
-  roots: ['<rootDir>/app/', '<rootDir>/lib/', '<rootDir>/components/', '<rootDir>/__tests__/', '<rootDir>/tests/'],
+  roots: ['<rootDir>/app/', '<rootDir>/lib/', '<rootDir>/components/', '<rootDir>/__tests__/'],
   testTimeout: 10000,
 }
 
