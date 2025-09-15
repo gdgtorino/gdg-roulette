@@ -240,8 +240,11 @@ export class EventStateMachine {
    * Get current state of an event
    */
   private getEventState(event: Event): EventState {
-    // If state field is explicitly set, use it directly
-    if (event.state && Object.values(EventState).includes(event.state as EventState)) {
+    // If state field is explicitly set, validate it
+    if (event.state) {
+      if (!Object.values(EventState).includes(event.state as EventState)) {
+        throw new Error('Invalid event state');
+      }
       return event.state as EventState;
     }
 
@@ -280,11 +283,8 @@ export class EventStateMachine {
       throw new Error('Only event creator can modify event state');
     }
 
-    // Validate state consistency
-    const currentState = this.getEventState(event);
-    if (!Object.values(EventState).includes(currentState)) {
-      throw new Error('Invalid event state');
-    }
+    // Validate state consistency (getEventState will throw if invalid)
+    this.getEventState(event);
 
     return event;
   }
