@@ -49,7 +49,7 @@ module.exports = {
     }],
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$|@testing-library|@radix-ui))',
+    'node_modules/(?!(.*\\.mjs$|@testing-library|@radix-ui|uuid))',
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   roots: ['<rootDir>/app/', '<rootDir>/lib/', '<rootDir>/components/', '<rootDir>/__tests__/'],
