@@ -42,6 +42,9 @@ export interface Winner {
 export interface JWTPayload {
   adminId: string;
   username: string;
+  sessionId?: string;
+  iat?: number;
+  exp?: number;
 }
 
 export interface CreateEventRequest {

@@ -1,8 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { z } from 'zod';
-// import { requireAdmin } from '@/lib/auth/session';
-// import { validateRequest } from '@/lib/api/validation';
-// import { getEvent, updateEvent, deleteEvent } from '@/lib/events/mutations';
 import { EventService } from '../../../../lib/services/EventService';
 import { AuthService } from '../../../../lib/services/AuthService';
 
@@ -196,7 +192,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       } else {
         confirmationHeader = null;
       }
-    } catch (_headerError) {
+    } catch {
       confirmationHeader = null;
     }
 

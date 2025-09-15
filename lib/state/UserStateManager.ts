@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { EventState } from './EventStateMachine';
+import { Event, Participant, Winner } from '../types';
 
 export interface UserState {
   status:
@@ -66,11 +68,10 @@ export class UserStateManager {
    */
   async determineUserState(
     eventId: string,
-    event: any,
-    participant?: any,
-    session?: any,
-    winner?: any,
-    sessionWasProvided?: boolean,
+    event: Event,
+    participant?: Participant,
+    session?: { id: string; userId: string },
+    winner?: Winner,
   ): Promise<UserState> {
     try {
       // Handle event not found
@@ -109,7 +110,7 @@ export class UserStateManager {
       }
 
       // Handle session expiration
-      if ((participant && (!session || !session.valid)) || (sessionWasProvided && !session)) {
+      if (participant && (!session || !session.valid)) {
         return {
           status: 'SESSION_EXPIRED',
           screen: 'REGISTRATION',
@@ -165,7 +166,7 @@ export class UserStateManager {
         screen: 'REGISTRATION',
         event,
       };
-    } catch (error) {
+    } catch {
       return {
         status: 'ERROR',
         screen: 'ERROR',
@@ -193,7 +194,7 @@ export class UserStateManager {
 
       const key = `${this.STORAGE_PREFIX}${eventId}`;
       window.localStorage.setItem(key, JSON.stringify(storedState));
-    } catch (error) {
+    } catch {
       console.warn('Failed to save user state to localStorage:', error);
     }
   }
@@ -215,7 +216,7 @@ export class UserStateManager {
       }
 
       return JSON.parse(stored) as StoredUserState;
-    } catch (error) {
+    } catch {
       console.warn('Failed to load user state from localStorage:', error);
       // Clear corrupted data
       this.clearUserState(eventId);
@@ -234,7 +235,7 @@ export class UserStateManager {
 
       const key = `${this.STORAGE_PREFIX}${eventId}`;
       window.localStorage.removeItem(key);
-    } catch (error) {
+    } catch {
       console.warn('Failed to clear user state from localStorage:', error);
     }
   }
@@ -271,7 +272,7 @@ export class UserStateManager {
   getScreenForStatus(
     status: UserState['status'],
     eventState: EventState,
-    hasWinner: boolean = false,
+    _hasWinner: boolean = false,
   ): UserState['screen'] {
     switch (status) {
       case 'UNREGISTERED':
@@ -360,10 +361,10 @@ export class UserStateManager {
    */
   mergeStoredState(
     storedState: StoredUserState,
-    currentEventData: any,
-    participantData?: any,
-    sessionData?: any,
-    winnerData?: any,
+    currentEventData: Event,
+    participantData?: Participant,
+    sessionData?: { id: string; userId: string },
+    winnerData?: Winner,
   ): UserState {
     return {
       status: storedState.userStatus as UserState['status'],

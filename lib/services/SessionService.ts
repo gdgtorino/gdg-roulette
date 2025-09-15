@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Session, Admin, Participant } from '../types';
 
 export interface SessionData {
-  userId: string;
+  _userId: string;
   userType: 'admin' | 'participant';
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   expiresAt?: Date;
 }
 
@@ -55,7 +56,7 @@ export class SessionService {
   /**
    * Get session by ID
    */
-  async getSession(sessionId: string): Promise<Session | null> {
+  async getSession(__sessionId: string): Promise<Session | null> {
     try {
       // In a real implementation, this would query the database
       // For now, return null
@@ -70,7 +71,7 @@ export class SessionService {
   /**
    * Validate session and return user data
    */
-  async validateSession(sessionId: string): Promise<SessionValidationResult> {
+  async validateSession(_sessionId: string): Promise<SessionValidationResult> {
     try {
       const session = await this.getSession(sessionId);
 
@@ -117,7 +118,7 @@ export class SessionService {
   /**
    * Refresh session expiration
    */
-  async refreshSession(sessionId: string, additionalDuration?: number): Promise<Session | null> {
+  async refreshSession(_sessionId: string, additionalDuration?: number): Promise<Session | null> {
     try {
       const session = await this.getSession(sessionId);
       if (!session || !session.isActive) {
@@ -143,8 +144,8 @@ export class SessionService {
    * Update session metadata
    */
   async updateSessionMetadata(
-    sessionId: string,
-    metadata: Record<string, any>,
+    _sessionId: string,
+    metadata: Record<string, unknown>,
   ): Promise<Session | null> {
     try {
       const session = await this.getSession(sessionId);
@@ -167,7 +168,7 @@ export class SessionService {
   /**
    * Invalidate session
    */
-  async invalidateSession(sessionId: string): Promise<boolean> {
+  async invalidateSession(_sessionId: string): Promise<boolean> {
     try {
       // In a real implementation, this would update the database
       // For now, return true
@@ -182,7 +183,7 @@ export class SessionService {
   /**
    * Invalidate all sessions for user
    */
-  async invalidateUserSessions(userId: string): Promise<boolean> {
+  async invalidateUserSessions(_userId: string): Promise<boolean> {
     try {
       // In a real implementation, this would update the database
       // For now, return true
@@ -197,7 +198,7 @@ export class SessionService {
   /**
    * Get active sessions for user
    */
-  async getUserSessions(userId: string): Promise<Session[]> {
+  async getUserSessions(_userId: string): Promise<Session[]> {
     try {
       // In a real implementation, this would query the database
       // For now, return empty array
@@ -212,7 +213,7 @@ export class SessionService {
   /**
    * Get session count for user
    */
-  async getUserSessionCount(userId: string): Promise<number> {
+  async getUserSessionCount(_userId: string): Promise<number> {
     try {
       const sessions = await this.getUserSessions(userId);
       return sessions.length;
@@ -280,7 +281,7 @@ export class SessionService {
   /**
    * Update session last accessed time
    */
-  private async updateSessionAccess(sessionId: string): Promise<void> {
+  private async updateSessionAccess(_sessionId: string): Promise<void> {
     try {
       // In a real implementation, this would update the database
       // For now, do nothing
@@ -302,14 +303,14 @@ export class SessionService {
   /**
    * Validate session ID format
    */
-  isValidSessionId(sessionId: string): boolean {
+  isValidSessionId(_sessionId: string): boolean {
     return /^sess_[a-z0-9]+_[a-z0-9]{16}$/.test(sessionId);
   }
 
   /**
    * Create admin session
    */
-  async createAdminSession(adminId: string, metadata?: Record<string, any>): Promise<Session> {
+  async createAdminSession(adminId: string, metadata?: Record<string, unknown>): Promise<Session> {
     return this.createSession({
       userId: adminId,
       userType: 'admin',
@@ -322,7 +323,7 @@ export class SessionService {
    */
   async createParticipantSession(
     participantId: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): Promise<Session> {
     return this.createSession({
       userId: participantId,

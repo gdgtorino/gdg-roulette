@@ -266,9 +266,8 @@ function addSecurityHeaders(response: NextResponse) {
   response.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'");
 }
 
-function addCorsHeaders(response: NextResponse, request: NextRequest) {
-  const origin = request.headers.get('Origin') || 'http://localhost:3000';
-  response.headers.set('Access-Control-Allow-Origin', origin);
+function addCorsHeaders(response: NextResponse) {
+  response.headers.set('Access-Control-Allow-Origin', 'http://localhost:3000');
   response.headers.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   response.headers.set('Access-Control-Allow-Credentials', 'true');

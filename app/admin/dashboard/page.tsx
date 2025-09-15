@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Event {
@@ -25,9 +25,9 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     fetchAdminData();
     fetchEvents();
-  }, []);
+  }, [fetchAdminData]);
 
-  const fetchAdminData = async () => {
+  const fetchAdminData = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/profile');
       if (response.ok) {
@@ -36,12 +36,12 @@ export default function AdminDashboardPage() {
       } else {
         router.push('/admin/login');
       }
-    } catch (error) {
-      console.error('Failed to fetch admin data:', error);
+    } catch {
+      console.error('Failed to fetch admin data');
       router.push('/admin/login');
     }
     setLoading(false);
-  };
+  }, [router]);
 
   const fetchEvents = async () => {
     try {
@@ -122,7 +122,6 @@ export default function AdminDashboardPage() {
       });
 
       if (response.ok) {
-        await response.json();
         setMessage({ type: 'success', text: `Winner${drawAll ? 's' : ''} drawn successfully` });
         fetchEvents();
       } else {

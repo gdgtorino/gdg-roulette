@@ -185,6 +185,8 @@ export class AdminService {
                 error: `Admin creation failed and was rolled back: ${emailError instanceof Error ? emailError.message : 'Email service unavailable'}`,
               };
             } catch (rollbackError) {
+              // Rollback error ignored for mock implementation
+              console.debug('Rollback failed:', rollbackError);
               return {
                 success: false,
                 error: `Admin creation and rollback both failed: ${emailError instanceof Error ? emailError.message : 'Email service unavailable'}`,
@@ -215,6 +217,7 @@ export class AdminService {
           };
         } catch (rollbackError) {
           // Log rollback failure but don't override original error
+          console.debug('Rollback failed:', rollbackError);
           return {
             success: false,
             error: `Admin creation and rollback both failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
