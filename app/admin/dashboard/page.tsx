@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
         const data = await response.json();
         setMessage({ type: 'error', text: data.message || 'Failed to create event' });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to create event' });
     }
   };
@@ -108,7 +108,7 @@ export default function AdminDashboardPage() {
         const data = await response.json();
         setMessage({ type: 'error', text: data.message || 'Operation failed' });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Operation failed' });
     }
   };
@@ -122,14 +122,14 @@ export default function AdminDashboardPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         setMessage({ type: 'success', text: `Winner${drawAll ? 's' : ''} drawn successfully` });
         fetchEvents();
       } else {
         const data = await response.json();
         setMessage({ type: 'error', text: data.message || 'No participants available for drawing' });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Draw failed' });
     }
   };
