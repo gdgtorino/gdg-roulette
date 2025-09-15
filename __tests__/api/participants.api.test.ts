@@ -177,7 +177,7 @@ describe('/api/participants API Routes', () => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(invalidData)
-        });
+        }));
 
         const response = await registerParticipantHandler(request);
         const responseData = await response.json();
@@ -221,7 +221,7 @@ describe('/api/participants API Routes', () => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(registrationData)
-        });
+        }));
 
         const response = await registerParticipantHandler(request);
         const responseData = await response.json();
@@ -284,7 +284,7 @@ describe('/api/participants API Routes', () => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(registrationData)
-        });
+        }));
 
         const response = await registerParticipantHandler(request);
         const responseData = await response.json();
@@ -354,7 +354,7 @@ describe('/api/participants API Routes', () => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(registrationData)
-        });
+        }));
 
         const response = await registerParticipantHandler(request);
         const responseData = await response.json();
@@ -485,7 +485,7 @@ describe('/api/participants API Routes', () => {
           'X-Rollback-On-Failure': 'true'
         },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -638,13 +638,13 @@ describe('/api/participants API Routes', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       const request2 = new NextRequest(new Request('http://localhost/api/participants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       // Act
       const [response1, response2] = await Promise.all([
@@ -743,7 +743,7 @@ describe('/api/participants API Routes', () => {
           'User-Agent': 'Test Browser'
         },
         body: JSON.stringify(registrationData)
-      });
+      }));
 
       // Act
       await registerParticipantHandler(request);
@@ -778,7 +778,7 @@ describe('/api/participants API Routes', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(maliciousData)
-      });
+      }));
 
       // Act
       const response = await registerParticipantHandler(request);
