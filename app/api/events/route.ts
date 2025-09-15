@@ -79,6 +79,7 @@ function handleGetEventsTestMode(): NextResponse {
       state: 'REGISTRATION',
       maxParticipants: 100,
       participantCount: 5,
+      winnersCount: 0,
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
     },
@@ -89,6 +90,7 @@ function handleGetEventsTestMode(): NextResponse {
       state: 'CLOSED',
       maxParticipants: 50,
       participantCount: 50,
+      winnersCount: 10,
       createdAt: new Date('2024-01-02'),
       updatedAt: new Date('2024-01-02'),
     },
@@ -116,7 +118,7 @@ async function handleCreateEventTestMode(request: NextRequest): Promise<NextResp
 
     // Handle authorization cases
     const cookies = request.headers.get('Cookie') || '';
-    if (!cookies.includes('sessionToken')) {
+    if (!cookies.includes('auth_token')) {
       return NextResponse.json({ error: 'Unauthorized - admin access required' }, { status: 401 });
     }
 
@@ -129,12 +131,13 @@ async function handleCreateEventTestMode(request: NextRequest): Promise<NextResp
     const mockEvent = {
       id: 'event-new-123',
       name: name,
-      description: null,
+      description: body.description || '',
       state: 'INIT',
-      maxParticipants: null,
+      maxParticipants: body.maxParticipants || 100,
       prizePool: null,
       scheduledStart: null,
       participantCount: 0,
+      winnersCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

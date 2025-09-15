@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import createIntlMiddleware from 'next-intl/middleware';
 
 function getAuthToken(request: NextRequest): string | null {
   // Check for auth_token cookie
@@ -31,17 +32,31 @@ function isValidToken(token: string): boolean {
   }
 }
 
+// Initialize the intl middleware for non-admin routes
+const handleI18nRouting = createIntlMiddleware({
+  locales: ['en', 'it'],
+  defaultLocale: 'en',
+});
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Check authentication for admin routes
-  if (pathname.startsWith('/(admin)') || pathname.startsWith('/admin')) {
-    const token = getAuthToken(request);
+  // Skip i18n for admin routes and API routes
+  if (pathname.startsWith('/admin') || pathname.startsWith('/api')) {
+    // Check authentication for admin routes (except login page)
+    if (pathname.startsWith('/admin') &&
+        !pathname.includes('/admin/login') &&
+        pathname !== '/admin') {
+      const token = getAuthToken(request);
 
-    if (!token || !isValidToken(token)) {
-      const loginUrl = new URL('/admin', request.url);
-      return NextResponse.redirect(loginUrl);
+      if (!token || !isValidToken(token)) {
+        const loginUrl = new URL('/admin/login', request.url);
+        return NextResponse.redirect(loginUrl);
+      }
     }
+  } else {
+    // Handle i18n for non-admin routes
+    return handleI18nRouting(request);
   }
 
   // Check session for protected API routes
