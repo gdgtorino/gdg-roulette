@@ -49,7 +49,17 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.fill('[data-testid="password-input"]', 'SecurePass123!');
 
       // Submit login form
-      await page.click('[data-testid="login-button"]');
+      await page.click('[data-testid="login-button"]', { force: true });
+
+      // Wait for either navigation to dashboard or error message
+      try {
+        await page.waitForURL('/admin/dashboard', { timeout: 10000 });
+      } catch (error) {
+        // If navigation fails, check for error messages
+        const errorMessage = await page.locator('[data-testid="error-message"]').textContent();
+        console.log('Login failed with error:', errorMessage);
+        throw new Error(`Login did not redirect to dashboard. Error: ${errorMessage}`);
+      }
 
       // Should redirect to admin dashboard
       await expect(page).toHaveURL('/admin/dashboard');

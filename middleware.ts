@@ -43,10 +43,14 @@ export async function middleware(request: NextRequest) {
 
   // Skip i18n for admin routes and API routes
   if (pathname.startsWith('/admin') || pathname.startsWith('/api')) {
+    // Redirect /admin to /admin/login
+    if (pathname === '/admin') {
+      const loginUrl = new URL('/admin/login', request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+
     // Check authentication for admin routes (except login page)
-    if (pathname.startsWith('/admin') &&
-        !pathname.includes('/admin/login') &&
-        pathname !== '/admin') {
+    if (pathname.startsWith('/admin') && !pathname.includes('/admin/login')) {
       const token = getAuthToken(request);
 
       if (!token || !isValidToken(token)) {
