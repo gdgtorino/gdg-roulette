@@ -21,6 +21,18 @@ jest.mock('../../lib/services/EventService');
 jest.mock('../../lib/services/SessionService');
 jest.mock('../../lib/services/NotificationService');
 
+// Helper function to create mock NextRequest
+function createMockRequest(data: any, headers: Record<string, string> = {}): NextRequest {
+  return {
+    json: async () => data,
+    headers: {
+      get: (key: string) => headers[key] || null,
+    },
+    nextUrl: { origin: 'http://localhost' },
+    signal: undefined
+  } as any as NextRequest;
+}
+
 describe('/api/participants API Routes', () => {
   let participantService: jest.Mocked<ParticipantService>;
   let eventService: jest.Mocked<EventService>;
@@ -82,13 +94,7 @@ describe('/api/participants API Routes', () => {
       sessionService.createUserSession.mockResolvedValue(mockSession);
       notificationService.sendRegistrationConfirmation.mockResolvedValue(true);
 
-      const request = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(registrationData)
-      }));
+      const request = createMockRequest(registrationData);
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -138,13 +144,7 @@ describe('/api/participants API Routes', () => {
       eventService.findById.mockResolvedValue(mockEvent);
       participantService.findByEventAndName.mockResolvedValue(existingParticipant);
 
-      const request = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(registrationData)
-      }));
+      const request = createMockRequest(registrationData);
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -171,13 +171,7 @@ describe('/api/participants API Routes', () => {
 
       // Act & Assert
       for (const invalidData of invalidRequests) {
-        const request = new NextRequest(new Request('http://localhost/api/participants', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(invalidData)
-        }));
+        const request = createMockRequest(invalidData);
 
         const response = await registerParticipantHandler(request);
         const responseData = await response.json();
@@ -215,13 +209,7 @@ describe('/api/participants API Routes', () => {
           name: invalidName
         };
 
-        const request = new NextRequest(new Request('http://localhost/api/participants', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(registrationData)
-        }));
+        const request = createMockRequest(registrationData);
 
         const response = await registerParticipantHandler(request);
         const responseData = await response.json();
@@ -278,13 +266,7 @@ describe('/api/participants API Routes', () => {
         participantService.create.mockResolvedValue(mockParticipant);
         sessionService.createUserSession.mockResolvedValue(mockSession);
 
-        const request = new NextRequest(new Request('http://localhost/api/participants', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(registrationData)
-        }));
+        const request = createMockRequest(registrationData);
 
         const response = await registerParticipantHandler(request);
         const responseData = await response.json();
@@ -304,13 +286,7 @@ describe('/api/participants API Routes', () => {
 
       eventService.findById.mockResolvedValue(null);
 
-      const request = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(registrationData)
-      }));
+      const request = createMockRequest(registrationData);
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -348,13 +324,7 @@ describe('/api/participants API Routes', () => {
 
         eventService.findById.mockResolvedValue(mockEvent);
 
-        const request = new NextRequest(new Request('http://localhost/api/participants', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(registrationData)
-        }));
+        const request = createMockRequest(registrationData);
 
         const response = await registerParticipantHandler(request);
         const responseData = await response.json();
@@ -385,13 +355,7 @@ describe('/api/participants API Routes', () => {
       eventService.findById.mockResolvedValue(mockEvent);
       participantService.getParticipantCount.mockResolvedValue(50);
 
-      const request = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(registrationData)
-      }));
+      const request = createMockRequest(registrationData);
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -431,13 +395,7 @@ describe('/api/participants API Routes', () => {
       participantService.create.mockResolvedValue(mockParticipant);
       sessionService.createUserSession.mockRejectedValue(new Error('Session service unavailable'));
 
-      const request = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(registrationData)
-      }));
+      const request = createMockRequest(registrationData);
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -478,14 +436,9 @@ describe('/api/participants API Routes', () => {
       sessionService.createUserSession.mockRejectedValue(new Error('Critical session failure'));
       participantService.delete.mockResolvedValue(true);
 
-      const request = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Rollback-On-Failure': 'true'
-        },
-        body: JSON.stringify(registrationData)
-      }));
+      const request = createMockRequest(registrationData, {
+        'X-Rollback-On-Failure': 'true'
+      });
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -533,13 +486,7 @@ describe('/api/participants API Routes', () => {
       sessionService.createUserSession.mockResolvedValue(mockSession);
       notificationService.sendRegistrationConfirmation.mockResolvedValue(true);
 
-      const request = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(registrationData)
-      }));
+      const request = createMockRequest(registrationData);
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -585,13 +532,7 @@ describe('/api/participants API Routes', () => {
       participantService.create.mockResolvedValue(mockParticipant);
       sessionService.createUserSession.mockResolvedValue(mockSession);
 
-      const request = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(registrationData)
-      }));
+      const request = createMockRequest(registrationData);
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -634,17 +575,8 @@ describe('/api/participants API Routes', () => {
         eventId: 'event-123'
       });
 
-      const request1 = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registrationData)
-      }));
-
-      const request2 = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registrationData)
-      }));
+      const request1 = createMockRequest(registrationData);
+      const request2 = createMockRequest(registrationData);
 
       // Act
       const [response1, response2] = await Promise.all([
@@ -680,14 +612,10 @@ describe('/api/participants API Routes', () => {
       // Act - Make multiple rapid registration attempts from same IP
       const promises = [];
       for (let i = 0; i < 6; i++) { // Exceed rate limit of 5 attempts per minute
-        const request = new NextRequest(new Request('http://localhost/api/participants', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Forwarded-For': '192.168.1.1' // Same IP
-          },
-          body: JSON.stringify({ ...registrationData, name: `User ${i}` })
-        }));
+        const request = createMockRequest(
+          { ...registrationData, name: `User ${i}` },
+          { 'X-Forwarded-For': '192.168.1.1' }
+        );
         promises.push(registerParticipantHandler(request));
       }
 
@@ -735,15 +663,10 @@ describe('/api/participants API Routes', () => {
 
       const analyticsLogSpy = jest.spyOn(console, 'info').mockImplementation();
 
-      const request = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Forwarded-For': '192.168.1.100',
-          'User-Agent': 'Test Browser'
-        },
-        body: JSON.stringify(registrationData)
-      }));
+      const request = createMockRequest(registrationData, {
+        'X-Forwarded-For': '192.168.1.100',
+        'User-Agent': 'Test Browser'
+      });
 
       // Act
       await registerParticipantHandler(request);
@@ -772,13 +695,7 @@ describe('/api/participants API Routes', () => {
         name: '<script>alert("xss")</script>John Doe'
       };
 
-      const request = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(maliciousData)
-      }));
+      const request = createMockRequest(maliciousData);
 
       // Act
       const response = await registerParticipantHandler(request);
@@ -822,13 +739,7 @@ describe('/api/participants API Routes', () => {
       participantService.create.mockResolvedValue(mockParticipant);
       sessionService.createUserSession.mockResolvedValue(mockSession);
 
-      const request = new NextRequest(new Request('http://localhost/api/participants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(registrationData)
-      }));
+      const request = createMockRequest(registrationData);
 
       // Act
       const response = await registerParticipantHandler(request);

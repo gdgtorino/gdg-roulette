@@ -19,6 +19,23 @@ import { SessionManager } from '../../lib/services/SessionManager';
 jest.mock('../../lib/services/AuthService');
 jest.mock('../../lib/services/SessionManager');
 
+// Helper function to create mock NextRequest
+function createMockRequest(data: any, headers: Record<string, string> = {}): NextRequest {
+  return {
+    json: async () => {
+      if (typeof data === 'string') {
+        return JSON.parse(data); // This will throw for invalid JSON
+      }
+      return data;
+    },
+    headers: {
+      get: (key: string) => headers[key] || null,
+    },
+    nextUrl: { origin: 'http://localhost' },
+    signal: undefined
+  } as any as NextRequest;
+}
+
 describe('/api/auth/* API Routes', () => {
   let authService: jest.Mocked<AuthService>;
   let sessionManager: jest.Mocked<SessionManager>;
@@ -57,13 +74,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      });
+      const request = createMockRequest(loginData);
 
       // Act
       const response = await loginHandler(request);
@@ -99,13 +110,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      });
+      const request = createMockRequest(loginData);
 
       // Act
       const response = await loginHandler(request);
@@ -135,13 +140,7 @@ describe('/api/auth/* API Routes', () => {
 
       // Act & Assert
       for (const invalidData of invalidRequests) {
-        const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(invalidData)
-        });
+        const request = createMockRequest(invalidData);
 
         const response = await loginHandler(request);
         const responseData = await response.json();
@@ -154,13 +153,7 @@ describe('/api/auth/* API Routes', () => {
 
     it('should handle malformed JSON in request body', async () => {
       // Arrange
-      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: 'invalid-json{'
-      });
+      const request = createMockRequest('invalid-json{');
 
       // Act
       const response = await loginHandler(request);
@@ -181,13 +174,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockRejectedValue(new Error('Database connection failed'));
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      });
+      const request = createMockRequest(loginData);
 
       // Act
       const response = await loginHandler(request);
@@ -565,13 +552,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      });
+      const request = createMockRequest(loginData);
 
       // Act
       const response = await loginHandler(request);
@@ -656,13 +637,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      });
+      const request = createMockRequest(loginData);
 
       // Act
       const response = await loginHandler(request);
@@ -693,13 +668,7 @@ describe('/api/auth/* API Routes', () => {
 
       authService.login.mockResolvedValue(mockLoginResult);
 
-      const request = new NextRequest(new Request('http://localhost/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      });
+      const request = createMockRequest(loginData);
 
       // Act
       const response = await loginHandler(request);
