@@ -34,6 +34,14 @@ describe('Authentication System', () => {
     passwordService = new PasswordService() as jest.Mocked<PasswordService>;
     adminRepository = new AdminRepository() as jest.Mocked<AdminRepository>;
 
+    // Set up mock implementations for PasswordService
+    const realPasswordService = new PasswordService();
+    passwordService.validateComplexity = jest.fn((password: string) => {
+      return realPasswordService.validateComplexity(password);
+    });
+    passwordService.hash = jest.fn();
+    passwordService.verify = jest.fn();
+
     // Initialize auth service with mocked dependencies
     authService = new AuthService(sessionManager, passwordService, adminRepository);
   });
