@@ -36,7 +36,8 @@ export class EventStateMachine {
       throw new Error('Admin ID is required to create event');
     }
 
-    const event = await this.eventService.createEvent({
+    // Use createBasicEvent to avoid automatic QR code generation
+    const event = await this.eventService.createBasicEvent({
       ...eventData,
       state: EventState.INIT,
       registrationOpen: false,
