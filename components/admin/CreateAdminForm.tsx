@@ -89,6 +89,11 @@ export function CreateAdminForm({
   // Check if user has permission to create admin accounts
   const hasPermission = admin?.permissions?.includes('MANAGE_USERS') || admin?.permissions?.includes('*') || false;
 
+  // Check if current user has permissions to create admins
+  const adminToCheck = currentAdmin || creatorAdmin;
+  const hasManageUsersPermission = adminToCheck?.permissions?.includes('MANAGE_USERS') ?? false;
+  const isFormDisabled = !hasManageUsersPermission;
+
   const validateUsername = (username: string): string | undefined => {
     const trimmed = username.trim();
 
@@ -245,9 +250,9 @@ export function CreateAdminForm({
         {(creatorAdmin || currentAdmin) && (
           <p className="text-sm text-gray-500 mt-2">Creating as: {(currentAdmin || creatorAdmin)?.username}</p>
         )}
-        {!hasPermission && (
-          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mt-4">
-            <p className="text-yellow-800 text-sm">Insufficient permissions to create admin accounts</p>
+        {isFormDisabled && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md" role="alert">
+            <p className="text-red-800 text-sm">Insufficient permissions to create admin accounts</p>
           </div>
         )}
       </div>
@@ -264,7 +269,7 @@ export function CreateAdminForm({
             value={formData.username}
             onChange={(e) => handleInputChange('username', e.target.value)}
             placeholder="Enter username"
-            disabled={isSubmitting || !hasPermission}
+            disabled={isSubmitting || isFormDisabled}
             aria-invalid={errors.username ? 'true' : 'false'}
             className={errors.username ? 'border-red-300' : ''}
           />
@@ -286,7 +291,7 @@ export function CreateAdminForm({
             value={formData.email}
             onChange={(e) => handleInputChange('email', e.target.value)}
             placeholder="Enter email address"
-            disabled={isSubmitting || !hasPermission}
+            disabled={isSubmitting || isFormDisabled}
             aria-invalid={errors.email ? 'true' : 'false'}
             className={errors.email ? 'border-red-300' : ''}
           />
@@ -308,7 +313,7 @@ export function CreateAdminForm({
             value={formData.password}
             onChange={(e) => handleInputChange('password', e.target.value)}
             placeholder="Enter secure password"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isFormDisabled}
             aria-invalid={errors.password ? 'true' : 'false'}
             aria-label="Password (main)"
             className={errors.password ? 'border-red-300' : ''}
@@ -334,7 +339,7 @@ export function CreateAdminForm({
             value={formData.confirmPassword}
             onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
             placeholder="Re-enter password"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isFormDisabled}
             aria-invalid={errors.confirmPassword ? 'true' : 'false'}
             aria-label="Confirm Password"
             className={errors.confirmPassword ? 'border-red-300' : ''}
@@ -354,7 +359,7 @@ export function CreateAdminForm({
             name="role"
             value={formData.role}
             onChange={(e) => handleInputChange('role', e.target.value)}
-            disabled={isSubmitting || !hasPermission}
+            disabled={isSubmitting || isFormDisabled}
             className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           >
             {ROLE_OPTIONS.map((role) => (
@@ -387,6 +392,11 @@ export function CreateAdminForm({
               </div>
             ))}
           </div>
+          {errors.role && (
+            <p className="mt-1 text-sm text-red-600" role="alert">
+              {errors.role}
+            </p>
+          )}
         </div>
 
         {/* Success Message */}
@@ -405,7 +415,7 @@ export function CreateAdminForm({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button type="submit" disabled={isSubmitting || !hasPermission} className="w-full sm:w-auto">
+          <Button type="submit" disabled={isSubmitting || isFormDisabled} className="w-full sm:w-auto">
             {isSubmitting ? (
               <>
                 <LoadingSpinner className="mr-2 h-4 w-4" />
@@ -421,7 +431,7 @@ export function CreateAdminForm({
               type="button"
               variant="outline"
               onClick={onCancel}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isFormDisabled}
               className="w-full sm:w-auto"
             >
               Cancel

@@ -55,7 +55,9 @@ const mockUserStateManager = {
   determineUserState: jest.fn(),
   recoverUserState: jest.fn(),
   persistUserState: jest.fn(),
-  clearUserState: jest.fn()
+  clearUserState: jest.fn(),
+  createDefaultState: jest.fn(),
+  saveUserState: jest.fn()
 };
 
 describe('User Experience System', () => {
@@ -73,6 +75,19 @@ describe('User Experience System', () => {
       mockNotificationService as any,
       mockUserStateManager as any
     );
+
+    // Setup default mock returns
+    mockUserStateManager.createDefaultState.mockImplementation((eventId: string) => ({
+      status: 'UNREGISTERED',
+      screen: 'REGISTRATION',
+      event: {
+        id: eventId,
+        name: 'Unknown Event',
+        state: EventState.INIT,
+        registrationOpen: false,
+        closed: false,
+      },
+    }));
 
     // Mock browser localStorage
     Object.defineProperty(window, 'localStorage', {

@@ -271,7 +271,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       addSecurityHeaders(response);
       return response;
     }
-  } catch {
+  } catch (error) {
     const response = NextResponse.json(
       {
         success: false,
