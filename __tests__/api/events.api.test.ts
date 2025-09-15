@@ -83,12 +83,12 @@ describe('/api/events/* API Routes', () => {
         events: mockEvents
       });
 
-      const request = new NextRequest('http://localhost/api/events', {
+      const request = new NextRequest(new Request('http://localhost/api/events', {
         method: 'GET',
         headers: {
           'Cookie': 'sessionToken=session-token-123'
         }
-      });
+      }));
 
       // Act
       const response = await getEventsHandler(request);
@@ -958,12 +958,12 @@ describe('/api/events/* API Routes', () => {
       authService.validateSession.mockResolvedValue(mockSessionValidation);
       eventService.getEventsForAdmin.mockRejectedValue(new Error('Database connection failed'));
 
-      const request = new NextRequest('http://localhost/api/events', {
+      const request = new NextRequest(new Request('http://localhost/api/events', {
         method: 'GET',
         headers: {
           'Cookie': 'sessionToken=session-token-123'
         }
-      });
+      }));
 
       // Act
       const response = await getEventsHandler(request);
