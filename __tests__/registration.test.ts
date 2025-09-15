@@ -17,39 +17,50 @@ import { QRCodeService } from '../lib/services/QRCodeService';
 import { EventState } from '../lib/state/EventStateMachine';
 import { RegistrationForm } from '../components/RegistrationForm';
 
-// Mock dependencies
-jest.mock('../lib/services/ParticipantService');
-jest.mock('../lib/services/EventService');
-jest.mock('../lib/services/SessionService');
-jest.mock('../lib/services/QRCodeService');
+// Mock services
+const mockParticipantService = {
+  findByEventAndName: jest.fn(),
+  findById: jest.fn(),
+  create: jest.fn(),
+  findByEventId: jest.fn()
+};
+
+const mockEventService = {
+  findById: jest.fn(),
+  create: jest.fn(),
+  updateState: jest.fn(),
+  findAll: jest.fn()
+};
+
+const mockSessionService = {
+  createUserSession: jest.fn(),
+  validateUserSession: jest.fn(),
+  extendSession: jest.fn(),
+  invalidateSession: jest.fn()
+};
+
+const mockQRCodeService = {
+  generateRegistrationUrl: jest.fn(),
+  generateQRCode: jest.fn()
+};
 
 describe('User Registration System', () => {
   let registrationService: RegistrationService;
-  let participantService: jest.Mocked<ParticipantService>;
-  let eventService: jest.Mocked<EventService>;
-  let sessionService: jest.Mocked<SessionService>;
-  let qrCodeService: jest.Mocked<QRCodeService>;
 
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
 
-    // Create mocked instances
-    participantService = new ParticipantService() as jest.Mocked<ParticipantService>;
-    eventService = new EventService() as jest.Mocked<EventService>;
-    sessionService = new SessionService() as jest.Mocked<SessionService>;
-    qrCodeService = new QRCodeService() as jest.Mocked<QRCodeService>;
-
-    // Initialize registration service
+    // Initialize registration service with mocked dependencies
     registrationService = new RegistrationService(
-      participantService,
-      eventService,
-      sessionService
+      mockParticipantService as any,
+      mockEventService as any,
+      mockSessionService as any
     );
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('User Registration with Unique Names', () => {
@@ -75,7 +86,7 @@ describe('User Registration System', () => {
         sessionId: 'session-123'
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
+      mockEventService.findById.mockResolvedValue(mockEvent);
       participantService.findByEventAndName.mockResolvedValue(null);
       participantService.create.mockResolvedValue(mockParticipant);
       sessionService.createUserSession.mockResolvedValue('session-123');
@@ -115,7 +126,7 @@ describe('User Registration System', () => {
         registeredAt: new Date()
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
+      mockEventService.findById.mockResolvedValue(mockEvent);
       participantService.findByEventAndName.mockResolvedValue(existingParticipant);
 
       // Act
@@ -151,7 +162,7 @@ describe('User Registration System', () => {
         closed: false
       };
 
-      eventService.findById
+      mockEventService.findById
         .mockResolvedValueOnce(mockEvent1)
         .mockResolvedValueOnce(mockEvent2);
 
@@ -230,7 +241,7 @@ describe('User Registration System', () => {
         closed: false
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
+      mockEventService.findById.mockResolvedValue(mockEvent);
       participantService.findByEventAndName.mockResolvedValue(null);
 
       // Mock successful creation for all valid names
@@ -269,7 +280,7 @@ describe('User Registration System', () => {
         closed: false
       };
 
-      eventService.findById.mockResolvedValue(registrationEvent);
+      mockEventService.findById.mockResolvedValue(registrationEvent);
       participantService.findByEventAndName.mockResolvedValue(null);
 
       // Act
@@ -292,7 +303,7 @@ describe('User Registration System', () => {
         closed: false
       };
 
-      eventService.findById.mockResolvedValue(initEvent);
+      mockEventService.findById.mockResolvedValue(initEvent);
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName);
@@ -316,7 +327,7 @@ describe('User Registration System', () => {
         closed: false
       };
 
-      eventService.findById.mockResolvedValue(drawEvent);
+      mockEventService.findById.mockResolvedValue(drawEvent);
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName);
@@ -340,7 +351,7 @@ describe('User Registration System', () => {
         closed: true
       };
 
-      eventService.findById.mockResolvedValue(closedEvent);
+      mockEventService.findById.mockResolvedValue(closedEvent);
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName);
@@ -364,7 +375,7 @@ describe('User Registration System', () => {
         closed: false
       };
 
-      eventService.findById.mockResolvedValue(closedRegistrationEvent);
+      mockEventService.findById.mockResolvedValue(closedRegistrationEvent);
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName);
@@ -397,7 +408,7 @@ describe('User Registration System', () => {
         registeredAt: new Date()
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
+      mockEventService.findById.mockResolvedValue(mockEvent);
       participantService.findByEventAndName.mockResolvedValue(null);
       participantService.create.mockResolvedValue(mockParticipant);
       sessionService.createUserSession.mockResolvedValue('session-123');
@@ -768,7 +779,7 @@ describe('User Registration System', () => {
       const eventId = 'nonexistent-event';
       const userName = 'John Doe';
 
-      eventService.findById.mockResolvedValue(null);
+      mockEventService.findById.mockResolvedValue(null);
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName);
@@ -791,7 +802,7 @@ describe('User Registration System', () => {
         closed: false
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
+      mockEventService.findById.mockResolvedValue(mockEvent);
       participantService.findByEventAndName.mockResolvedValue(null);
       participantService.create.mockRejectedValue(new Error('Database connection failed'));
 
@@ -823,7 +834,7 @@ describe('User Registration System', () => {
         registeredAt: new Date()
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
+      mockEventService.findById.mockResolvedValue(mockEvent);
       participantService.findByEventAndName.mockResolvedValue(null);
       participantService.create.mockResolvedValue(mockParticipant);
       sessionService.createUserSession.mockRejectedValue(new Error('Session creation failed'));
@@ -850,7 +861,7 @@ describe('User Registration System', () => {
         closed: false
       };
 
-      eventService.findById.mockResolvedValue(mockEvent);
+      mockEventService.findById.mockResolvedValue(mockEvent);
       participantService.findByEventAndName.mockResolvedValue(null);
       participantService.create.mockResolvedValue({
         id: 'participant-123',
