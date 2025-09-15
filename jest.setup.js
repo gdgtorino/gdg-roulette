@@ -52,7 +52,31 @@ jest.mock('next/navigation', () => ({
 
 // Mock Next.js server components (NextResponse)
 jest.mock('next/server', () => ({
-  NextRequest: jest.fn(),
+  NextRequest: jest.fn().mockImplementation((url, init) => {
+    const headersMap = new Map(Object.entries(init?.headers || {}));
+    const request = {
+      url,
+      method: init?.method || 'GET',
+      headers: {
+        get: (key) => headersMap.get(key),
+        has: (key) => headersMap.has(key),
+        entries: () => headersMap.entries(),
+        keys: () => headersMap.keys(),
+        values: () => headersMap.values(),
+      },
+      json: async () => {
+        if (init?.body) {
+          try {
+            return JSON.parse(init.body);
+          } catch (error) {
+            throw new Error('Invalid JSON');
+          }
+        }
+        return {};
+      },
+    };
+    return request;
+  }),
   NextResponse: {
     json: jest.fn((data, init) => ({
       json: async () => data,
