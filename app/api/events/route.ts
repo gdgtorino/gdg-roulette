@@ -5,6 +5,12 @@ import { validateRequest } from '@/lib/api/validation';
 import { createEvent, getEvents } from '@/lib/events/mutations';
 import { EventService } from '../../../lib/services/EventService';
 import { AuthService } from '../../../lib/services/AuthService';
+import { EventRepository } from '../../../lib/repositories/EventRepository';
+import { ParticipantService } from '../../../lib/services/ParticipantService';
+import { ParticipantRepository } from '../../../lib/repositories/ParticipantRepository';
+import { SessionManager } from '../../../lib/services/SessionManager';
+import { PasswordService } from '../../../lib/services/PasswordService';
+import { AdminRepository } from '../../../lib/repositories/AdminRepository';
 const createEventSchema = z.object({
   name: z.string().min(1, 'Event name is required'),
   description: z.string().optional(),
@@ -14,19 +20,24 @@ const createEventSchema = z.object({
 });
 
 // Global service instances that can be overridden in tests
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let eventService: EventService;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let authService: AuthService;
 
-// Initialize services
+// Initialize services with proper dependency injection
+const eventRepository = new EventRepository();
+const participantRepository = new ParticipantRepository();
+const participantService = new ParticipantService(participantRepository, eventRepository);
+const sessionManager = new SessionManager();
+const passwordService = new PasswordService();
+const adminRepository = new AdminRepository();
+
 // eslint-disable-next-line prefer-const
-eventService = new EventService();
+eventService = new EventService(eventRepository, participantService);
 // eslint-disable-next-line prefer-const
-authService = new AuthService();
+authService = new AuthService(sessionManager, passwordService, adminRepository);
 
 // Function to set test services
-export function setTestServices(services: {
+export function setTestEventsServices(services: {
   eventService?: EventService;
   authService?: AuthService;
 }) {

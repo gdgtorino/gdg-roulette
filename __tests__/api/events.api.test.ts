@@ -11,7 +11,7 @@ import { NextRequest } from 'next/server';
 import {
   GET as getEventsHandler,
   POST as createEventHandler,
-  setTestServices as setEventsTestServices,
+  setTestEventsServices,
 } from '../../app/api/events/route';
 import {
   GET as getEventHandler,
@@ -64,7 +64,7 @@ describe('/api/events/* API Routes', () => {
     jest.clearAllMocks();
 
     // Set up test services
-    setEventsTestServices({
+    setTestEventsServices({
       eventService: mockEventService as any,
       authService: mockAuthService as any,
     });

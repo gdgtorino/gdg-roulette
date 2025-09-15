@@ -24,14 +24,13 @@ const adminRepository = new AdminRepository();
 authService = new AuthService(sessionManager, passwordService, adminRepository);
 
 // Allow tests to override services
-// Note: Commented out for build compatibility - re-enable for testing
-// export function setTestAuthServices(services: {
-//   authService?: AuthService;
-//   sessionManager?: SessionManager;
-// }) {
-//   if (services.authService) authService = services.authService;
-//   if (services.sessionManager) sessionManager = services.sessionManager;
-// }
+export function setTestAuthServices(services: {
+  authService?: AuthService;
+  sessionManager?: SessionManager;
+}) {
+  if (services.authService) authService = services.authService;
+  if (services.sessionManager) sessionManager = services.sessionManager;
+}
 
 export async function POST(request: NextRequest) {
   try {

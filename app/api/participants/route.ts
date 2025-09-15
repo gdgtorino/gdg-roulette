@@ -19,7 +19,7 @@ const eventRepository = new EventRepository();
 // eslint-disable-next-line prefer-const
 participantService = new ParticipantService(participantRepository, eventRepository);
 // eslint-disable-next-line prefer-const
-eventService = new EventService(eventRepository);
+eventService = new EventService(eventRepository, participantService);
 // eslint-disable-next-line prefer-const
 sessionService = new SessionService();
 // eslint-disable-next-line prefer-const
