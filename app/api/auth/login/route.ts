@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { validateRequest } from '@/lib/api/validation';
+import { AuthService } from '../../../../lib/services/AuthService';
+import { SessionManager } from '../../../../lib/services/SessionManager';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
