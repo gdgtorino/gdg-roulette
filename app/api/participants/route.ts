@@ -400,8 +400,56 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
   try {
     // Call service methods as expected by tests
     const event = await testEventService.findById(eventId);
-    await testParticipantService.findByEventAndName(eventId, trimmedName);
-    await testParticipantService.getParticipantCount(eventId);
+
+    // Check if event exists
+    if (!event) {
+      return NextResponse.json(
+        { success: false, error: 'Event not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check event state - must be in REGISTRATION state
+    if (event.state !== 'REGISTRATION') {
+      let message = 'Registration is not open for this event';
+      if (event.state === 'DRAW') {
+        message = 'Registration is closed - draw in progress';
+      } else if (event.state === 'CLOSED') {
+        message = 'Event is closed';
+      }
+
+      return NextResponse.json(
+        { success: false, error: message },
+        { status: 400 }
+      );
+    }
+
+    // Check for existing participant
+    const existingParticipant = await testParticipantService.findByEventAndName(eventId, trimmedName);
+    if (existingParticipant) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Name already registered for this event',
+          existingParticipant
+        },
+        { status: 409 }
+      );
+    }
+
+    // Check participant limits
+    const currentCount = await testParticipantService.getParticipantCount(eventId);
+    if (event.maxParticipants && currentCount >= event.maxParticipants) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Event has reached maximum participant limit',
+          maxParticipants: event.maxParticipants,
+          currentParticipants: currentCount
+        },
+        { status: 400 }
+      );
+    }
 
     const createdParticipant = await testParticipantService.create({
       eventId: eventId,

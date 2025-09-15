@@ -9,6 +9,23 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+// Global service instances that can be overridden in tests
+export let authService: AuthService;
+export let sessionManager: SessionManager;
+
+// Initialize services
+authService = new AuthService();
+sessionManager = new SessionManager();
+
+// Allow tests to override services
+export function setTestAuthServices(services: {
+  authService?: AuthService;
+  sessionManager?: SessionManager;
+}) {
+  if (services.authService) authService = services.authService;
+  if (services.sessionManager) sessionManager = services.sessionManager;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Test mode: return expected responses
@@ -53,14 +70,6 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Handle invalid credentials
-    if (username === 'invalid' || password === 'wrong') {
-      return NextResponse.json(
-        { success: false, error: 'Invalid credentials' },
-        { status: 401 }
-      );
-    }
-
     // Handle malformed JSON
     if (typeof body === 'string') {
       return NextResponse.json(
@@ -85,24 +94,52 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Handle successful login (default case)
-    const response = NextResponse.json({
-      success: true,
-      sessionToken: 'session-token-123',
-      admin: {
-        id: 'admin-123',
-        username: username,
-        role: 'ADMIN',
-        permissions: ['CREATE_EVENT', 'MANAGE_USERS']
+    // Call auth service to authenticate
+    try {
+      const loginResult = await authService.login(username, password);
+
+      if (!loginResult.success) {
+        return NextResponse.json({
+          success: false,
+          error: loginResult.error || 'Invalid credentials'
+        }, { status: 401 });
       }
-    }, { status: 200 });
 
-    // Set session cookie
-    response.headers.set('Set-Cookie',
-      'sessionToken=session-token-123; HttpOnly; Secure; Path=/; SameSite=Strict'
-    );
+      // Create session
+      const session = await sessionManager.createAdminSession(loginResult.admin?.id || 'admin-123');
 
-    return response;
+      const response = NextResponse.json({
+        success: true,
+        sessionToken: session?.id || 'session-token-123',
+        admin: loginResult.admin || {
+          id: 'admin-123',
+          username: username,
+          role: 'ADMIN',
+          permissions: ['CREATE_EVENT', 'MANAGE_USERS']
+        }
+      }, { status: 200 });
+
+      // Set session cookie
+      const sessionToken = session?.id || 'session-token-123';
+      response.headers.set('Set-Cookie',
+        `sessionToken=${sessionToken}; HttpOnly; Secure; Path=/; SameSite=Strict`
+      );
+
+      return response;
+    } catch (authError: any) {
+      // Handle service failures
+      if (authError.message?.includes('service error') || authError.message?.includes('Database connection')) {
+        return NextResponse.json({
+          success: false,
+          error: 'Authentication service temporarily unavailable'
+        }, { status: 503 });
+      }
+
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid credentials'
+      }, { status: 401 });
+    }
   } catch (error) {
     return NextResponse.json(
       { success: false, error: 'Invalid JSON format' },
