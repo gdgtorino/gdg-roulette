@@ -87,9 +87,9 @@ describe('User Registration System', () => {
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockResolvedValue(mockParticipant);
-      sessionService.createUserSession.mockResolvedValue('session-123');
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue(mockParticipant);
+      mockSessionService.createUserSession.mockResolvedValue('session-123');
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName);
@@ -98,12 +98,12 @@ describe('User Registration System', () => {
       expect(result.success).toBe(true);
       expect(result.participant).toEqual(mockParticipant);
       expect(result.sessionId).toBe('session-123');
-      expect(participantService.findByEventAndName).toHaveBeenCalledWith(eventId, userName);
-      expect(participantService.create).toHaveBeenCalledWith({
+      expect(mockParticipantService.findByEventAndName).toHaveBeenCalledWith(eventId, userName);
+      expect(mockParticipantService.create).toHaveBeenCalledWith({
         eventId,
         name: userName
       });
-      expect(sessionService.createUserSession).toHaveBeenCalledWith('participant-123', eventId);
+      expect(mockSessionService.createUserSession).toHaveBeenCalledWith('participant-123', eventId);
     });
 
     it('should block duplicate name registration in same event', async () => {
@@ -127,7 +127,7 @@ describe('User Registration System', () => {
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(existingParticipant);
+      mockParticipantService.findByEventAndName.mockResolvedValue(existingParticipant);
 
       // Act
       const result = await registrationService.registerParticipant(eventId, duplicateName);
@@ -136,8 +136,8 @@ describe('User Registration System', () => {
       expect(result.success).toBe(false);
       expect(result.error).toBe('Name already registered for this event');
       expect(result.participant).toBeUndefined();
-      expect(participantService.create).not.toHaveBeenCalled();
-      expect(sessionService.createUserSession).not.toHaveBeenCalled();
+      expect(mockParticipantService.create).not.toHaveBeenCalled();
+      expect(mockSessionService.createUserSession).not.toHaveBeenCalled();
     });
 
     it('should allow same name in different events', async () => {
@@ -166,8 +166,8 @@ describe('User Registration System', () => {
         .mockResolvedValueOnce(mockEvent1)
         .mockResolvedValueOnce(mockEvent2);
 
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create
         .mockResolvedValueOnce({
           id: 'participant-123',
           eventId: event1Id,
@@ -183,7 +183,7 @@ describe('User Registration System', () => {
           sessionId: 'session-456'
         });
 
-      sessionService.createUserSession
+      mockSessionService.createUserSession
         .mockResolvedValueOnce('session-123')
         .mockResolvedValueOnce('session-456');
 
@@ -242,10 +242,10 @@ describe('User Registration System', () => {
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
 
       // Mock successful creation for all valid names
-      participantService.create.mockImplementation((data) => Promise.resolve({
+      mockParticipantService.create.mockImplementation((data) => Promise.resolve({
         id: `participant-${Math.random()}`,
         eventId: data.eventId,
         name: data.name,
@@ -253,7 +253,7 @@ describe('User Registration System', () => {
         sessionId: `session-${Math.random()}`
       }));
 
-      sessionService.createUserSession.mockImplementation(() =>
+      mockSessionService.createUserSession.mockImplementation(() =>
         Promise.resolve(`session-${Math.random()}`)
       );
 
@@ -281,7 +281,7 @@ describe('User Registration System', () => {
       };
 
       mockEventService.findById.mockResolvedValue(registrationEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName);
@@ -311,7 +311,7 @@ describe('User Registration System', () => {
       // Assert
       expect(result.success).toBe(false);
       expect(result.error).toBe('Registration is not open for this event');
-      expect(participantService.create).not.toHaveBeenCalled();
+      expect(mockParticipantService.create).not.toHaveBeenCalled();
     });
 
     it('should block registration in DRAW state', async () => {
@@ -335,7 +335,7 @@ describe('User Registration System', () => {
       // Assert
       expect(result.success).toBe(false);
       expect(result.error).toBe('Registration is closed - draw in progress');
-      expect(participantService.create).not.toHaveBeenCalled();
+      expect(mockParticipantService.create).not.toHaveBeenCalled();
     });
 
     it('should block registration in CLOSED state', async () => {
@@ -359,7 +359,7 @@ describe('User Registration System', () => {
       // Assert
       expect(result.success).toBe(false);
       expect(result.error).toBe('Event is closed');
-      expect(participantService.create).not.toHaveBeenCalled();
+      expect(mockParticipantService.create).not.toHaveBeenCalled();
     });
 
     it('should block registration when registrationOpen is false', async () => {
@@ -383,7 +383,7 @@ describe('User Registration System', () => {
       // Assert
       expect(result.success).toBe(false);
       expect(result.error).toBe('Registration is not open for this event');
-      expect(participantService.create).not.toHaveBeenCalled();
+      expect(mockParticipantService.create).not.toHaveBeenCalled();
     });
   });
 
@@ -409,9 +409,9 @@ describe('User Registration System', () => {
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockResolvedValue(mockParticipant);
-      sessionService.createUserSession.mockResolvedValue('session-123');
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue(mockParticipant);
+      mockSessionService.createUserSession.mockResolvedValue('session-123');
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName);
@@ -419,7 +419,7 @@ describe('User Registration System', () => {
       // Assert
       expect(result.success).toBe(true);
       expect(result.sessionId).toBe('session-123');
-      expect(sessionService.createUserSession).toHaveBeenCalledWith('participant-123', eventId);
+      expect(mockSessionService.createUserSession).toHaveBeenCalledWith('participant-123', eventId);
     });
 
     it('should recover user session from browser storage', async () => {
@@ -440,8 +440,8 @@ describe('User Registration System', () => {
         registeredAt: new Date()
       };
 
-      sessionService.validateUserSession.mockResolvedValue(mockSession);
-      participantService.findById.mockResolvedValue(mockParticipant);
+      mockSessionService.validateUserSession.mockResolvedValue(mockSession);
+      mockParticipantService.findById.mockResolvedValue(mockParticipant);
 
       // Act
       const result = await registrationService.recoverSession(sessionId);
@@ -455,7 +455,7 @@ describe('User Registration System', () => {
     it('should handle expired session recovery', async () => {
       // Arrange
       const sessionId = 'expired-session';
-      sessionService.validateUserSession.mockResolvedValue(null);
+      mockSessionService.validateUserSession.mockResolvedValue(null);
 
       // Act
       const result = await registrationService.recoverSession(sessionId);
@@ -477,7 +477,7 @@ describe('User Registration System', () => {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
       };
 
-      sessionService.validateUserSession.mockResolvedValue(mockSession);
+      mockSessionService.validateUserSession.mockResolvedValue(mockSession);
 
       // Simulate multiple recovery attempts (page refreshes)
       const recoveryAttempts = 5;
@@ -495,7 +495,7 @@ describe('User Registration System', () => {
       const sessionId = 'active-session';
       const newExpiryTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-      sessionService.extendSession.mockResolvedValue({
+      mockSessionService.extendSession.mockResolvedValue({
         id: sessionId,
         participantId: 'participant-123',
         eventId: 'event-123',
@@ -509,7 +509,7 @@ describe('User Registration System', () => {
       // Assert
       expect(result.success).toBe(true);
       expect(result.session.expiresAt).toEqual(newExpiryTime);
-      expect(sessionService.extendSession).toHaveBeenCalledWith(sessionId);
+      expect(mockSessionService.extendSession).toHaveBeenCalledWith(sessionId);
     });
   });
 
@@ -803,8 +803,8 @@ describe('User Registration System', () => {
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockRejectedValue(new Error('Database connection failed'));
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockRejectedValue(new Error('Database connection failed'));
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName);
@@ -835,9 +835,9 @@ describe('User Registration System', () => {
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockResolvedValue(mockParticipant);
-      sessionService.createUserSession.mockRejectedValue(new Error('Session creation failed'));
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue(mockParticipant);
+      mockSessionService.createUserSession.mockRejectedValue(new Error('Session creation failed'));
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName);
@@ -862,15 +862,15 @@ describe('User Registration System', () => {
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
-      participantService.findByEventAndName.mockResolvedValue(null);
-      participantService.create.mockResolvedValue({
+      mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue({
         id: 'participant-123',
         eventId,
         name: userName,
         registeredAt: new Date()
       });
-      sessionService.createUserSession.mockRejectedValue(new Error('Session creation failed'));
-      participantService.delete.mockResolvedValue(true);
+      mockSessionService.createUserSession.mockRejectedValue(new Error('Session creation failed'));
+      mockParticipantService.delete.mockResolvedValue(true);
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName, { rollbackOnSessionFailure: true });
@@ -878,7 +878,7 @@ describe('User Registration System', () => {
       // Assert
       expect(result.success).toBe(false);
       expect(result.error).toBe('Registration failed - session could not be created');
-      expect(participantService.delete).toHaveBeenCalledWith('participant-123');
+      expect(mockParticipantService.delete).toHaveBeenCalledWith('participant-123');
     });
   });
 });
