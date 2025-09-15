@@ -251,6 +251,32 @@ export class ParticipantService {
   }
 
   /**
+   * Get available participants (alias for undrawn participants for test compatibility)
+   */
+  async getAvailableParticipants(eventId: string): Promise<Participant[]> {
+    return this.getUndrawenParticipants(eventId);
+  }
+
+  /**
+   * Get all participants for an event (test compatibility method)
+   */
+  async getAllParticipants(eventId: string): Promise<Participant[]> {
+    try {
+      const result = await this.getParticipants(eventId);
+      return result.participants || [];
+    } catch (error) {
+      throw new Error(`Failed to get all participants: ${error}`);
+    }
+  }
+
+  /**
+   * Get total participant count (alias for getParticipantCount for test compatibility)
+   */
+  async getTotalParticipants(eventId: string): Promise<number> {
+    return this.getParticipantCount(eventId);
+  }
+
+  /**
    * Get count of undrawn participants
    */
   async getUndrawenCount(eventId: string): Promise<number> {

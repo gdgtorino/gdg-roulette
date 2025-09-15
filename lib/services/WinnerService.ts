@@ -3,8 +3,9 @@ import { Winner, Participant } from '../types';
 export interface WinnerCreateData {
   eventId: string;
   participantId: string;
-  position: number;
-  drawnAt: Date;
+  participantName: string;
+  drawOrder: number;
+  drawnAt?: Date;
   metadata?: Record<string, any>;
 }
 
@@ -19,8 +20,7 @@ export class WinnerService {
       const winner: Winner = {
         id: this.generateId(),
         ...winnerData,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        drawnAt: winnerData.drawnAt || new Date()
       };
 
       // In a real implementation, this would save to database
@@ -29,6 +29,13 @@ export class WinnerService {
     } catch (error) {
       throw new Error(`Failed to record winner: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  /**
+   * Create a winner (alias for recordWinner for test compatibility)
+   */
+  async createWinner(winnerData: WinnerCreateData): Promise<Winner> {
+    return this.recordWinner(winnerData);
   }
 
   /**

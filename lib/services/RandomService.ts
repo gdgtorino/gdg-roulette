@@ -127,6 +127,13 @@ export class RandomService {
   }
 
   /**
+   * Select random participant from array (alias for test compatibility)
+   */
+  async selectRandomParticipant<T>(participants: T[]): Promise<T> {
+    return this.selectRandom(participants);
+  }
+
+  /**
    * Select multiple random elements from array (without replacement)
    */
   async selectRandomMultiple<T>(array: T[], count: number): Promise<T[]> {

@@ -1,10 +1,9 @@
-import { PrismaClient } from '@prisma/client';
-import { ParticipantRepository } from '../repositories/ParticipantRepository';
-import { EventRepository } from '../repositories/EventRepository';
+import { ParticipantService } from './ParticipantService';
+import { WinnerService } from './WinnerService';
 import { NotificationService } from './NotificationService';
+import { EventService } from './EventService';
+import { RandomService } from './RandomService';
 import { Participant, Winner } from '../types';
-
-const prisma = new PrismaClient();
 
 export interface DrawResult {
   success: boolean;
@@ -19,22 +18,101 @@ export interface DrawBatchResult {
 }
 
 export class LotteryService {
-  private notificationService: NotificationService;
-
   constructor(
-    private participantRepository: ParticipantRepository,
-    private eventRepository: EventRepository
-  ) {
-    this.notificationService = new NotificationService();
+    private participantService: ParticipantService,
+    private winnerService: WinnerService,
+    private notificationService: NotificationService,
+    private eventService: EventService,
+    private randomService: RandomService
+  ) {}
+
+  /**
+   * Draw a single winner from the remaining participants (with admin verification)
+   */
+  async drawSingleWinner(eventId: string, adminId: string): Promise<DrawResult> {
+    try {
+      // Check if event exists and is in the correct state
+      const event = await this.eventService.findById(eventId);
+      if (!event) {
+        return {
+          success: false,
+          error: 'Event not found'
+        };
+      }
+
+      if (event.closed) {
+        return {
+          success: false,
+          error: 'Cannot draw from a closed event'
+        };
+      }
+
+      // Verify admin owns the event (if createdBy is set)
+      if (event.createdBy && event.createdBy !== adminId) {
+        return {
+          success: false,
+          error: 'Only event creator can perform draw'
+        };
+      }
+
+      // Get available participants (not yet winners)
+      const availableParticipants = await this.participantService.getAvailableParticipants(eventId);
+      if (availableParticipants.length === 0) {
+        return {
+          success: false,
+          error: 'No participants available for drawing'
+        };
+      }
+
+      // Check if event has reached maximum draws
+      const currentWinnerCount = await this.winnerService.getWinnerCount(eventId);
+      const maxParticipants = event.maxParticipants || availableParticipants.length;
+      if (currentWinnerCount >= maxParticipants) {
+        return {
+          success: false,
+          error: 'All participants have been drawn'
+        };
+      }
+
+      // Use random service to select winner
+      const selectedParticipant = await this.randomService.selectRandomParticipant(availableParticipants);
+
+      // Create winner record
+      const winner = await this.winnerService.createWinner({
+        eventId,
+        participantId: selectedParticipant.id,
+        participantName: selectedParticipant.name,
+        drawOrder: currentWinnerCount + 1
+      });
+
+      // Notify winner and broadcast update
+      try {
+        await this.notificationService.notifyWinner(winner);
+        await this.notificationService.broadcastDrawUpdate(eventId, winner);
+      } catch (notificationError) {
+        // Log error but don't fail the draw
+        console.error('Notification failed:', notificationError);
+      }
+
+      return {
+        success: true,
+        winner
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error during draw'
+      };
+    }
   }
 
   /**
-   * Draw a single winner from the remaining participants
+   * Draw a single winner from the remaining participants (legacy method)
    */
   async drawWinner(eventId: string): Promise<DrawResult> {
     try {
       // Check if event exists and is in the correct state
-      const event = await this.eventRepository.findById(eventId);
+      const event = await this.eventService.findById(eventId);
       if (!event) {
         return {
           success: false,
@@ -152,11 +230,7 @@ export class LotteryService {
    */
   async getWinners(eventId: string): Promise<Winner[]> {
     try {
-      const winners = await prisma.winner.findMany({
-        where: { eventId },
-        orderBy: { drawOrder: 'asc' }
-      });
-      return winners;
+      return await this.winnerService.getWinnersByEvent(eventId);
     } catch (error) {
       throw new Error(`Failed to get winners: ${error}`);
     }
@@ -167,10 +241,7 @@ export class LotteryService {
    */
   async getWinnerCount(eventId: string): Promise<number> {
     try {
-      const count = await prisma.winner.count({
-        where: { eventId }
-      });
-      return count;
+      return await this.winnerService.getWinnerCount(eventId);
     } catch (error) {
       throw new Error(`Failed to get winner count: ${error}`);
     }
