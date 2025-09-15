@@ -31,3 +31,4 @@ junit.xml
 # Test databases
 test_*.db
 *.test.db
+.yarn
