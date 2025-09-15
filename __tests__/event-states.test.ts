@@ -24,6 +24,7 @@ describe('Event State Machine', () => {
   let eventRepository: jest.Mocked<EventRepository>;
   let participantService: jest.Mocked<ParticipantService>;
   let lotteryService: jest.Mocked<LotteryService>;
+  let mockEvent: any;
 
   beforeEach(() => {
     // Reset all mocks
@@ -37,6 +38,20 @@ describe('Event State Machine', () => {
     // Initialize services
     eventService = new EventService(eventRepository, participantService);
     eventStateMachine = new EventStateMachine(eventService, lotteryService);
+
+    // Initialize shared mock event
+    mockEvent = {
+      id: 'event-123',
+      name: 'Test Event',
+      createdBy: 'admin-123',
+      state: EventState.INIT,
+      registrationOpen: false,
+      closed: false,
+      qrCode: 'qr-code-data',
+      createdAt: new Date(),
+      participants: [],
+      winners: []
+    };
   });
 
   afterEach(() => {
@@ -126,22 +141,6 @@ describe('Event State Machine', () => {
   });
 
   describe('State Transitions', () => {
-    let mockEvent: any;
-
-    beforeEach(() => {
-      mockEvent = {
-        id: 'event-123',
-        name: 'Test Event',
-        createdBy: 'admin-123',
-        state: EventState.INIT,
-        registrationOpen: false,
-        closed: false,
-        qrCode: 'qr-code-data',
-        createdAt: new Date(),
-        participants: [],
-        winners: []
-      };
-    });
 
     describe('INIT → REGISTRATION Transition', () => {
       it('should transition from INIT to REGISTRATION state', async () => {
