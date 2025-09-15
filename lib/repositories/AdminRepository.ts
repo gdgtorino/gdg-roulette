@@ -26,10 +26,11 @@ export class AdminRepository {
     }
   }
 
-  async findByEmail(): Promise<Admin | null> {
+  async findByEmail(email: string): Promise<Admin | null> {
     try {
       // Note: Admin model in schema doesn't have email field,
       // but tests expect it. For now, return null as if no email-based lookup is supported
+      // In a real implementation, this would query by email field
       return null;
     } catch (error) {
       throw new Error(`Failed to find admin by email: ${error}`);

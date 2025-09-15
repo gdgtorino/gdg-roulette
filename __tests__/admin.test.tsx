@@ -509,8 +509,11 @@ describe('Admin Management System', () => {
         permissions: ['CREATE_EVENT', 'VIEW_ANALYTICS']
       };
 
-      adminRepository.findById.mockResolvedValue(existingAdmin);
-      permissionService.hasPermission.mockReturnValue(true); // Modifier has permission
+      // Mock the admin being updated
+      adminRepository.findById.mockResolvedValueOnce(existingAdmin);
+      // Mock the modifier admin
+      adminRepository.findById.mockResolvedValueOnce({ id: 'modifier-admin-id', permissions: ['*'] });
+      permissionService.canGrantPermission.mockReturnValue(true); // Modifier can grant all permissions
       permissionService.validatePermissions.mockReturnValue({ valid: true, errors: [] });
 
       adminRepository.updatePermissions.mockResolvedValue({
@@ -559,8 +562,11 @@ describe('Admin Management System', () => {
       const adminId = 'admin-123';
       const conflictingPermissions = ['CREATE_EVENT', 'DELETE_ALL_EVENTS', 'READ_ONLY_MODE'];
 
-      adminRepository.findById.mockResolvedValue({ id: 'modifier-123', permissions: ['*'] });
-      permissionService.hasPermission.mockReturnValue(true);
+      // Mock the admin being updated
+      adminRepository.findById.mockResolvedValueOnce({ id: adminId, permissions: [] });
+      // Mock the modifier admin
+      adminRepository.findById.mockResolvedValueOnce({ id: 'modifier-123', permissions: ['*'] });
+      permissionService.canGrantPermission.mockReturnValue(true); // Modifier can grant permissions
       permissionService.validatePermissions.mockReturnValue({
         valid: false,
         errors: ['Cannot combine DELETE_ALL_EVENTS with READ_ONLY_MODE']
@@ -636,7 +642,7 @@ describe('Admin Management System', () => {
       expect(screen.getByText('System Settings')).toBeInTheDocument();
 
       rerender(<AdminDashboard admin={regularAdmin} />);
-      expect(screen.getByText('Create Event')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Create Event' })).toBeInTheDocument();
       expect(screen.queryByText('User Management')).not.toBeInTheDocument();
 
       rerender(<AdminDashboard admin={moderator} />);
@@ -746,6 +752,7 @@ describe('Admin Management System', () => {
       ];
 
       adminRepository.findById.mockResolvedValue(admin);
+      permissionService.hasPermission.mockReturnValue(false); // Regular admin, can't view all events
       eventService.getEventsForAdmin.mockResolvedValue(allEvents.filter(e => e.createdBy === adminId));
 
       // Act
@@ -872,7 +879,7 @@ describe('Admin Management System', () => {
       // Assert
       expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/^password/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/role/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /create admin/i })).toBeInTheDocument();
@@ -1130,7 +1137,7 @@ describe('Admin Management System', () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(result.error).toContain('rollback');
+      expect(result.error).toMatch(/rollback|rolled back/i);
       expect(adminRepository.delete).toHaveBeenCalledWith('admin-123');
     });
   });

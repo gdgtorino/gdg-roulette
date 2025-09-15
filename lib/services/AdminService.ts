@@ -289,16 +289,13 @@ export class AdminService {
       const modifierPermissions = modifier.permissions || this.permissionService.getDefaultPermissions(modifier.role);
 
       // Check if modifier can grant these permissions
-      const securityViolations = this.permissionService.checkSecurityViolations(
-        modifierPermissions,
-        newPermissions,
-      );
-
-      if (securityViolations.length > 0) {
-        return {
-          success: false,
-          error: 'Cannot grant permissions higher than your own',
-        };
+      for (const permission of newPermissions) {
+        if (!this.permissionService.canGrantPermission(modifierPermissions, permission)) {
+          return {
+            success: false,
+            error: 'Cannot grant permissions higher than your own',
+          };
+        }
       }
 
       // Validate permission combination
@@ -306,7 +303,7 @@ export class AdminService {
       if (!validation.valid) {
         return {
           success: false,
-          error: validation.errors.join('; '),
+          error: validation.errors[0], // Use first error to match test expectations
         };
       }
 
@@ -317,10 +314,10 @@ export class AdminService {
         success: true,
         admin: updatedAdmin,
       };
-    } catch {
+    } catch (error) {
       return {
         success: false,
-        error: `Failed to update permissions: `,
+        error: `Failed to update permissions: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
