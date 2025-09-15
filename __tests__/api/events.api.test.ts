@@ -19,7 +19,10 @@ import {
   DELETE as deleteEventHandler,
   setTestServices as setEventTestServices,
 } from '../../app/api/events/[eventId]/route';
-import { POST as executeDrawHandler } from '../../app/api/draws/[eventId]/execute/route';
+import {
+  POST as executeDrawHandler,
+  setTestServices as setDrawTestServices
+} from '../../app/api/draws/[eventId]/execute/route';
 import { EventService } from '../../lib/services/EventService';
 import { LotteryService } from '../../lib/services/LotteryService';
 import { AuthService } from '../../lib/services/AuthService';
@@ -34,6 +37,8 @@ const mockEventService = {
   update: jest.fn(),
   delete: jest.fn(),
   getEventsForAdmin: jest.fn(),
+  getEventsByState: jest.fn(),
+  getEventDetails: jest.fn(),
   createEvent: jest.fn(),
   updateEvent: jest.fn(),
   deleteEvent: jest.fn(),
@@ -42,6 +47,7 @@ const mockEventService = {
 const mockLotteryService = {
   drawSingleWinner: jest.fn(),
   drawAllRemainingParticipants: jest.fn(),
+  drawAllRemaining: jest.fn(),
   getDrawResults: jest.fn(),
 };
 
@@ -65,6 +71,11 @@ describe('/api/events/* API Routes', () => {
 
     setEventTestServices({
       eventService: mockEventService as any,
+      authService: mockAuthService as any,
+    });
+
+    setDrawTestServices({
+      lotteryService: mockLotteryService as any,
       authService: mockAuthService as any,
     });
   });
@@ -116,14 +127,12 @@ describe('/api/events/* API Routes', () => {
         events: mockEvents,
       });
 
-      const request = new NextRequest(
-        new Request('http://localhost/api/events', {
-          method: 'GET',
-          headers: {
-            Cookie: 'sessionToken=session-token-123',
-          },
-        }),
-      );
+      const request = new NextRequest('http://localhost/api/events', {
+        method: 'GET',
+        headers: {
+          Cookie: 'sessionToken=session-token-123',
+        },
+      });
 
       // Act
       const response = await getEventsHandler(request);
@@ -645,6 +654,7 @@ describe('/api/events/* API Routes', () => {
         method: 'DELETE',
         headers: {
           Cookie: 'sessionToken=session-token-123',
+          'X-Confirm-Delete': 'true',
         },
       });
 
@@ -678,6 +688,7 @@ describe('/api/events/* API Routes', () => {
         method: 'DELETE',
         headers: {
           Cookie: 'sessionToken=session-token-123',
+          'X-Confirm-Delete': 'true',
         },
       });
 
