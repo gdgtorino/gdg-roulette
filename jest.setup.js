@@ -50,14 +50,16 @@ jest.mock('next/navigation', () => ({
 }))
 
 // Mock Next.js Image component
-const React = require('react');
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props) => {
-    // eslint-disable-next-line @next/next/no-img-element
-    return React.createElement('img', props)
-  },
-}))
+jest.mock('next/image', () => {
+  const mockReact = require('react');
+  return {
+    __esModule: true,
+    default: (props) => {
+      // eslint-disable-next-line @next/next/no-img-element
+      return mockReact.createElement('img', props)
+    },
+  }
+})
 
 // Mock environment variables
 process.env = {

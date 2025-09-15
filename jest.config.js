@@ -1,6 +1,5 @@
-// Use pure ts-jest configuration to handle JSX in .ts test files
+// Use Babel to handle JSX in .ts test files
 module.exports = {
-  preset: 'ts-jest',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
@@ -37,12 +36,16 @@ module.exports = {
     },
   },
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: {
-        jsx: 'react-jsx',
-        esModuleInterop: true,
-        allowSyntheticDefaultImports: true,
-      },
+    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+        ['@babel/preset-typescript', {
+          allowDeclareFields: true,
+          isTSX: true,
+          allExtensions: true
+        }],
+        ['@babel/preset-react', { runtime: 'automatic' }],
+      ],
     }],
   },
   transformIgnorePatterns: [
