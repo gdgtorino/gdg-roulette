@@ -3,6 +3,10 @@ export interface Admin {
   username: string;
   password: string;
   createdAt: Date;
+  email?: string;
+  role?: string;
+  permissions?: string[];
+  isActive?: boolean;
 }
 
 export interface Event {
@@ -14,6 +18,9 @@ export interface Event {
   registrationOpen: boolean;
   closed: boolean;
   qrCode: string;
+  state?: string;
+  participants?: Participant[];
+  winners?: Winner[];
 }
 
 export interface Participant {

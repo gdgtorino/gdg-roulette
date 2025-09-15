@@ -72,8 +72,10 @@ export class AuthService {
 
       // Check for existing sessions and destroy them (prevent concurrent sessions)
       const existingSessions = await this.sessionManager.getActiveSessionsForAdmin(admin.id);
-      for (const sessionToken of existingSessions) {
-        await this.sessionManager.destroySession(sessionToken);
+      if (Array.isArray(existingSessions)) {
+        for (const sessionToken of existingSessions) {
+          await this.sessionManager.destroySession(sessionToken);
+        }
       }
 
       // Create new session
@@ -190,10 +192,10 @@ export class AuthService {
 
       // Validate new password complexity
       const validation = this.passwordService.validateComplexity(newPassword);
-      if (!validation.valid) {
+      if (!validation || !validation.valid) {
         return {
           success: false,
-          error: validation.errors.join('; ')
+          error: validation?.errors?.join('; ') || 'Invalid password complexity'
         };
       }
 
