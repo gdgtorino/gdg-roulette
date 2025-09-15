@@ -164,7 +164,8 @@ export class PasswordService {
     }
 
     // Check if any character appears more than 3 times
-    for (const count of charCount.values()) {
+    const counts = Array.from(charCount.values());
+    for (const count of counts) {
       if (count > 3) {
         return true;
       }
