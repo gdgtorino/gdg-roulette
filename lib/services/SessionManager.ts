@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import { JWTPayload } from '../types';
 
 const prisma = new PrismaClient();
 
@@ -70,7 +71,7 @@ export class SessionManager {
   async validateSession(token: string): Promise<SessionData | null> {
     try {
       // Verify JWT token
-      const decoded = jwt.verify(token, this.jwtSecret) as any;
+      const decoded = jwt.verify(token, this.jwtSecret) as JWTPayload;
 
       if (!decoded.sessionId || !decoded.adminId) {
         return null;
@@ -228,7 +229,7 @@ export class SessionManager {
       });
 
       // Create new JWT token with extended expiration
-      const decoded = jwt.verify(token, this.jwtSecret) as any;
+      const decoded = jwt.verify(token, this.jwtSecret) as JWTPayload;
       const newToken = jwt.sign(
         {
           sessionId: session.id,

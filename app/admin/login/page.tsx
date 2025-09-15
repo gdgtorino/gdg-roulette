@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
         setError('Invalid response format');
         setLoading(false);
       }
-    } catch (err) {
+    } catch {
       setError('Network connection lost');
       setLoading(false);
     }

@@ -38,7 +38,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       } else {
         sessionToken = undefined;
       }
-    } catch (headerError) {
+    } catch {
       sessionToken = undefined;
     }
 
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     let body;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch {
       return NextResponse.json({
         success: false,
         error: 'Invalid JSON format'

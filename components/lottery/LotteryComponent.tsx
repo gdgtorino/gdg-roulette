@@ -116,7 +116,7 @@ export function LotteryComponent({
         }, 2000);
       }
     }, animationDuration);
-  }, [drawComplete, winners, maxWinners, remainingParticipants, onDrawComplete, onWinnerSelected]);
+  }, [drawComplete, winners, maxWinners, remainingParticipants, onDrawComplete, onWinnerSelected, event.id]);
 
   const resetDraw = () => {
     setWinners([]);

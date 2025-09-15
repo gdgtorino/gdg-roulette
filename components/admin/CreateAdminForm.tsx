@@ -83,12 +83,6 @@ export function CreateAdminForm({
   const [submitError, setSubmitError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Use currentAdmin or creatorAdmin for permissions
-  const admin = currentAdmin || creatorAdmin;
-
-  // Check if user has permission to create admin accounts
-  const hasPermission = admin?.permissions?.includes('MANAGE_USERS') || admin?.permissions?.includes('*') || false;
-
   // Check if current user has permissions to create admins
   const adminToCheck = currentAdmin || creatorAdmin;
   const hasManageUsersPermission = adminToCheck?.permissions?.includes('MANAGE_USERS') ?? false;

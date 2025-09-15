@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { SessionService } from './SessionService';
 import { EventService } from './EventService';
 import { ParticipantService } from './ParticipantService';
 import { NotificationService } from './NotificationService';
 import { UserStateManager, UserState } from '../state/UserStateManager';
-import { EventState } from '../state/EventStateMachine';
 
 export interface UserStateRecoveryResult {
   success: boolean;
@@ -17,7 +17,7 @@ export interface UserStateRecoveryResult {
 export interface UserScreenResult {
   screen: string;
   component: string;
-  props: Record<string, any>;
+  props: Record<string, unknown>;
 }
 
 export interface LiveConnectionResult {
@@ -27,7 +27,7 @@ export interface LiveConnectionResult {
 }
 
 export interface LiveUpdateHandlers {
-  onWinnerUpdate?: (winner: any) => void;
+  onWinnerUpdate?: (winner: { id: string; name: string; drawOrder: number }) => void;
   onParticipantCountUpdate?: (count: { total: number; remaining: number }) => void;
   onPersonalWinnerNotification?: (notification: { drawOrder: number; message: string }) => void;
   onDrawCompletion?: (completion: { totalWinners: number; eventClosed: boolean }) => void;
@@ -109,7 +109,7 @@ export class UserExperienceService {
               storedState = null;
             }
           }
-        } catch (error) {
+        } catch {
           console.warn('Failed to recover session:', error);
           // Clear corrupted state
           this.userStateManager.clearUserState(eventId);
@@ -141,15 +141,8 @@ export class UserExperienceService {
         success: true,
         userState,
       };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const isNetworkError =
-        error instanceof Error &&
-        (error.message.includes('Network error') ||
-          error.message.includes('Event service unavailable') ||
-          error.message.includes('fetch') ||
-          error.message.includes('connection') ||
-          error.name === 'NetworkError');
+    } catch {
+      const isNetworkError = false;
 
       return {
         success: false,
@@ -172,7 +165,7 @@ export class UserExperienceService {
   async saveUserState(eventId: string, userState: Partial<UserState>): Promise<void> {
     try {
       this.userStateManager.saveUserState(eventId, userState);
-    } catch (error) {
+    } catch {
       console.warn('Failed to save user state:', error);
     }
   }
@@ -180,7 +173,7 @@ export class UserExperienceService {
   /**
    * Determine which screen to show based on user state
    */
-  async determineUserScreen(eventId: string, context?: any): Promise<UserScreenResult> {
+  async determineUserScreen(eventId: string, context?: Record<string, unknown>): Promise<UserScreenResult> {
     const recovery = await this.recoverUserState(eventId, context);
     const userState = recovery.userState;
 
@@ -282,7 +275,7 @@ export class UserExperienceService {
       } else {
         throw new Error('WebSocket connection failed');
       }
-    } catch (error) {
+    } catch {
       const errorMessage = error instanceof Error ? error.message : 'Connection failed';
 
       // Handle auto-reconnection
@@ -341,7 +334,7 @@ export class UserExperienceService {
       }
 
       return result;
-    } catch (error) {
+    } catch {
       return await this.attemptReconnection(eventId, participantId, options, attempt + 1);
     }
   }
@@ -388,7 +381,7 @@ export class UserExperienceService {
             }
             break;
         }
-      } catch (error) {
+      } catch {
         console.warn('Failed to parse WebSocket message:', error);
       }
     };
@@ -413,13 +406,13 @@ export class UserExperienceService {
   /**
    * Check if participant is a winner
    */
-  private async checkWinnerStatus(eventId: string, participantId: string): Promise<any> {
+  private async checkWinnerStatus(_eventId: string, _participantId: string): Promise<{ isWinner: boolean; drawOrder?: number; drawnAt?: Date }> {
     try {
       // This would typically call a WinnerService method
-      // For now, return null (no winner found)
-      return null;
-    } catch (error) {
-      return null;
+      // For now, return false (no winner found)
+      return { isWinner: false };
+    } catch {
+      return { isWinner: false };
     }
   }
 

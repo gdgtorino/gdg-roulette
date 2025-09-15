@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { requireAdmin } from '@/lib/auth/session';
-import { validateRequest } from '@/lib/api/validation';
-import { getEvent, updateEvent, deleteEvent } from '@/lib/events/mutations';
 import { EventService } from '../../../../lib/services/EventService';
 import { AuthService } from '../../../../lib/services/AuthService';
 
-const updateEventSchema = z.object({
-  name: z.string().min(1).optional(),
-  description: z.string().optional(),
-  maxParticipants: z.number().int().positive().optional(),
-  prizePool: z.number().positive().optional(),
-  status: z.enum(['draft', 'registration', 'drawing', 'completed']).optional(),
-});
+// const updateEventSchema = z.object({
+//   name: z.string().min(1).optional(),
+//   description: z.string().optional(),
+//   maxParticipants: z.number().int().positive().optional(),
+//   prizePool: z.number().positive().optional(),
+//   status: z.enum(['draft', 'registration', 'drawing', 'completed']).optional(),
+// });
 
 // Global service instances that can be overridden in tests
 export let eventService: EventService;
@@ -50,7 +46,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       } else {
         sessionToken = undefined;
       }
-    } catch (headerError) {
+    } catch {
       sessionToken = undefined;
     }
 
@@ -104,7 +100,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       } else {
         sessionToken = undefined;
       }
-    } catch (headerError) {
+    } catch {
       sessionToken = undefined;
     }
 
@@ -124,7 +120,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     let body;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch {
       return NextResponse.json({
         success: false,
         error: 'Invalid JSON format'
@@ -171,7 +167,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       } else {
         sessionToken = undefined;
       }
-    } catch (headerError) {
+    } catch {
       sessionToken = undefined;
     }
 
@@ -195,7 +191,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       } else {
         confirmationHeader = null;
       }
-    } catch (headerError) {
+    } catch {
       confirmationHeader = null;
     }
 

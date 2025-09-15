@@ -218,7 +218,7 @@ export class PermissionService {
    */
   createPermissionMask(userPermissions: Permission[]): Record<Permission, boolean> {
     const allPermissions = this.getAllValidPermissions();
-    const mask: Record<Permission, boolean> = {} as any;
+    const mask: Record<Permission, boolean> = {} as Record<Permission, boolean>;
 
     for (const permission of allPermissions) {
       mask[permission] = this.hasPermission(userPermissions, permission);

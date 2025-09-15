@@ -147,7 +147,7 @@ export class RegistrationService {
           },
           sessionId,
         };
-      } catch (sessionError) {
+      } catch {
         // Handle session creation failure
         if (options?.rollbackOnSessionFailure) {
           // Rollback participant creation

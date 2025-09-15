@@ -166,7 +166,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       try {
         const authServiceResult = await authService.login(username, password);
         loginResult = authServiceResult;
-      } catch (error) {
+      } catch {
         // If auth service fails, keep the default failed result
       }
     }
@@ -236,42 +236,9 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       );
 
       addSecurityHeaders(response);
-      addCorsHeaders(response, request);
+      addCorsHeaders(response);
       return response;
-    } catch (authError: unknown) {
-      // Handle service failures
-      if (
-        (authError as Error)?.message?.includes('service error') ||
-        (authError as Error)?.message?.includes('Database connection')
-      ) {
-        const response = NextResponse.json(
-          {
-            success: false,
-            error: 'Internal server error',
-            errorCode: 'SERVICE_ERROR',
-            timestamp: new Date().toISOString(),
-          },
-          { status: 500 },
-        );
-
-        addSecurityHeaders(response);
-        return response;
-      }
-
-      const response = NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid credentials',
-          errorCode: 'AUTH_FAILED',
-          timestamp: new Date().toISOString(),
-        },
-        { status: 401 },
-      );
-
-      addSecurityHeaders(response);
-      return response;
-    }
-  } catch (error) {
+  } catch {
     const response = NextResponse.json(
       {
         success: false,

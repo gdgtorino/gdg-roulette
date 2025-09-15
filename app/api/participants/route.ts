@@ -226,7 +226,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         eventId: string;
         registeredAt?: Date;
         qrCode?: string;
-        [key: string]: any;
+        [key: string]: unknown;
       };
       timestamp: Date;
       sessionToken?: string;
@@ -279,7 +279,7 @@ async function handleTestMode(
   body: {
     eventId?: string;
     name?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   },
   request?: NextRequest,
 ): Promise<NextResponse> {
@@ -558,7 +558,7 @@ async function handleTestMode(
         eventId: string;
         registeredAt?: Date;
         qrCode?: string;
-        [key: string]: any;
+        [key: string]: unknown;
       };
       timestamp: Date;
       sessionToken?: string;

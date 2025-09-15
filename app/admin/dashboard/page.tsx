@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Event {
@@ -25,9 +25,9 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     fetchAdminData();
     fetchEvents();
-  }, []);
+  }, [fetchAdminData]);
 
-  const fetchAdminData = async () => {
+  const fetchAdminData = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/profile');
       if (response.ok) {
@@ -36,12 +36,12 @@ export default function AdminDashboardPage() {
       } else {
         router.push('/admin/login');
       }
-    } catch (error) {
-      console.error('Failed to fetch admin data:', error);
+    } catch {
+      console.error('Failed to fetch admin data');
       router.push('/admin/login');
     }
     setLoading(false);
-  };
+  }, [router]);
 
   const fetchEvents = async () => {
     try {
@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
         const data = await response.json();
         setMessage({ type: 'error', text: data.message || 'Failed to create event' });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to create event' });
     }
   };
@@ -108,7 +108,7 @@ export default function AdminDashboardPage() {
         const data = await response.json();
         setMessage({ type: 'error', text: data.message || 'Operation failed' });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Operation failed' });
     }
   };
@@ -122,14 +122,13 @@ export default function AdminDashboardPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
         setMessage({ type: 'success', text: `Winner${drawAll ? 's' : ''} drawn successfully` });
         fetchEvents();
       } else {
         const data = await response.json();
         setMessage({ type: 'error', text: data.message || 'No participants available for drawing' });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Draw failed' });
     }
   };

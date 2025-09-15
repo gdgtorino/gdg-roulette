@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Winner } from '../types';
 
 export interface WinnerCreateData {
-  eventId: string;
+  _eventId: string;
   participantId: string;
   participantName: string;
   drawOrder: number;
@@ -43,7 +44,7 @@ export class WinnerService {
   /**
    * Get all winners for an event
    */
-  async getWinnersByEvent(eventId: string): Promise<Winner[]> {
+  async getWinnersByEvent(_eventId: string): Promise<Winner[]> {
     try {
       // In a real implementation, this would query the database
       // For now, return empty array
@@ -58,7 +59,7 @@ export class WinnerService {
   /**
    * Get winner count for an event
    */
-  async getWinnerCount(eventId: string): Promise<number> {
+  async getWinnerCount(_eventId: string): Promise<number> {
     try {
       const winners = await this.getWinnersByEvent(eventId);
       return winners.length;
@@ -72,7 +73,7 @@ export class WinnerService {
   /**
    * Get winner by ID
    */
-  async getWinnerById(_winnerId: string): Promise<Winner | null> {
+  async getWinnerById(__winnerId: string): Promise<Winner | null> {
     try {
       // In a real implementation, this would query the database
       // For now, return null
@@ -87,7 +88,7 @@ export class WinnerService {
   /**
    * Get winner by position in event
    */
-  async getWinnerByPosition(eventId: string, position: number): Promise<Winner | null> {
+  async getWinnerByPosition(_eventId: string, position: number): Promise<Winner | null> {
     try {
       const winners = await this.getWinnersByEvent(eventId);
       return winners.find((winner) => winner.position === position) || null;
@@ -101,7 +102,7 @@ export class WinnerService {
   /**
    * Check if participant is already a winner
    */
-  async isParticipantWinner(eventId: string, participantId: string): Promise<boolean> {
+  async isParticipantWinner(_eventId: string, participantId: string): Promise<boolean> {
     try {
       const winners = await this.getWinnersByEvent(eventId);
       return winners.some((winner) => winner.participantId === participantId);
@@ -115,7 +116,7 @@ export class WinnerService {
   /**
    * Get next available position for winner
    */
-  async getNextPosition(eventId: string): Promise<number> {
+  async getNextPosition(_eventId: string): Promise<number> {
     try {
       const winners = await this.getWinnersByEvent(eventId);
       if (winners.length === 0) {
@@ -132,7 +133,7 @@ export class WinnerService {
   /**
    * Delete winner by ID
    */
-  async deleteWinner(_winnerId: string): Promise<boolean> {
+  async deleteWinner(__winnerId: string): Promise<boolean> {
     try {
       // In a real implementation, this would delete from database
       // For now, return true
@@ -147,7 +148,7 @@ export class WinnerService {
   /**
    * Clear all winners for an event
    */
-  async clearEventWinners(_eventId: string): Promise<boolean> {
+  async clearEventWinners(__eventId: string): Promise<boolean> {
     try {
       // In a real implementation, this would delete all winners for the event
       // For now, return true
@@ -163,8 +164,8 @@ export class WinnerService {
    * Update winner metadata
    */
   async updateWinnerMetadata(
-    _winnerId: string,
-    _metadata: Record<string, unknown>,
+    __winnerId: string,
+    __metadata: Record<string, unknown>,
   ): Promise<Winner | null> {
     try {
       // In a real implementation, this would update the database

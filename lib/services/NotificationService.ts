@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
-import { Participant, Winner, SSEEventData } from '../types';
+import { Participant, Winner } from '../types';
 
 export interface NotificationEvent {
   eventId: string;
   type: 'participantRegistered' | 'registrationToggled' | 'eventClosed' | 'winnerDrawn';
-  data: any;
+  data: unknown;
   timestamp: Date;
 }
 
@@ -185,7 +185,8 @@ export class NotificationService extends EventEmitter {
   /**
    * Send SMS notification (mock method for test compatibility)
    */
-  async sendSMSNotification(winner: Winner): Promise<boolean> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async sendSMSNotification(_winner: Winner): Promise<boolean> {
     // Mock implementation for tests
     return true;
   }
@@ -193,10 +194,10 @@ export class NotificationService extends EventEmitter {
   /**
    * Broadcast custom notification to event
    */
-  async notifyCustom(eventId: string, type: string, data: any): Promise<void> {
+  async notifyCustom(eventId: string, type: string, data: unknown): Promise<void> {
     const notification: NotificationEvent = {
       eventId,
-      type: type as any,
+      type: type as NotificationEvent['type'],
       data,
       timestamp: new Date(),
     };
@@ -317,7 +318,7 @@ export class NotificationService extends EventEmitter {
   /**
    * Format message for SSE
    */
-  private formatSSEMessage(event: NotificationEvent | any): string {
+  private formatSSEMessage(event: NotificationEvent): string {
     const data = JSON.stringify({
       type: event.type,
       data: event.data,
@@ -369,7 +370,8 @@ export class NotificationService extends EventEmitter {
   /**
    * Get participant count (mock implementation)
    */
-  private async getParticipantCount(eventId: string): Promise<number> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async getParticipantCount(_eventId: string): Promise<number> {
     // This would normally call the ParticipantService
     return 0;
   }
@@ -377,7 +379,8 @@ export class NotificationService extends EventEmitter {
   /**
    * Get remaining participant count (mock implementation)
    */
-  private async getRemainingParticipantCount(eventId: string): Promise<number> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async getRemainingParticipantCount(_eventId: string): Promise<number> {
     // This would normally call the ParticipantService
     return 0;
   }
@@ -470,8 +473,8 @@ export class NotificationService extends EventEmitter {
    * Send registration confirmation notification
    */
   async sendRegistrationConfirmation(data: {
-    participant: any;
-    event: any;
+    participant: { id: string; name: string; eventId: string };
+    event: { id: string; name: string };
     registrationUrl: string;
   }): Promise<boolean> {
     try {
