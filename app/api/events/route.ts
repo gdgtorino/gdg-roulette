@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth/session';
 import { validateRequest } from '@/lib/api/validation';
 import { createEvent, getEvents } from '@/lib/events/mutations';
+import { EventService } from '../../../lib/services/EventService';
+import { AuthService } from '../../../lib/services/AuthService';
 
 const createEventSchema = z.object({
   name: z.string().min(1, 'Event name is required'),
@@ -11,6 +13,23 @@ const createEventSchema = z.object({
   prizePool: z.number().positive().optional(),
   scheduledStart: z.string().datetime().optional(),
 });
+
+// Global service instances that can be overridden in tests
+export let eventService: EventService;
+export let authService: AuthService;
+
+// Initialize services
+eventService = new EventService();
+authService = new AuthService();
+
+// Function to set test services
+export function setTestServices(services: {
+  eventService?: EventService;
+  authService?: AuthService;
+}) {
+  if (services.eventService) eventService = services.eventService;
+  if (services.authService) authService = services.authService;
+}
 
 export async function GET() {
   try {
