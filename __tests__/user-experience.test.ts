@@ -22,39 +22,56 @@ import { WaitingScreen } from '../components/WaitingScreen';
 import { LotteryScreen } from '../components/LotteryScreen';
 import { ResultScreen } from '../components/ResultScreen';
 
-// Mock dependencies
-jest.mock('../lib/services/SessionService');
-jest.mock('../lib/services/EventService');
-jest.mock('../lib/services/ParticipantService');
-jest.mock('../lib/services/NotificationService');
-jest.mock('../lib/state/UserStateManager');
+// Mock services
+const mockSessionService = {
+  validateSession: jest.fn(),
+  createUserSession: jest.fn(),
+  extendSession: jest.fn(),
+  invalidateSession: jest.fn()
+};
+
+const mockEventService = {
+  findById: jest.fn(),
+  create: jest.fn(),
+  updateState: jest.fn(),
+  findAll: jest.fn()
+};
+
+const mockParticipantService = {
+  findById: jest.fn(),
+  findByEventAndName: jest.fn(),
+  create: jest.fn(),
+  findByEventId: jest.fn()
+};
+
+const mockNotificationService = {
+  connectToLiveUpdates: jest.fn(),
+  sendNotification: jest.fn(),
+  subscribeToEvents: jest.fn(),
+  disconnect: jest.fn()
+};
+
+const mockUserStateManager = {
+  determineUserState: jest.fn(),
+  recoverUserState: jest.fn(),
+  persistUserState: jest.fn(),
+  clearUserState: jest.fn()
+};
 
 describe('User Experience System', () => {
   let userExperienceService: UserExperienceService;
-  let sessionService: jest.Mocked<SessionService>;
-  let eventService: jest.Mocked<EventService>;
-  let participantService: jest.Mocked<ParticipantService>;
-  let notificationService: jest.Mocked<NotificationService>;
-  let userStateManager: jest.Mocked<UserStateManager>;
 
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
 
-    // Create mocked instances
-    sessionService = new SessionService() as jest.Mocked<SessionService>;
-    eventService = new EventService() as jest.Mocked<EventService>;
-    participantService = new ParticipantService() as jest.Mocked<ParticipantService>;
-    notificationService = new NotificationService() as jest.Mocked<NotificationService>;
-    userStateManager = new UserStateManager() as jest.Mocked<UserStateManager>;
-
     // Initialize user experience service
     userExperienceService = new UserExperienceService(
-      sessionService,
-      eventService,
-      participantService,
-      notificationService,
-      userStateManager
+      mockSessionService as any,
+      mockEventService as any,
+      mockParticipantService as any,
+      mockNotificationService as any,
+      mockUserStateManager as any
     );
 
     // Mock browser localStorage
@@ -91,8 +108,8 @@ describe('User Experience System', () => {
       };
 
       (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(storedState));
-      eventService.findById.mockResolvedValue(mockEvent);
-      userStateManager.determineUserState.mockResolvedValue({
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'UNREGISTERED',
         screen: 'REGISTRATION',
         event: mockEvent
@@ -106,7 +123,7 @@ describe('User Experience System', () => {
       expect(result.userState.status).toBe('UNREGISTERED');
       expect(result.userState.screen).toBe('REGISTRATION');
       expect(result.userState.event).toEqual(mockEvent);
-      expect(eventService.findById).toHaveBeenCalledWith(eventId);
+      expect(mockEventService.findById).toHaveBeenCalledWith(eventId);
     });
 
     it('should recover registered user state with session validation', async () => {
@@ -145,10 +162,10 @@ describe('User Experience System', () => {
       };
 
       (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(storedState));
-      sessionService.validateSession.mockResolvedValue(mockSession);
-      participantService.findById.mockResolvedValue(mockParticipant);
-      eventService.findById.mockResolvedValue(mockEvent);
-      userStateManager.determineUserState.mockResolvedValue({
+      mockSessionService.validateSession.mockResolvedValue(mockSession);
+      mockParticipantService.findById.mockResolvedValue(mockParticipant);
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'REGISTERED',
         screen: 'WAITING',
         event: mockEvent,
@@ -165,7 +182,7 @@ describe('User Experience System', () => {
       expect(result.userState.screen).toBe('WAITING');
       expect(result.userState.participant).toEqual(mockParticipant);
       expect(result.userState.session).toEqual(mockSession);
-      expect(sessionService.validateSession).toHaveBeenCalledWith(sessionId);
+      expect(mockSessionService.validateSession).toHaveBeenCalledWith(sessionId);
     });
 
     it('should handle expired session recovery gracefully', async () => {
@@ -189,9 +206,9 @@ describe('User Experience System', () => {
       };
 
       (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(storedState));
-      sessionService.validateSession.mockResolvedValue(null); // Session expired
-      eventService.findById.mockResolvedValue(mockEvent);
-      userStateManager.determineUserState.mockResolvedValue({
+      mockSessionService.validateSession.mockResolvedValue(null); // Session expired
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'UNREGISTERED',
         screen: 'REGISTRATION',
         event: mockEvent,
@@ -259,8 +276,8 @@ describe('User Experience System', () => {
 
       // Simulate corrupted localStorage data
       (window.localStorage.getItem as jest.Mock).mockReturnValue('invalid-json-data');
-      eventService.findById.mockResolvedValue(mockEvent);
-      userStateManager.determineUserState.mockResolvedValue({
+      mockEventService.findById.mockResolvedValue(mockEvent);
+      mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'UNREGISTERED',
         screen: 'REGISTRATION',
         event: mockEvent
@@ -296,7 +313,7 @@ describe('User Experience System', () => {
       };
 
       (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(storedState));
-      sessionService.validateSession.mockResolvedValue(mockSession);
+      mockSessionService.validateSession.mockResolvedValue(mockSession);
 
       // Act - Simulate multiple recoveries (page refreshes)
       for (let i = 0; i < 5; i++) {
@@ -306,7 +323,7 @@ describe('User Experience System', () => {
       }
 
       // Assert
-      expect(sessionService.validateSession).toHaveBeenCalledTimes(5);
+      expect(mockSessionService.validateSession).toHaveBeenCalledTimes(5);
     });
   });
 
@@ -322,7 +339,7 @@ describe('User Experience System', () => {
         closed: false
       };
 
-      userStateManager.determineUserState.mockResolvedValue({
+      mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'UNREGISTERED',
         screen: 'REGISTRATION',
         event: mockEvent
@@ -354,7 +371,7 @@ describe('User Experience System', () => {
         eventId
       };
 
-      userStateManager.determineUserState.mockResolvedValue({
+      mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'REGISTERED',
         screen: 'WAITING',
         event: mockEvent,
@@ -391,7 +408,7 @@ describe('User Experience System', () => {
         eventId
       };
 
-      userStateManager.determineUserState.mockResolvedValue({
+      mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'REGISTERED',
         screen: 'LOTTERY_LIVE',
         event: mockEvent,
@@ -436,7 +453,7 @@ describe('User Experience System', () => {
         drawnAt: new Date()
       };
 
-      userStateManager.determineUserState.mockResolvedValue({
+      mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'WINNER',
         screen: 'WINNER_RESULT',
         event: mockEvent,
@@ -474,7 +491,7 @@ describe('User Experience System', () => {
         eventId
       };
 
-      userStateManager.determineUserState.mockResolvedValue({
+      mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'NOT_WINNER',
         screen: 'NOT_WINNER_RESULT',
         event: mockEvent,
@@ -497,7 +514,7 @@ describe('User Experience System', () => {
       // Arrange
       const eventId = 'nonexistent-event';
 
-      userStateManager.determineUserState.mockResolvedValue({
+      mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'ERROR',
         screen: 'ERROR',
         error: 'Event not found'
@@ -523,7 +540,7 @@ describe('User Experience System', () => {
         closed: true
       };
 
-      userStateManager.determineUserState.mockResolvedValue({
+      mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'EVENT_CLOSED',
         screen: 'EVENT_CLOSED',
         event: mockEvent
@@ -555,7 +572,7 @@ describe('User Experience System', () => {
       };
 
       (global as any).WebSocket = jest.fn().mockImplementation(() => mockWebSocket);
-      notificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
+      mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
 
       // Act
       const connection = await userExperienceService.connectToLiveUpdates(eventId, participantId);
@@ -563,7 +580,7 @@ describe('User Experience System', () => {
       // Assert
       expect(connection.connected).toBe(true);
       expect(connection.socket).toBe(mockWebSocket);
-      expect(notificationService.connectToLiveUpdates).toHaveBeenCalledWith(eventId, participantId);
+      expect(mockNotificationService.connectToLiveUpdates).toHaveBeenCalledWith(eventId, participantId);
     });
 
     it('should handle winner announcement updates', async () => {
@@ -580,7 +597,7 @@ describe('User Experience System', () => {
         readyState: WebSocket.OPEN
       };
 
-      notificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
+      mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
 
       const winnerUpdate = {
         type: 'WINNER_ANNOUNCED',
@@ -622,7 +639,7 @@ describe('User Experience System', () => {
         readyState: WebSocket.OPEN
       };
 
-      notificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
+      mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
 
       const participantUpdate = {
         type: 'PARTICIPANT_COUNT_UPDATE',
@@ -664,7 +681,7 @@ describe('User Experience System', () => {
         readyState: WebSocket.OPEN
       };
 
-      notificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
+      mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
 
       const personalWinUpdate = {
         type: 'YOU_ARE_WINNER',
@@ -710,7 +727,7 @@ describe('User Experience System', () => {
         readyState: WebSocket.OPEN
       };
 
-      notificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
+      mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
 
       const drawCompleteUpdate = {
         type: 'DRAW_COMPLETED',
@@ -748,7 +765,7 @@ describe('User Experience System', () => {
       const eventId = 'event-123';
       const participantId = 'participant-456';
 
-      notificationService.connectToLiveUpdates.mockRejectedValue(
+      mockNotificationService.connectToLiveUpdates.mockRejectedValue(
         new Error('WebSocket connection failed')
       );
 
@@ -773,7 +790,7 @@ describe('User Experience System', () => {
       const participantId = 'participant-456';
 
       let connectionAttempts = 0;
-      notificationService.connectToLiveUpdates.mockImplementation(() => {
+      mockNotificationService.connectToLiveUpdates.mockImplementation(() => {
         connectionAttempts++;
         if (connectionAttempts <= 2) {
           return Promise.reject(new Error('Connection failed'));
@@ -1283,7 +1300,7 @@ describe('User Experience System', () => {
       // Arrange
       const eventId = 'event-123';
 
-      eventService.findById.mockRejectedValue(new Error('Event service unavailable'));
+      mockEventService.findById.mockRejectedValue(new Error('Event service unavailable'));
 
       // Act
       const result = await userExperienceService.recoverUserState(eventId);
@@ -1310,7 +1327,7 @@ describe('User Experience System', () => {
         readyState: WebSocket.CLOSED
       };
 
-      notificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
+      mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
 
       const disconnectionHandler = jest.fn();
 
@@ -1361,8 +1378,8 @@ describe('User Experience System', () => {
       const eventId = 'event-123';
       const expiredSessionId = 'expired-session';
 
-      sessionService.validateSession.mockResolvedValue(null);
-      eventService.findById.mockResolvedValue({
+      mockSessionService.validateSession.mockResolvedValue(null);
+      mockEventService.findById.mockResolvedValue({
         id: eventId,
         name: 'Test Event',
         state: EventState.DRAW
@@ -1384,7 +1401,7 @@ describe('User Experience System', () => {
       // Arrange
       const eventId = 'event-123';
 
-      eventService.findById.mockRejectedValue(new Error('Network error'));
+      mockEventService.findById.mockRejectedValue(new Error('Network error'));
 
       // Act
       const result = await userExperienceService.recoverUserState(eventId);

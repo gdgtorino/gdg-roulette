@@ -22,7 +22,8 @@ const mockParticipantService = {
   findByEventAndName: jest.fn(),
   findById: jest.fn(),
   create: jest.fn(),
-  findByEventId: jest.fn()
+  findByEventId: jest.fn(),
+  delete: jest.fn()
 };
 
 const mockEventService = {
@@ -57,6 +58,9 @@ describe('User Registration System', () => {
       mockEventService as any,
       mockSessionService as any
     );
+
+    // Inject QRCodeService for QR code related tests
+    (registrationService as any).qrCodeService = mockQRCodeService;
   });
 
   afterEach(() => {
@@ -280,8 +284,18 @@ describe('User Registration System', () => {
         closed: false
       };
 
+      const mockParticipant = {
+        id: 'participant-123',
+        eventId,
+        name: userName,
+        registeredAt: new Date(),
+        sessionId: 'session-123'
+      };
+
       mockEventService.findById.mockResolvedValue(registrationEvent);
       mockParticipantService.findByEventAndName.mockResolvedValue(null);
+      mockParticipantService.create.mockResolvedValue(mockParticipant);
+      mockSessionService.createUserSession.mockResolvedValue('session-123');
 
       // Act
       const result = await registrationService.registerParticipant(eventId, userName);
@@ -519,14 +533,14 @@ describe('User Registration System', () => {
       const eventId = 'event-123';
       const expectedUrl = `https://example.com/register/${eventId}`;
 
-      qrCodeService.generateRegistrationUrl.mockReturnValue(expectedUrl);
+      mockQRCodeService.generateRegistrationUrl.mockReturnValue(expectedUrl);
 
       // Act
       const registrationUrl = registrationService.generateRegistrationLink(eventId);
 
       // Assert
       expect(registrationUrl).toBe(expectedUrl);
-      expect(qrCodeService.generateRegistrationUrl).toHaveBeenCalledWith(eventId);
+      expect(mockQRCodeService.generateRegistrationUrl).toHaveBeenCalledWith(eventId);
     });
 
     it('should generate QR code for registration link', async () => {
@@ -535,8 +549,8 @@ describe('User Registration System', () => {
       const registrationUrl = `https://example.com/register/${eventId}`;
       const qrCodeData = 'data:image/png;base64,qrcode-data-here';
 
-      qrCodeService.generateRegistrationUrl.mockReturnValue(registrationUrl);
-      qrCodeService.generateQRCode.mockResolvedValue(qrCodeData);
+      mockQRCodeService.generateRegistrationUrl.mockReturnValue(registrationUrl);
+      mockQRCodeService.generateQRCode.mockResolvedValue(qrCodeData);
 
       // Act
       const result = await registrationService.generateQRCode(eventId);
@@ -545,14 +559,14 @@ describe('User Registration System', () => {
       expect(result.success).toBe(true);
       expect(result.qrCodeData).toBe(qrCodeData);
       expect(result.registrationUrl).toBe(registrationUrl);
-      expect(qrCodeService.generateQRCode).toHaveBeenCalledWith(registrationUrl);
+      expect(mockQRCodeService.generateQRCode).toHaveBeenCalledWith(registrationUrl);
     });
 
     it('should handle QR code generation errors', async () => {
       // Arrange
       const eventId = 'event-123';
-      qrCodeService.generateRegistrationUrl.mockReturnValue('https://example.com/register/event-123');
-      qrCodeService.generateQRCode.mockRejectedValue(new Error('QR generation failed'));
+      mockQRCodeService.generateRegistrationUrl.mockReturnValue('https://example.com/register/event-123');
+      mockQRCodeService.generateQRCode.mockRejectedValue(new Error('QR generation failed'));
 
       // Act
       const result = await registrationService.generateQRCode(eventId);
@@ -577,11 +591,11 @@ describe('User Registration System', () => {
       const event1Id = 'event-123';
       const event2Id = 'event-456';
 
-      qrCodeService.generateRegistrationUrl
+      mockQRCodeService.generateRegistrationUrl
         .mockReturnValueOnce(`https://example.com/register/${event1Id}`)
         .mockReturnValueOnce(`https://example.com/register/${event2Id}`);
 
-      qrCodeService.generateQRCode
+      mockQRCodeService.generateQRCode
         .mockResolvedValueOnce('qr-data-1')
         .mockResolvedValueOnce('qr-data-2');
 
