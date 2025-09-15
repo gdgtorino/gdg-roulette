@@ -303,4 +303,11 @@ export class SessionService {
       metadata
     });
   }
+
+  /**
+   * Create user session (alias for createParticipantSession)
+   */
+  async createUserSession(participantId: string, eventId?: string): Promise<Session> {
+    return this.createParticipantSession(participantId, eventId ? { eventId } : {});
+  }
 }

@@ -457,4 +457,28 @@ export class NotificationService extends EventEmitter {
       }
     }
   }
+
+  /**
+   * Send registration confirmation notification
+   */
+  async sendRegistrationConfirmation(data: {
+    participant: any;
+    event: any;
+    registrationUrl: string
+  }): Promise<boolean> {
+    try {
+      // In a real implementation, this would send email/SMS/push notification
+      // For now, we'll just log it and return success
+      console.log('Registration confirmation sent:', {
+        participantId: data.participant.id,
+        participantName: data.participant.name,
+        eventName: data.event.name,
+        registrationUrl: data.registrationUrl
+      });
+      return true;
+    } catch (error) {
+      console.error('Failed to send registration confirmation:', error);
+      return false;
+    }
+  }
 }

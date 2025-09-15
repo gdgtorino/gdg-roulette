@@ -288,6 +288,36 @@ export class ParticipantService {
   }
 
   /**
+   * Create a participant (alias for registerParticipant)
+   */
+  async create(data: { eventId: string; name: string }): Promise<Participant> {
+    const result = await this.registerParticipant(data);
+    if (!result.success || !result.participant) {
+      throw new Error(result.error || 'Failed to create participant');
+    }
+    return result.participant;
+  }
+
+  /**
+   * Delete a participant (alias for removeParticipant)
+   */
+  async delete(participantId: string): Promise<boolean> {
+    const result = await this.removeParticipant(participantId);
+    return result.success;
+  }
+
+  /**
+   * Find participant by event and name
+   */
+  async findByEventAndName(eventId: string, name: string): Promise<Participant | null> {
+    try {
+      return await this.participantRepository.findByEventIdAndName(eventId, name);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
    * Check if participant exists in event
    */
   async participantExists(eventId: string, name: string): Promise<boolean> {
