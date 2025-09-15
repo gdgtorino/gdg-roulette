@@ -70,6 +70,26 @@ export class EventService {
   }
 
   /**
+   * Create a basic event without QR code generation (for state machine)
+   */
+  async createBasicEvent(eventData: EventCreationData): Promise<Event> {
+    try {
+      const event = await this.eventRepository.create({
+        name: eventData.name,
+        description: eventData.description,
+        createdBy: eventData.createdBy,
+        state: eventData.state,
+        registrationOpen: eventData.registrationOpen ?? false,
+        closed: eventData.closed ?? false
+      });
+
+      return event;
+    } catch (error) {
+      throw new Error(`Failed to create basic event: ${error}`);
+    }
+  }
+
+  /**
    * Find event by ID
    */
   async findById(eventId: string): Promise<Event | null> {
