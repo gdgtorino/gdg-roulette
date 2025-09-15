@@ -10,9 +10,10 @@ let authService: AuthService;
 let sessionManager: SessionManager;
 
 // Initialize services
-sessionManager = new SessionManager();
+const sessionManagerInstance = new SessionManager();
 const passwordService = new PasswordService();
 const adminRepository = new AdminRepository();
+sessionManager = sessionManagerInstance;
 authService = new AuthService(sessionManager, passwordService, adminRepository);
 
 // Allow tests to override services

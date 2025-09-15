@@ -16,10 +16,14 @@ let notificationService: NotificationService;
 // Initialize services
 const participantRepository = new ParticipantRepository();
 const eventRepository = new EventRepository();
-participantService = new ParticipantService(participantRepository, eventRepository);
-eventService = new EventService(eventRepository);
-sessionService = new SessionService();
-notificationService = new NotificationService();
+const participantServiceInstance = new ParticipantService(participantRepository, eventRepository);
+const eventServiceInstance = new EventService(eventRepository);
+const sessionServiceInstance = new SessionService();
+const notificationServiceInstance = new NotificationService();
+participantService = participantServiceInstance;
+eventService = eventServiceInstance;
+sessionService = sessionServiceInstance;
+notificationService = notificationServiceInstance;
 
 // Allow tests to override services
 // Note: Commented out for build compatibility - re-enable for testing

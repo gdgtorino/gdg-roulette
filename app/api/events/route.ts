@@ -15,12 +15,16 @@ const createEventSchema = z.object({
 });
 
 // Global service instances that can be overridden in tests
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let eventService: EventService;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let authService: AuthService;
 
 // Initialize services
-eventService = new EventService();
-authService = new AuthService();
+const eventServiceInstance = new EventService();
+const authServiceInstance = new AuthService();
+eventService = eventServiceInstance;
+authService = authServiceInstance;
 
 // Function to set test services
 // Note: Commented out for build compatibility - re-enable for testing

@@ -7,8 +7,10 @@ let lotteryService: LotteryService;
 let authService: AuthService;
 
 // Initialize services
-lotteryService = new LotteryService();
-authService = new AuthService();
+const lotteryServiceInstance = new LotteryService();
+const authServiceInstance = new AuthService();
+lotteryService = lotteryServiceInstance;
+authService = authServiceInstance;
 
 // Function to set test services
 // Note: Commented out for build compatibility - re-enable for testing

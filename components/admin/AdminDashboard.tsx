@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/Badge';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { EventManagement } from './EventManagement';
-import { EventList } from './EventList';
+// import { EventList } from './EventList'; // Removed unused import
 // import { EventStats } from './EventStats'; // Removed unused import
 import { AdminNavigation } from './AdminNavigation';
 import { Admin, Event } from '@/lib/types';
@@ -93,13 +93,7 @@ export function AdminDashboard({ admin, data, onLoadData, onCreateEvent }: Admin
     'overview',
   );
 
-  useEffect(() => {
-    if (!data && onLoadData) {
-      loadDashboardData();
-    }
-  }, [data, onLoadData]);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -120,7 +114,13 @@ export function AdminDashboard({ admin, data, onLoadData, onCreateEvent }: Admin
     } finally {
       setLoading(false);
     }
-  };
+  }, [onLoadData]);
+
+  useEffect(() => {
+    if (!data && onLoadData) {
+      loadDashboardData();
+    }
+  }, [data, onLoadData, loadDashboardData]);
 
   const handleCreateEvent = async () => {
     if (onCreateEvent) {

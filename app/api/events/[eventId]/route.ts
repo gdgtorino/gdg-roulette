@@ -15,8 +15,10 @@ let eventService: EventService;
 let authService: AuthService;
 
 // Initialize services
-eventService = new EventService();
-authService = new AuthService();
+const eventServiceInstance = new EventService();
+const authServiceInstance = new AuthService();
+eventService = eventServiceInstance;
+authService = authServiceInstance;
 
 // Function to set test services
 // Note: Commented out for build compatibility - re-enable for testing

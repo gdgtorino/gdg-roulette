@@ -16,9 +16,10 @@ let authService: AuthService;
 let sessionManager: SessionManager;
 
 // Initialize services
-sessionManager = new SessionManager();
+const sessionManagerInstance = new SessionManager();
 const passwordService = new PasswordService();
 const adminRepository = new AdminRepository();
+sessionManager = sessionManagerInstance;
 authService = new AuthService(sessionManager, passwordService, adminRepository);
 
 // Allow tests to override services
@@ -152,7 +153,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
     }
 
     // Simple test authentication for E2E tests
-    let loginResult: { success: boolean; error?: string; admin?: any } = { success: false, error: 'Invalid credentials' };
+    let loginResult: { success: boolean; error?: string; admin?: unknown } = { success: false, error: 'Invalid credentials' };
 
     // Test credentials for E2E tests
     if (username === 'admin1' && password === 'SecurePass123!') {
