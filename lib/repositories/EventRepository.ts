@@ -77,6 +77,10 @@ export class EventRepository {
       });
       return event;
     } catch (error) {
+      // Preserve the original error message
+      if (error instanceof Error) {
+        throw error;
+      }
       throw new Error(`Failed to update event: ${error}`);
     }
   }
