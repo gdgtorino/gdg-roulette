@@ -24,7 +24,8 @@ const mockAuthService = {
 const mockSessionManager = {
   createAdminSession: jest.fn(),
   validateSession: jest.fn(),
-  invalidateSession: jest.fn()
+  invalidateSession: jest.fn(),
+  refreshSession: jest.fn()
 };
 
 // Helper function to create mock NextRequest
@@ -382,16 +383,12 @@ describe('/api/auth/* API Routes', () => {
       const response = await logoutHandler(request);
 
       // Assert
-      const setCookieHeaders = response.headers.getSetCookie();
-      expect(setCookieHeaders.some(header =>
-        header.includes('sessionToken=') && header.includes('expires=Thu, 01 Jan 1970')
-      )).toBe(true);
-      expect(setCookieHeaders.some(header =>
-        header.includes('adminPrefs=') && header.includes('expires=Thu, 01 Jan 1970')
-      )).toBe(true);
-      expect(setCookieHeaders.some(header =>
-        header.includes('csrfToken=') && header.includes('expires=Thu, 01 Jan 1970')
-      )).toBe(true);
+      const setCookieHeader = response.headers.get('Set-Cookie');
+      expect(setCookieHeader).toBeDefined();
+      expect(setCookieHeader).toContain('sessionToken=');
+      expect(setCookieHeader).toContain('expires=Thu, 01 Jan 1970');
+      expect(setCookieHeader).toContain('adminPrefs=');
+      expect(setCookieHeader).toContain('csrfToken=');
     });
 
     it('should log successful logout events', async () => {
