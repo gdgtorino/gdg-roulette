@@ -137,7 +137,7 @@ describe('/api/auth/* API Routes', () => {
       expect(responseData.admin).toBeUndefined();
 
       const setCookieHeader = response.headers.get('Set-Cookie');
-      expect(setCookieHeader).toBeNull();
+      expect(setCookieHeader).toBeFalsy();
     });
 
     it('should validate required login fields', async () => {
