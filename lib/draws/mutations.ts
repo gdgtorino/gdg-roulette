@@ -23,13 +23,13 @@ async function getAuthenticatedContext(): Promise<Context | null> {
     // Create mock request for context
     const mockReq = {
       headers: {
-        get: (name: string) => name === 'authorization' ? `Bearer ${token}` : null,
+        get: (name: string) => (name === 'authorization' ? `Bearer ${token}` : null),
       },
     } as { headers: { get: (name: string) => string | null } };
 
     return {
       req: mockReq,
-      admin
+      admin,
     } as unknown as Context;
   } catch {
     return null;
@@ -105,7 +105,7 @@ export async function validateDrawEligibility(eventId: string) {
 
     // Check if there are participants available to draw
     const availableParticipants = participants.filter(
-      p => !winners.some(w => w.participantId === p.id)
+      (p) => !winners.some((w) => w.participantId === p.id),
     );
 
     if (availableParticipants.length === 0) {
@@ -116,7 +116,7 @@ export async function validateDrawEligibility(eventId: string) {
       canDraw: true,
       availableParticipants: availableParticipants.length,
       totalParticipants: participants.length,
-      totalWinners: winners.length
+      totalWinners: winners.length,
     };
   } catch (error) {
     if (error instanceof TRPCError && error.code === 'UNAUTHORIZED') {

@@ -47,13 +47,16 @@ export class UserExperienceService {
     private eventService: EventService,
     private participantService: ParticipantService,
     private notificationService: NotificationService,
-    private userStateManager: UserStateManager
+    private userStateManager: UserStateManager,
   ) {}
 
   /**
    * Recover user state from browser storage after page refresh
    */
-  async recoverUserState(eventId: string, options?: { sessionId?: string }): Promise<UserStateRecoveryResult> {
+  async recoverUserState(
+    eventId: string,
+    options?: { sessionId?: string },
+  ): Promise<UserStateRecoveryResult> {
     try {
       // Load stored state from localStorage
       let storedState = this.userStateManager.loadUserState(eventId);
@@ -65,7 +68,7 @@ export class UserExperienceService {
           sessionId: options.sessionId,
           userStatus: 'REGISTERED',
           participantId: undefined,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
       }
 
@@ -77,7 +80,7 @@ export class UserExperienceService {
           userState: this.userStateManager.createDefaultState(eventId),
           error: 'Event not found',
           networkError: false,
-          retryable: false
+          retryable: false,
         };
       }
 
@@ -120,7 +123,7 @@ export class UserExperienceService {
         event,
         participant,
         session,
-        winner
+        winner,
       );
 
       // Handle session expiration
@@ -130,14 +133,14 @@ export class UserExperienceService {
 
       return {
         success: true,
-        userState
+        userState,
       };
     } catch (error) {
-      const isNetworkError = error instanceof Error && (
-        error.message.includes('Network') ||
-        error.message.includes('fetch') ||
-        error.message.includes('connection')
-      );
+      const isNetworkError =
+        error instanceof Error &&
+        (error.message.includes('Network') ||
+          error.message.includes('fetch') ||
+          error.message.includes('connection'));
 
       return {
         success: false,
@@ -148,8 +151,8 @@ export class UserExperienceService {
         fallbackState: {
           status: 'ERROR',
           screen: 'ERROR',
-          message: 'Unable to connect to event service'
-        }
+          message: 'Unable to connect to event service',
+        },
       };
     }
   }
@@ -179,8 +182,8 @@ export class UserExperienceService {
           component: 'RegistrationScreen',
           props: {
             event: userState.event,
-            message: userState.message
-          }
+            message: userState.message,
+          },
         };
 
       case 'WAITING':
@@ -190,8 +193,8 @@ export class UserExperienceService {
           props: {
             event: userState.event,
             participant: userState.participant,
-            session: userState.session
-          }
+            session: userState.session,
+          },
         };
 
       case 'LOTTERY_LIVE':
@@ -201,8 +204,8 @@ export class UserExperienceService {
           props: {
             event: userState.event,
             participant: userState.participant,
-            isLive: context?.liveDrawActive || userState.event?.isLive || false
-          }
+            isLive: context?.liveDrawActive || userState.event?.isLive || false,
+          },
         };
 
       case 'WINNER_RESULT':
@@ -214,8 +217,8 @@ export class UserExperienceService {
             winner: userState.winner,
             event: userState.event,
             participant: userState.participant,
-            drawOrder: userState.winner?.drawOrder
-          }
+            drawOrder: userState.winner?.drawOrder,
+          },
         };
 
       case 'NOT_WINNER_RESULT':
@@ -225,8 +228,8 @@ export class UserExperienceService {
           props: {
             isWinner: false,
             participant: userState.participant,
-            event: userState.event
-          }
+            event: userState.event,
+          },
         };
 
       case 'EVENT_CLOSED':
@@ -234,8 +237,8 @@ export class UserExperienceService {
           screen: 'EVENT_CLOSED',
           component: 'ClosedEventScreen',
           props: {
-            event: userState.event
-          }
+            event: userState.event,
+          },
         };
 
       case 'ERROR':
@@ -244,8 +247,8 @@ export class UserExperienceService {
           screen: 'ERROR',
           component: 'ErrorScreen',
           props: {
-            error: userState.error || 'Unknown error occurred'
-          }
+            error: userState.error || 'Unknown error occurred',
+          },
         };
     }
   }
@@ -256,7 +259,7 @@ export class UserExperienceService {
   async connectToLiveUpdates(
     eventId: string,
     participantId: string,
-    options?: LiveConnectionOptions
+    options?: LiveConnectionOptions,
   ): Promise<LiveConnectionResult> {
     try {
       const socket = await this.notificationService.connectToLiveUpdates(eventId, participantId);
@@ -265,7 +268,7 @@ export class UserExperienceService {
         this.setupLiveUpdateHandlers(socket, options || {});
         return {
           connected: true,
-          socket
+          socket,
         };
       } else {
         throw new Error('WebSocket connection failed');
@@ -275,12 +278,7 @@ export class UserExperienceService {
 
       // Handle auto-reconnection
       if (options?.autoReconnect && options?.maxReconnectAttempts) {
-        return await this.attemptReconnection(
-          eventId,
-          participantId,
-          options,
-          1
-        );
+        return await this.attemptReconnection(eventId, participantId, options, 1);
       }
 
       // Call error handler
@@ -290,7 +288,7 @@ export class UserExperienceService {
 
       return {
         connected: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   }
@@ -302,7 +300,7 @@ export class UserExperienceService {
     eventId: string,
     participantId: string,
     options: LiveConnectionOptions,
-    attempt: number
+    attempt: number,
   ): Promise<LiveConnectionResult> {
     if (attempt > (options.maxReconnectAttempts || 3)) {
       if (options.onReconnection) {
@@ -310,18 +308,18 @@ export class UserExperienceService {
       }
       return {
         connected: false,
-        error: 'Max reconnection attempts exceeded'
+        error: 'Max reconnection attempts exceeded',
       };
     }
 
     try {
       // Wait before reconnecting (exponential backoff)
       const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
 
       const result = await this.connectToLiveUpdates(eventId, participantId, {
         ...options,
-        autoReconnect: false // Prevent infinite recursion
+        autoReconnect: false, // Prevent infinite recursion
       });
 
       if (result.connected) {
@@ -358,7 +356,7 @@ export class UserExperienceService {
             if (handlers.onParticipantCountUpdate) {
               handlers.onParticipantCountUpdate({
                 total: data.totalParticipants,
-                remaining: data.remainingParticipants
+                remaining: data.remainingParticipants,
               });
             }
             break;
@@ -367,7 +365,7 @@ export class UserExperienceService {
             if (handlers.onPersonalWinnerNotification && data.winner) {
               handlers.onPersonalWinnerNotification({
                 drawOrder: data.winner.drawOrder,
-                message: data.congratulationsMessage
+                message: data.congratulationsMessage,
               });
             }
             break;
@@ -376,7 +374,7 @@ export class UserExperienceService {
             if (handlers.onDrawCompletion) {
               handlers.onDrawCompletion({
                 totalWinners: data.totalWinners,
-                eventClosed: data.eventClosed
+                eventClosed: data.eventClosed,
               });
             }
             break;
@@ -391,7 +389,7 @@ export class UserExperienceService {
         handlers.onDisconnection({
           code: event.code,
           reason: event.reason,
-          reconnecting: true
+          reconnecting: true,
         });
       }
     };
@@ -419,14 +417,11 @@ export class UserExperienceService {
   /**
    * Update user state and persist changes
    */
-  async updateUserState(
-    eventId: string,
-    updates: Partial<UserState>
-  ): Promise<UserState> {
+  async updateUserState(eventId: string, updates: Partial<UserState>): Promise<UserState> {
     const current = await this.recoverUserState(eventId);
     const newState = {
       ...current.userState,
-      ...updates
+      ...updates,
     };
 
     await this.saveUserState(eventId, newState);

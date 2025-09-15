@@ -17,7 +17,7 @@ test.describe('User Flow E2E Tests', () => {
   test.beforeAll(async ({ browser }) => {
     context = await browser.newContext({
       viewport: { width: 1280, height: 720 },
-      ignoreHTTPSErrors: true
+      ignoreHTTPSErrors: true,
     });
 
     // Set up admin page to create events for testing
@@ -73,15 +73,21 @@ test.describe('User Flow E2E Tests', () => {
 
       // Should show success message
       await expect(page.locator('[data-testid="registration-success"]')).toBeVisible();
-      await expect(page.locator('[data-testid="success-message"]')).toContainText('Successfully registered');
-      await expect(page.locator('[data-testid="participant-name-display"]')).toContainText('John Doe');
+      await expect(page.locator('[data-testid="success-message"]')).toContainText(
+        'Successfully registered',
+      );
+      await expect(page.locator('[data-testid="participant-name-display"]')).toContainText(
+        'John Doe',
+      );
 
       // Should show unique participant QR code
       await expect(page.locator('[data-testid="participant-qr-code"]')).toBeVisible();
 
       // Should transition to waiting screen
       await expect(page.locator('[data-testid="waiting-screen"]')).toBeVisible();
-      await expect(page.locator('[data-testid="waiting-message"]')).toContainText('You will be notified when the draw begins');
+      await expect(page.locator('[data-testid="waiting-message"]')).toContainText(
+        'You will be notified when the draw begins',
+      );
     });
 
     test('should validate registration form inputs', async () => {
@@ -112,9 +118,9 @@ test.describe('User Flow E2E Tests', () => {
       const validNames = [
         'María García',
         'Jean-Pierre Dupont',
-        'O\'Sullivan',
+        "O'Sullivan",
         '李明',
-        'José María de la Cruz'
+        'José María de la Cruz',
       ];
 
       for (const validName of validNames) {
@@ -125,7 +131,9 @@ test.describe('User Flow E2E Tests', () => {
         await page.click('[data-testid="register-button"]');
 
         await expect(page.locator('[data-testid="registration-success"]')).toBeVisible();
-        await expect(page.locator('[data-testid="participant-name-display"]')).toContainText(validName);
+        await expect(page.locator('[data-testid="participant-name-display"]')).toContainText(
+          validName,
+        );
       }
     });
 
@@ -144,7 +152,9 @@ test.describe('User Flow E2E Tests', () => {
       await page2.click('[data-testid="register-button"]');
 
       // Should show duplicate error
-      await expect(page2.locator('[data-testid="duplicate-error"]')).toContainText('Name already registered');
+      await expect(page2.locator('[data-testid="duplicate-error"]')).toContainText(
+        'Name already registered',
+      );
       await expect(page2.locator('[data-testid="registration-success"]')).not.toBeVisible();
 
       await page2.close();
@@ -170,7 +180,9 @@ test.describe('User Flow E2E Tests', () => {
 
       // Should show registration closed message
       await expect(page.locator('[data-testid="registration-closed"]')).toBeVisible();
-      await expect(page.locator('[data-testid="closed-message"]')).toContainText('Registration is closed');
+      await expect(page.locator('[data-testid="closed-message"]')).toContainText(
+        'Registration is closed',
+      );
       await expect(page.locator('[data-testid="registration-form"]')).not.toBeVisible();
     });
 
@@ -189,8 +201,8 @@ test.describe('User Flow E2E Tests', () => {
             success: false,
             error: 'Event has reached maximum participant limit',
             maxParticipants: 50,
-            currentParticipants: 50
-          })
+            currentParticipants: 50,
+          }),
         });
       });
 
@@ -198,7 +210,9 @@ test.describe('User Flow E2E Tests', () => {
       await page.click('[data-testid="register-button"]');
 
       // Should show limit reached error
-      await expect(page.locator('[data-testid="limit-error"]')).toContainText('maximum participant limit');
+      await expect(page.locator('[data-testid="limit-error"]')).toContainText(
+        'maximum participant limit',
+      );
       await expect(page.locator('[data-testid="current-count"]')).toContainText('50/50');
     });
   });
@@ -217,7 +231,9 @@ test.describe('User Flow E2E Tests', () => {
 
       // Should recover registered state and show waiting screen
       await expect(page.locator('[data-testid="waiting-screen"]')).toBeVisible();
-      await expect(page.locator('[data-testid="participant-name-display"]')).toContainText('State Recovery User');
+      await expect(page.locator('[data-testid="participant-name-display"]')).toContainText(
+        'State Recovery User',
+      );
       await expect(page.locator('[data-testid="registration-form"]')).not.toBeVisible();
     });
 
@@ -236,7 +252,9 @@ test.describe('User Flow E2E Tests', () => {
       await page.reload();
 
       // Should show session expired message and registration form
-      await expect(page.locator('[data-testid="session-expired-message"]')).toContainText('Session expired');
+      await expect(page.locator('[data-testid="session-expired-message"]')).toContainText(
+        'Session expired',
+      );
       await expect(page.locator('[data-testid="registration-form"]')).toBeVisible();
     });
 
@@ -254,7 +272,9 @@ test.describe('User Flow E2E Tests', () => {
 
       // Should still show waiting screen
       await expect(page.locator('[data-testid="waiting-screen"]')).toBeVisible();
-      await expect(page.locator('[data-testid="participant-name-display"]')).toContainText('Cross Screen User');
+      await expect(page.locator('[data-testid="participant-name-display"]')).toContainText(
+        'Cross Screen User',
+      );
     });
   });
 
@@ -304,7 +324,9 @@ test.describe('User Flow E2E Tests', () => {
       await eventCard.locator('[data-testid="draw-single-winner-button"]').click();
 
       // User should see winner notification in real-time
-      await expect(page.locator('[data-testid="winner-notification"]')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('[data-testid="winner-notification"]')).toBeVisible({
+        timeout: 5000,
+      });
 
       // Should show winner name and position
       const winnerName = await page.locator('[data-testid="winner-name"]').textContent();
@@ -328,17 +350,21 @@ test.describe('User Flow E2E Tests', () => {
           headers: {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive'
+            Connection: 'keep-alive',
           },
-          body: `data: {"type":"YOU_ARE_WINNER","winner":{"participantName":"Winner User","drawOrder":1},"congratulationsMessage":"Congratulations! You have been selected!"}\n\n`
+          body: `data: {"type":"YOU_ARE_WINNER","winner":{"participantName":"Winner User","drawOrder":1},"congratulationsMessage":"Congratulations! You have been selected!"}\n\n`,
         });
       });
 
       await expect(page.locator('[data-testid="lottery-screen"]')).toBeVisible();
 
       // Should show personal winner celebration
-      await expect(page.locator('[data-testid="personal-winner-celebration"]')).toBeVisible({ timeout: 5000 });
-      await expect(page.locator('[data-testid="congratulations-message"]')).toContainText('Congratulations!');
+      await expect(page.locator('[data-testid="personal-winner-celebration"]')).toBeVisible({
+        timeout: 5000,
+      });
+      await expect(page.locator('[data-testid="congratulations-message"]')).toContainText(
+        'Congratulations!',
+      );
       await expect(page.locator('[data-testid="winner-position-display"]')).toContainText('1');
 
       // Should show confetti animation
@@ -356,7 +382,9 @@ test.describe('User Flow E2E Tests', () => {
       await adminPage.click('[data-testid="confirm-draw-all"]');
 
       // User should see draw completion notification
-      await expect(page.locator('[data-testid="draw-completed-notification"]')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('[data-testid="draw-completed-notification"]')).toBeVisible({
+        timeout: 10000,
+      });
       await expect(page.locator('[data-testid="total-winners-count"]')).toBeVisible();
 
       // Should transition to final results screen
@@ -409,14 +437,14 @@ test.describe('User Flow E2E Tests', () => {
             winner: {
               participantName: 'Results Winner',
               drawOrder: 2,
-              drawnAt: new Date().toISOString()
+              drawnAt: new Date().toISOString(),
             },
             event: {
               name: 'User Test Event',
               totalParticipants: 5,
-              totalWinners: 5
-            }
-          })
+              totalWinners: 5,
+            },
+          }),
         });
       });
 
@@ -424,7 +452,9 @@ test.describe('User Flow E2E Tests', () => {
 
       // Should show winner results screen
       await expect(page.locator('[data-testid="winner-results-screen"]')).toBeVisible();
-      await expect(page.locator('[data-testid="congratulations-header"]')).toContainText('Congratulations!');
+      await expect(page.locator('[data-testid="congratulations-header"]')).toContainText(
+        'Congratulations!',
+      );
       await expect(page.locator('[data-testid="winner-name"]')).toContainText('Results Winner');
       await expect(page.locator('[data-testid="winner-position"]')).toContainText('2');
 
@@ -455,14 +485,14 @@ test.describe('User Flow E2E Tests', () => {
             success: true,
             isWinner: false,
             participant: {
-              name: 'Non Winner'
+              name: 'Non Winner',
             },
             event: {
               name: 'User Test Event',
               totalParticipants: 5,
-              totalWinners: 3
-            }
-          })
+              totalWinners: 3,
+            },
+          }),
         });
       });
 
@@ -470,7 +500,9 @@ test.describe('User Flow E2E Tests', () => {
 
       // Should show non-winner results screen
       await expect(page.locator('[data-testid="non-winner-results-screen"]')).toBeVisible();
-      await expect(page.locator('[data-testid="thank-you-message"]')).toContainText('Thank you for participating');
+      await expect(page.locator('[data-testid="thank-you-message"]')).toContainText(
+        'Thank you for participating',
+      );
       await expect(page.locator('[data-testid="participant-name"]')).toContainText('Non Winner');
 
       // Should show consolation message and statistics
@@ -516,12 +548,12 @@ test.describe('User Flow E2E Tests', () => {
             winner: {
               participantName: 'Share User',
               drawOrder: 1,
-              drawnAt: new Date().toISOString()
+              drawnAt: new Date().toISOString(),
             },
             event: {
-              name: 'User Test Event'
-            }
-          })
+              name: 'User Test Event',
+            },
+          }),
         });
       });
 
@@ -538,7 +570,9 @@ test.describe('User Flow E2E Tests', () => {
 
       // Test copy link functionality
       await page.click('[data-testid="copy-link-button"]');
-      await expect(page.locator('[data-testid="link-copied-message"]')).toContainText('Link copied');
+      await expect(page.locator('[data-testid="link-copied-message"]')).toContainText(
+        'Link copied',
+      );
     });
   });
 
@@ -629,7 +663,7 @@ test.describe('User Flow E2E Tests', () => {
               color: white !important;
             }
           }
-        `
+        `,
       });
 
       // Elements should still be visible and functional
@@ -655,8 +689,8 @@ test.describe('User Flow E2E Tests', () => {
           contentType: 'application/json',
           body: JSON.stringify({
             success: false,
-            error: 'Internal server error'
-          })
+            error: 'Internal server error',
+          }),
         });
       });
 
@@ -677,10 +711,10 @@ test.describe('User Flow E2E Tests', () => {
             participant: {
               id: 'participant-123',
               name: 'API Failure User',
-              eventId: eventId
+              eventId: eventId,
             },
-            sessionToken: 'session-token-123'
-          })
+            sessionToken: 'session-token-123',
+          }),
         });
       });
 
@@ -693,7 +727,7 @@ test.describe('User Flow E2E Tests', () => {
 
       // Simulate slow network
       await page.route('/api/participants', async (route) => {
-        await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second delay
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 second delay
         route.fulfill({
           status: 201,
           contentType: 'application/json',
@@ -701,9 +735,9 @@ test.describe('User Flow E2E Tests', () => {
             success: true,
             participant: {
               id: 'participant-123',
-              name: 'Slow Network User'
-            }
-          })
+              name: 'Slow Network User',
+            },
+          }),
         });
       });
 
@@ -715,7 +749,9 @@ test.describe('User Flow E2E Tests', () => {
       await expect(page.locator('[data-testid="loading-message"]')).toContainText('Registering');
 
       // Should eventually succeed
-      await expect(page.locator('[data-testid="registration-success"]')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('[data-testid="registration-success"]')).toBeVisible({
+        timeout: 5000,
+      });
       await expect(page.locator('[data-testid="loading-indicator"]')).not.toBeVisible();
     });
 
@@ -732,7 +768,9 @@ test.describe('User Flow E2E Tests', () => {
 
       // Should show compatibility warning
       await expect(page.locator('[data-testid="compatibility-warning"]')).toBeVisible();
-      await expect(page.locator('[data-testid="limited-features-message"]')).toContainText('limited features');
+      await expect(page.locator('[data-testid="limited-features-message"]')).toContainText(
+        'limited features',
+      );
 
       // Basic functionality should still work
       await expect(page.locator('[data-testid="registration-success"]')).toBeVisible();
@@ -754,7 +792,9 @@ test.describe('User Flow E2E Tests', () => {
       await expect(page.locator('[data-testid="offline-message"]')).toContainText('offline');
 
       // Critical information should still be available
-      await expect(page.locator('[data-testid="participant-name-display"]')).toContainText('Offline User');
+      await expect(page.locator('[data-testid="participant-name-display"]')).toContainText(
+        'Offline User',
+      );
       await expect(page.locator('[data-testid="participant-qr-code"]')).toBeVisible();
 
       // Go back online

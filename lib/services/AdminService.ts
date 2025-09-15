@@ -60,7 +60,7 @@ export class AdminService {
     private adminRepository: AdminRepository,
     private passwordService: PasswordService,
     private permissionService: PermissionService,
-    private eventService: EventService
+    private eventService: EventService,
   ) {}
 
   /**
@@ -69,7 +69,7 @@ export class AdminService {
   async createAdmin(
     adminData: AdminCreationData,
     creatorAdminId: string,
-    options?: { sendWelcomeEmail?: boolean; rollbackOnFailure?: boolean }
+    options?: { sendWelcomeEmail?: boolean; rollbackOnFailure?: boolean },
   ): Promise<AdminCreationResult> {
     let createdAdminId: string | null = null;
 
@@ -79,7 +79,7 @@ export class AdminService {
       if (!creator) {
         return {
           success: false,
-          error: 'Creator admin not found'
+          error: 'Creator admin not found',
         };
       }
 
@@ -88,7 +88,7 @@ export class AdminService {
       if (!this.permissionService.hasPermission(creatorPermissions, 'MANAGE_USERS')) {
         return {
           success: false,
-          error: 'Insufficient permissions to create admin accounts'
+          error: 'Insufficient permissions to create admin accounts',
         };
       }
 
@@ -97,7 +97,7 @@ export class AdminService {
       if (validationErrors.length > 0) {
         return {
           success: false,
-          error: validationErrors.join('; ')
+          error: validationErrors.join('; '),
         };
       }
 
@@ -110,7 +110,7 @@ export class AdminService {
       if (existingByUsername) {
         return {
           success: false,
-          error: 'Username already exists'
+          error: 'Username already exists',
         };
       }
 
@@ -120,7 +120,7 @@ export class AdminService {
         if (existingByEmail) {
           return {
             success: false,
-            error: 'Email address already registered'
+            error: 'Email address already registered',
           };
         }
       }
@@ -138,7 +138,7 @@ export class AdminService {
         email: trimmedEmail,
         role: adminData.role,
         createdBy: creatorAdminId,
-        permissions
+        permissions,
       });
 
       createdAdminId = newAdmin.id;
@@ -151,15 +151,16 @@ export class AdminService {
         details: {
           username: trimmedUsername,
           role: adminData.role,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
 
       // Simulate post-creation operations that might fail
       if (options?.sendWelcomeEmail) {
         try {
           // Mock email service that might fail
-          if (Math.random() > 0.8) { // 20% chance of failure for testing
+          if (Math.random() > 0.8) {
+            // 20% chance of failure for testing
             throw new Error('Email service unavailable');
           }
         } catch (error) {
@@ -167,7 +168,7 @@ export class AdminService {
             await this.adminRepository.delete(createdAdminId);
             return {
               success: false,
-              error: `Admin creation failed and was rolled back: ${error}`
+              error: `Admin creation failed and was rolled back: ${error}`,
             };
           }
         }
@@ -178,8 +179,8 @@ export class AdminService {
         admin: {
           ...newAdmin,
           permissions,
-          role: adminData.role
-        }
+          role: adminData.role,
+        },
       };
     } catch (error) {
       // Rollback if requested and admin was created
@@ -193,7 +194,7 @@ export class AdminService {
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to process admin account'
+        error: error instanceof Error ? error.message : 'Failed to process admin account',
       };
     }
   }
@@ -222,7 +223,7 @@ export class AdminService {
   async updatePermissions(
     adminId: string,
     newPermissions: Permission[],
-    modifierAdminId: string
+    modifierAdminId: string,
   ): Promise<AdminUpdateResult> {
     try {
       // Check if admin exists
@@ -230,7 +231,7 @@ export class AdminService {
       if (!admin) {
         return {
           success: false,
-          error: 'Admin not found'
+          error: 'Admin not found',
         };
       }
 
@@ -239,7 +240,7 @@ export class AdminService {
       if (!modifier) {
         return {
           success: false,
-          error: 'Modifier admin not found'
+          error: 'Modifier admin not found',
         };
       }
 
@@ -248,13 +249,13 @@ export class AdminService {
       // Check if modifier can grant these permissions
       const securityViolations = this.permissionService.checkSecurityViolations(
         modifierPermissions,
-        newPermissions
+        newPermissions,
       );
 
       if (securityViolations.length > 0) {
         return {
           success: false,
-          error: 'Cannot grant permissions higher than your own'
+          error: 'Cannot grant permissions higher than your own',
         };
       }
 
@@ -263,7 +264,7 @@ export class AdminService {
       if (!validation.valid) {
         return {
           success: false,
-          error: validation.errors.join('; ')
+          error: validation.errors.join('; '),
         };
       }
 
@@ -272,12 +273,12 @@ export class AdminService {
 
       return {
         success: true,
-        admin: updatedAdmin
+        admin: updatedAdmin,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to update permissions: ${error}`
+        error: `Failed to update permissions: ${error}`,
       };
     }
   }
@@ -292,23 +293,23 @@ export class AdminService {
       if (!hasPermission) {
         return {
           success: false,
-          error: 'Insufficient permissions to create events'
+          error: 'Insufficient permissions to create events',
         };
       }
 
       const event = await this.eventService.createEvent({
         ...eventData,
-        createdBy: adminId
+        createdBy: adminId,
       });
 
       return {
         success: true,
-        event
+        event,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to create event: ${error}`
+        error: `Failed to create event: ${error}`,
       };
     }
   }
@@ -322,7 +323,7 @@ export class AdminService {
       if (!admin) {
         return {
           success: false,
-          error: 'Admin not found'
+          error: 'Admin not found',
         };
       }
 
@@ -339,12 +340,12 @@ export class AdminService {
 
       return {
         success: true,
-        events
+        events,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to get events: ${error}`
+        error: `Failed to get events: ${error}`,
       };
     }
   }
@@ -355,7 +356,7 @@ export class AdminService {
   async updateEvent(
     eventId: string,
     updateData: { name?: string; description?: string },
-    adminId: string
+    adminId: string,
   ): Promise<{ success: boolean; event?: any; error?: string }> {
     try {
       // Check if event exists
@@ -363,7 +364,7 @@ export class AdminService {
       if (!event) {
         return {
           success: false,
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
@@ -375,19 +376,19 @@ export class AdminService {
       if (!canModifyAny && (!canModifyOwn || event.createdBy !== adminId)) {
         return {
           success: false,
-          error: 'Insufficient permissions to modify this event'
+          error: 'Insufficient permissions to modify this event',
         };
       }
 
       const updatedEvent = await this.eventService.updateEvent(eventId, updateData);
       return {
         success: true,
-        event: updatedEvent
+        event: updatedEvent,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to update event: ${error}`
+        error: `Failed to update event: ${error}`,
       };
     }
   }
@@ -468,27 +469,27 @@ export class AdminService {
 
       // Mock implementation for demonstration
       const adminsByRole: Record<Role, number> = {
-        'SUPER_ADMIN': 1,
-        'ADMIN': allAdmins.length - 1,
-        'MODERATOR': 0
+        SUPER_ADMIN: 1,
+        ADMIN: allAdmins.length - 1,
+        MODERATOR: 0,
       };
 
       const recentActivity = this.auditLogs.filter(
-        log => Date.now() - log.details.timestamp.getTime() < 24 * 60 * 60 * 1000
+        (log) => Date.now() - log.details.timestamp.getTime() < 24 * 60 * 60 * 1000,
       ).length;
 
       return {
         totalAdmins: allAdmins.length,
         activeAdmins: allAdmins.length, // Mock - would check last login times
         adminsByRole,
-        recentActivity
+        recentActivity,
       };
     } catch (error) {
       return {
         totalAdmins: 0,
         activeAdmins: 0,
-        adminsByRole: { 'SUPER_ADMIN': 0, 'ADMIN': 0, 'MODERATOR': 0 },
-        recentActivity: 0
+        adminsByRole: { SUPER_ADMIN: 0, ADMIN: 0, MODERATOR: 0 },
+        recentActivity: 0,
       };
     }
   }
@@ -498,7 +499,7 @@ export class AdminService {
    */
   async deleteAdmin(
     adminId: string,
-    deleterAdminId: string
+    deleterAdminId: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
       // Check if admin exists
@@ -506,7 +507,7 @@ export class AdminService {
       if (!admin) {
         return {
           success: false,
-          error: 'Admin not found'
+          error: 'Admin not found',
         };
       }
 
@@ -514,7 +515,7 @@ export class AdminService {
       if (adminId === deleterAdminId) {
         return {
           success: false,
-          error: 'Cannot delete your own account'
+          error: 'Cannot delete your own account',
         };
       }
 
@@ -523,7 +524,7 @@ export class AdminService {
       if (!this.permissionService.hasPermission(deleterPermissions, '*')) {
         return {
           success: false,
-          error: 'Only super admins can delete admin accounts'
+          error: 'Only super admins can delete admin accounts',
         };
       }
 
@@ -536,15 +537,15 @@ export class AdminService {
         targetAdmin: adminId,
         details: {
           username: admin.username,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
 
       return { success: true };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to delete admin: ${error}`
+        error: `Failed to delete admin: ${error}`,
       };
     }
   }

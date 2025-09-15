@@ -1,53 +1,54 @@
-import { execSync } from 'child_process'
-import { PrismaClient, UserRole } from '@prisma/client'
+import { execSync } from 'child_process';
+import { PrismaClient, UserRole } from '@prisma/client';
 
 // Database test setup utilities
 export async function setupTestDatabase() {
-  const testDatabaseUrl = process.env.TEST_DATABASE_URL || 'postgresql://test:test@localhost:5432/test_the_draw'
+  const testDatabaseUrl =
+    process.env.TEST_DATABASE_URL || 'postgresql://test:test@localhost:5432/test_the_draw';
 
-  console.log('Setting up test database...')
+  console.log('Setting up test database...');
 
   try {
     // Create test database if it doesn't exist
-    const createDbCommand = `createdb test_the_draw -h localhost -U test || echo "Database might already exist"`
-    execSync(createDbCommand, { stdio: 'inherit' })
+    const createDbCommand = `createdb test_the_draw -h localhost -U test || echo "Database might already exist"`;
+    execSync(createDbCommand, { stdio: 'inherit' });
 
     // Reset the test database schema
     execSync('yarn workspace @the-draw/backend prisma migrate reset --force --skip-seed', {
       stdio: 'inherit',
-      env: { ...process.env, DATABASE_URL: testDatabaseUrl }
-    })
+      env: { ...process.env, DATABASE_URL: testDatabaseUrl },
+    });
 
     // Run migrations
     execSync('yarn workspace @the-draw/backend prisma migrate deploy', {
       stdio: 'inherit',
-      env: { ...process.env, DATABASE_URL: testDatabaseUrl }
-    })
+      env: { ...process.env, DATABASE_URL: testDatabaseUrl },
+    });
 
     // Generate Prisma client
     execSync('yarn workspace @the-draw/backend prisma generate', {
       stdio: 'inherit',
-      env: { ...process.env, DATABASE_URL: testDatabaseUrl }
-    })
+      env: { ...process.env, DATABASE_URL: testDatabaseUrl },
+    });
 
-    console.log('Test database setup completed successfully')
+    console.log('Test database setup completed successfully');
   } catch (error) {
-    console.error('Failed to setup test database:', error)
-    throw error
+    console.error('Failed to setup test database:', error);
+    throw error;
   }
 }
 
 export async function teardownTestDatabase() {
-  console.log('Tearing down test database...')
+  console.log('Tearing down test database...');
 
   try {
     // Drop test database
-    const dropDbCommand = `dropdb test_the_draw -h localhost -U test || echo "Database might not exist"`
-    execSync(dropDbCommand, { stdio: 'inherit' })
+    const dropDbCommand = `dropdb test_the_draw -h localhost -U test || echo "Database might not exist"`;
+    execSync(dropDbCommand, { stdio: 'inherit' });
 
-    console.log('Test database teardown completed')
+    console.log('Test database teardown completed');
   } catch (error) {
-    console.error('Failed to teardown test database:', error)
+    console.error('Failed to teardown test database:', error);
     // Don't throw here as this is cleanup
   }
 }
@@ -59,10 +60,10 @@ export async function seedTestDatabase() {
         url: process.env.TEST_DATABASE_URL || process.env.DATABASE_URL,
       },
     },
-  })
+  });
 
   try {
-    console.log('Seeding test database...')
+    console.log('Seeding test database...');
 
     // Create test admin user
     const adminUser = await prisma.user.create({
@@ -71,7 +72,7 @@ export async function seedTestDatabase() {
         password: 'test123',
         role: UserRole.ADMIN,
       },
-    })
+    });
 
     // Create test regular user
     const regularUser = await prisma.user.create({
@@ -80,7 +81,7 @@ export async function seedTestDatabase() {
         password: 'test123',
         role: UserRole.OPERATOR,
       },
-    })
+    });
 
     // Create test event (commented out as models may not exist)
     // const testEvent = await prisma.event.create({
@@ -108,18 +109,18 @@ export async function seedTestDatabase() {
     //   },
     // })
 
-    console.log('Test database seeded successfully')
+    console.log('Test database seeded successfully');
     return {
       adminUser,
       regularUser,
       // testEvent,
       // testLottery,
-    }
+    };
   } catch (error) {
-    console.error('Failed to seed test database:', error)
-    throw error
+    console.error('Failed to seed test database:', error);
+    throw error;
   } finally {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   }
 }
 
@@ -130,20 +131,20 @@ export async function cleanTestDatabase() {
         url: process.env.TEST_DATABASE_URL || process.env.DATABASE_URL,
       },
     },
-  })
+  });
 
   try {
     // Clean up in reverse order of dependencies (commented out as models may not exist)
     // await prisma.lotteryEntry.deleteMany()
     // await prisma.lottery.deleteMany()
     // await prisma.event.deleteMany()
-    await prisma.user.deleteMany()
+    await prisma.user.deleteMany();
 
-    console.log('Test database cleaned successfully')
+    console.log('Test database cleaned successfully');
   } catch (error) {
-    console.error('Failed to clean test database:', error)
-    throw error
+    console.error('Failed to clean test database:', error);
+    throw error;
   } finally {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   }
 }

@@ -23,7 +23,7 @@ export const LotteryScreen: React.FC<LotteryScreenProps> = ({
   event,
   isLive = false,
   currentWinners = [],
-  showAnimation = false
+  showAnimation = false,
 }) => {
   return (
     <div>

@@ -62,9 +62,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ event, onSub
     <div>
       <h2>{event.name}</h2>
 
-      {!event.registrationOpen && (
-        <p>Registration is closed</p>
-      )}
+      {!event.registrationOpen && <p>Registration is closed</p>}
 
       <form onSubmit={handleSubmit}>
         <label htmlFor="name">Name</label>
@@ -78,10 +76,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ event, onSub
           aria-describedby={message ? 'message' : undefined}
         />
 
-        <button
-          type="submit"
-          disabled={isDisabled}
-        >
+        <button type="submit" disabled={isDisabled}>
           {isLoading ? 'Registering...' : 'Register'}
         </button>
       </form>

@@ -10,8 +10,8 @@ export class EventRepository {
         where: { id },
         include: {
           participants: true,
-          winners: true
-        }
+          winners: true,
+        },
       });
       return event;
     } catch (error) {
@@ -35,12 +35,12 @@ export class EventRepository {
           createdBy: eventData.createdBy,
           registrationOpen: eventData.registrationOpen ?? true,
           closed: eventData.closed ?? false,
-          qrCode: eventData.qrCode ?? ''
+          qrCode: eventData.qrCode ?? '',
         },
         include: {
           participants: true,
-          winners: true
-        }
+          winners: true,
+        },
       });
       return event;
     } catch (error) {
@@ -48,27 +48,32 @@ export class EventRepository {
     }
   }
 
-  async update(id: string, updateData: {
-    name?: string;
-    description?: string;
-    state?: string;
-    registrationOpen?: boolean;
-    closed?: boolean;
-    qrCode?: string;
-  }): Promise<Event> {
+  async update(
+    id: string,
+    updateData: {
+      name?: string;
+      description?: string;
+      state?: string;
+      registrationOpen?: boolean;
+      closed?: boolean;
+      qrCode?: string;
+    },
+  ): Promise<Event> {
     try {
       const event = await prisma.event.update({
         where: { id },
         data: {
           ...(updateData.name && { name: updateData.name }),
-          ...(updateData.registrationOpen !== undefined && { registrationOpen: updateData.registrationOpen }),
+          ...(updateData.registrationOpen !== undefined && {
+            registrationOpen: updateData.registrationOpen,
+          }),
           ...(updateData.closed !== undefined && { closed: updateData.closed }),
-          ...(updateData.qrCode && { qrCode: updateData.qrCode })
+          ...(updateData.qrCode && { qrCode: updateData.qrCode }),
         },
         include: {
           participants: true,
-          winners: true
-        }
+          winners: true,
+        },
       });
       return event;
     } catch (error) {
@@ -79,7 +84,7 @@ export class EventRepository {
   async delete(id: string): Promise<boolean> {
     try {
       await prisma.event.delete({
-        where: { id }
+        where: { id },
       });
       return true;
     } catch (error) {
@@ -93,9 +98,9 @@ export class EventRepository {
         where: { createdBy: adminId },
         include: {
           participants: true,
-          winners: true
+          winners: true,
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       });
       return events;
     } catch (error) {
@@ -108,9 +113,9 @@ export class EventRepository {
       const events = await prisma.event.findMany({
         include: {
           participants: true,
-          winners: true
+          winners: true,
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       });
       return events;
     } catch (error) {
@@ -122,13 +127,13 @@ export class EventRepository {
     try {
       const events = await prisma.event.findMany({
         where: {
-          closed: false
+          closed: false,
         },
         include: {
           participants: true,
-          winners: true
+          winners: true,
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       });
       return events;
     } catch (error) {
@@ -143,8 +148,8 @@ export class EventRepository {
         data: { qrCode },
         include: {
           participants: true,
-          winners: true
-        }
+          winners: true,
+        },
       });
       return event;
     } catch (error) {

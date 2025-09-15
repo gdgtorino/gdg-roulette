@@ -23,13 +23,13 @@ async function getAuthenticatedContext(): Promise<Context | null> {
 
     const mockReq = {
       headers: {
-        get: (name: string) => name === 'authorization' ? `Bearer ${token}` : null,
+        get: (name: string) => (name === 'authorization' ? `Bearer ${token}` : null),
       },
     } as { headers: { get: (name: string) => string | null } };
 
     return {
       req: mockReq,
-      admin
+      admin,
     } as unknown as Context;
   } catch {
     return null;
@@ -55,8 +55,8 @@ export async function getEventWithParticipants(eventId: string) {
       success: true,
       data: {
         event,
-        participants
-      }
+        participants,
+      },
     };
   } catch (error) {
     if (error instanceof TRPCError) {
@@ -74,7 +74,7 @@ export async function getEventWithParticipants(eventId: string) {
 
 export async function toggleEventRegistration(
   _prevState: { success: boolean; error?: string; data?: unknown } | null,
-  eventId: string
+  eventId: string,
 ): Promise<{ success: boolean; error?: string; data?: unknown }> {
   try {
     const ctx = await getAuthenticatedContext();

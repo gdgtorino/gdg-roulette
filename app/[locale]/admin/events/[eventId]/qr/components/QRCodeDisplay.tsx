@@ -2,8 +2,14 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface Event {
   id: string;
@@ -26,7 +32,7 @@ export function QRCodeDisplay({ event }: QRCodeDisplayProps) {
     open: false,
     title: '',
     message: '',
-    type: 'success'
+    type: 'success',
   });
 
   const registrationUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/register/${event.id}`;
@@ -38,7 +44,7 @@ export function QRCodeDisplay({ event }: QRCodeDisplayProps) {
         open: true,
         title: 'Success',
         message: 'Link copied to clipboard!',
-        type: 'success'
+        type: 'success',
       });
     }
   };
@@ -73,30 +79,34 @@ export function QRCodeDisplay({ event }: QRCodeDisplayProps) {
 
         {/* Registration Status */}
         <div className="mb-6">
-          <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-            event.registrationOpen
-              ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200'
-              : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200'
-          }`}>
+          <div
+            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+              event.registrationOpen
+                ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200'
+                : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200'
+            }`}
+          >
             Registration {event.registrationOpen ? 'Open' : 'Closed'}
           </div>
         </div>
       </div>
 
       {/* Modal for notifications */}
-      <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
+      <Dialog open={modal.open} onOpenChange={(open) => setModal((prev) => ({ ...prev, open }))}>
         <DialogContent className="dark:bg-gray-800 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle className={modal.type === 'error' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
+            <DialogTitle
+              className={
+                modal.type === 'error'
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-green-600 dark:text-green-400'
+              }
+            >
               {modal.title}
             </DialogTitle>
-            <DialogDescription className="dark:text-gray-300">
-              {modal.message}
-            </DialogDescription>
+            <DialogDescription className="dark:text-gray-300">{modal.message}</DialogDescription>
           </DialogHeader>
-          <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>
-            OK
-          </Button>
+          <Button onClick={() => setModal((prev) => ({ ...prev, open: false }))}>OK</Button>
         </DialogContent>
       </Dialog>
     </>

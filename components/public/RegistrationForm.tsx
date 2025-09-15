@@ -61,7 +61,7 @@ export function RegistrationForm({ eventId }: RegistrationFormProps) {
   };
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -107,12 +107,7 @@ export function RegistrationForm({ eventId }: RegistrationFormProps) {
         />
       </div>
 
-      <Button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full"
-        size="lg"
-      >
+      <Button type="submit" disabled={isSubmitting} className="w-full" size="lg">
         {isSubmitting ? 'Registering...' : 'Register for Draw'}
       </Button>
     </form>

@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { getDrawPageData } from '@/lib/actions/draw';
 import { HeaderControls } from '@/components/ClientComponents';
 import { DrawMachine } from './components/DrawMachine';
@@ -26,14 +26,14 @@ async function DrawPageData({ eventId }: { eventId: string }) {
   const { event, participants, winners } = result.data;
 
   // Serialize dates for client components
-  const serializedParticipants = participants.map(p => ({
+  const serializedParticipants = participants.map((p) => ({
     ...p,
-    registeredAt: p.registeredAt.toISOString()
+    registeredAt: p.registeredAt.toISOString(),
   }));
 
-  const serializedWinners = winners.map(w => ({
+  const serializedWinners = winners.map((w) => ({
     ...w,
-    drawnAt: w.drawnAt.toISOString()
+    drawnAt: w.drawnAt.toISOString(),
   }));
 
   // Check if registration is still open
@@ -42,16 +42,16 @@ async function DrawPageData({ eventId }: { eventId: string }) {
       <div className="text-center py-12">
         <Card className="max-w-md mx-auto dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="text-yellow-600 dark:text-yellow-400">Registration Still Open</CardTitle>
+            <CardTitle className="text-yellow-600 dark:text-yellow-400">
+              Registration Still Open
+            </CardTitle>
             <CardDescription className="dark:text-gray-300">
               Please close registration before starting the draw.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href={`/admin/events/${eventId}/qr`}>
-              <Button>
-                Go to QR Page
-              </Button>
+              <Button>Go to QR Page</Button>
             </Link>
           </CardContent>
         </Card>
@@ -61,7 +61,7 @@ async function DrawPageData({ eventId }: { eventId: string }) {
 
   // Filter available participants (not yet drawn)
   const availableParticipants = serializedParticipants.filter(
-    p => !serializedWinners.some(w => w.participantId === p.id)
+    (p) => !serializedWinners.some((w) => w.participantId === p.id),
   );
 
   return (
@@ -80,11 +80,11 @@ async function DrawPageData({ eventId }: { eventId: string }) {
       {/* Current Winners */}
       <Card className="dark:bg-gray-800 dark:border-gray-700">
         <CardHeader>
-          <CardTitle className="dark:text-white">
-            Winners ({serializedWinners.length})
-          </CardTitle>
+          <CardTitle className="dark:text-white">Winners ({serializedWinners.length})</CardTitle>
           <CardDescription className="dark:text-gray-300">
-            {serializedWinners.length > 0 ? 'Congratulations to our winners!' : 'No winners drawn yet'}
+            {serializedWinners.length > 0
+              ? 'Congratulations to our winners!'
+              : 'No winners drawn yet'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -196,43 +196,50 @@ async function DrawPageHeader({ eventId }: { eventId: string }) {
 export default function DrawPageServer({ eventId }: DrawPageServerProps) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Suspense fallback={
-        <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
-          <div className="mx-auto max-w-6xl px-6 py-4">
-            <div className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+      <Suspense
+        fallback={
+          <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
+            <div className="mx-auto max-w-6xl px-6 py-4">
+              <div className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+            </div>
           </div>
-        </div>
-      }>
+        }
+      >
         <DrawPageHeader eventId={eventId} />
       </Suspense>
 
       <div className="mx-auto max-w-6xl px-6 py-6">
-        <Suspense fallback={
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="lg:col-span-2">
-              <Card className="dark:bg-gray-800 dark:border-gray-700">
-                <CardContent className="p-8">
-                  <div className="h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
-                </CardContent>
-              </Card>
+        <Suspense
+          fallback={
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="lg:col-span-2">
+                <Card className="dark:bg-gray-800 dark:border-gray-700">
+                  <CardContent className="p-8">
+                    <div className="h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                  </CardContent>
+                </Card>
+              </div>
+              {[1, 2].map((i) => (
+                <Card key={i} className="dark:bg-gray-800 dark:border-gray-700">
+                  <CardHeader>
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 animate-pulse rounded w-32 mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 animate-pulse rounded w-48"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((j) => (
+                        <div
+                          key={j}
+                          className="h-8 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"
+                        ></div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            {[1, 2].map(i => (
-              <Card key={i} className="dark:bg-gray-800 dark:border-gray-700">
-                <CardHeader>
-                  <div className="h-6 bg-gray-200 dark:bg-gray-700 animate-pulse rounded w-32 mb-2"></div>
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 animate-pulse rounded w-48"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {[1, 2, 3].map(j => (
-                      <div key={j} className="h-8 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        }>
+          }
+        >
           <DrawPageData eventId={eventId} />
         </Suspense>
       </div>

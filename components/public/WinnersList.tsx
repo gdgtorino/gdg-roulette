@@ -24,7 +24,7 @@ export function WinnersList({
   eventName,
   showEventName = false,
   maxWinners,
-  className
+  className,
 }: WinnersListProps) {
   const formatDate = (date: Date | string) => {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -97,9 +97,7 @@ export function WinnersList({
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-gray-900">
-                      {winner.participantName}
-                    </h3>
+                    <h3 className="font-semibold text-gray-900">{winner.participantName}</h3>
                     {winner.drawOrder <= 3 && (
                       <Badge
                         variant="outline"
@@ -107,12 +105,15 @@ export function WinnersList({
                           winner.drawOrder === 1
                             ? 'border-yellow-400 text-yellow-700'
                             : winner.drawOrder === 2
-                            ? 'border-gray-400 text-gray-700'
-                            : 'border-amber-400 text-amber-700'
+                              ? 'border-gray-400 text-gray-700'
+                              : 'border-amber-400 text-amber-700'
                         }`}
                       >
-                        {winner.drawOrder === 1 ? '1st Place' :
-                         winner.drawOrder === 2 ? '2nd Place' : '3rd Place'}
+                        {winner.drawOrder === 1
+                          ? '1st Place'
+                          : winner.drawOrder === 2
+                            ? '2nd Place'
+                            : '3rd Place'}
                       </Badge>
                     )}
                   </div>
@@ -123,12 +124,8 @@ export function WinnersList({
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-bold text-gray-700">
-                  #{winner.drawOrder}
-                </div>
-                <div className="text-xs text-gray-500">
-                  Draw Order
-                </div>
+                <div className="text-lg font-bold text-gray-700">#{winner.drawOrder}</div>
+                <div className="text-xs text-gray-500">Draw Order</div>
               </div>
             </div>
           ))}
@@ -136,7 +133,8 @@ export function WinnersList({
           {maxWinners && winners.length > maxWinners && (
             <div className="text-center py-2">
               <Badge variant="outline" className="text-xs">
-                +{winners.length - maxWinners} more winner{winners.length - maxWinners > 1 ? 's' : ''}
+                +{winners.length - maxWinners} more winner
+                {winners.length - maxWinners > 1 ? 's' : ''}
               </Badge>
             </div>
           )}

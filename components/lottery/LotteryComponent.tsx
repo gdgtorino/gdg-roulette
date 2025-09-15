@@ -25,7 +25,7 @@ export function LotteryComponent({
   onDrawComplete,
   autoStart = false,
   maxWinners = 10,
-  isAdmin = false
+  isAdmin = false,
 }: LotteryComponentProps) {
   const [winners, setWinners] = useState<Winner[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -86,16 +86,14 @@ export function LotteryComponent({
           participantId: selectedParticipant.id,
           participantName: selectedParticipant.name,
           drawOrder: winners.length + 1,
-          drawnAt: new Date()
+          drawnAt: new Date(),
         };
 
         setCurrentSelection(selectedParticipant.name);
-        setWinners(prev => [...prev, newWinner]);
+        setWinners((prev) => [...prev, newWinner]);
 
         // Remove selected participant from remaining pool
-        setRemainingParticipants(prev =>
-          prev.filter(p => p.id !== selectedParticipant.id)
-        );
+        setRemainingParticipants((prev) => prev.filter((p) => p.id !== selectedParticipant.id));
 
         if (onWinnerSelected) {
           onWinnerSelected(newWinner);
@@ -151,9 +149,7 @@ export function LotteryComponent({
       <Card className="p-6">
         <div className="flex flex-col sm:flex-row items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              {event.name} - Lottery Draw
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">{event.name} - Lottery Draw</h1>
             <p className="text-gray-600">
               {participants.length} participants • {maxWinners} winners to be selected
             </p>
@@ -161,7 +157,13 @@ export function LotteryComponent({
 
           <div className="flex items-center space-x-4 mt-4 sm:mt-0">
             <Badge variant={drawComplete ? 'success' : isDrawing ? 'warning' : 'secondary'}>
-              {drawComplete ? 'Complete' : isDrawing ? 'Drawing...' : drawStarted ? 'In Progress' : 'Ready'}
+              {drawComplete
+                ? 'Complete'
+                : isDrawing
+                  ? 'Drawing...'
+                  : drawStarted
+                    ? 'In Progress'
+                    : 'Ready'}
             </Badge>
 
             {isAdmin && !drawStarted && (
@@ -190,10 +192,7 @@ export function LotteryComponent({
           <div className="flex flex-col items-center space-y-6">
             {/* Animation Component */}
             <div className="w-full">
-              <LotteryAnimation
-                isActive={isDrawing}
-                currentWinner={currentSelection}
-              />
+              <LotteryAnimation isActive={isDrawing} currentWinner={currentSelection} />
             </div>
 
             {/* Current Selection Display */}
@@ -202,13 +201,9 @@ export function LotteryComponent({
                 <div className="text-2xl font-bold mb-2">
                   {isDrawing ? '🎲 Selecting...' : '🎉 Selected!'}
                 </div>
-                <div className="text-xl font-semibold">
-                  {currentSelection || 'Drawing...'}
-                </div>
+                <div className="text-xl font-semibold">{currentSelection || 'Drawing...'}</div>
                 {!isDrawing && currentSelection && winners.length > 0 && (
-                  <div className="text-sm opacity-90 mt-2">
-                    Winner #{winners.length}
-                  </div>
+                  <div className="text-sm opacity-90 mt-2">Winner #{winners.length}</div>
                 )}
               </div>
             )}
@@ -218,7 +213,9 @@ export function LotteryComponent({
               <div className="w-full">
                 <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
                   <span>Progress</span>
-                  <span>{winners.length} / {maxWinners}</span>
+                  <span>
+                    {winners.length} / {maxWinners}
+                  </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div
@@ -253,23 +250,22 @@ export function LotteryComponent({
                 <div
                   key={winner.id}
                   className={`flex items-center justify-between p-4 rounded-lg border-l-4 ${
-                    index === 0 ? 'border-yellow-400 bg-yellow-50' :
-                    index === 1 ? 'border-gray-400 bg-gray-50' :
-                    index === 2 ? 'border-orange-400 bg-orange-50' :
-                    'border-blue-400 bg-blue-50'
+                    index === 0
+                      ? 'border-yellow-400 bg-yellow-50'
+                      : index === 1
+                        ? 'border-gray-400 bg-gray-50'
+                        : index === 2
+                          ? 'border-orange-400 bg-orange-50'
+                          : 'border-blue-400 bg-blue-50'
                   } transition-all duration-300`}
                   style={{
-                    animation: index === winners.length - 1 ? 'fadeInUp 0.5s ease-out' : undefined
+                    animation: index === winners.length - 1 ? 'fadeInUp 0.5s ease-out' : undefined,
                   }}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="text-2xl">
-                      {getPositionDisplay(winner.drawOrder)}
-                    </div>
+                    <div className="text-2xl">{getPositionDisplay(winner.drawOrder)}</div>
                     <div>
-                      <p className="font-semibold text-gray-800">
-                        {winner.participantName}
-                      </p>
+                      <p className="font-semibold text-gray-800">{winner.participantName}</p>
                       <p className="text-sm text-gray-500">
                         Position #{winner.drawOrder} • {winner.drawnAt.toLocaleTimeString()}
                       </p>
@@ -299,9 +295,7 @@ export function LotteryComponent({
       {/* Statistics */}
       {drawComplete && (
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-            Draw Summary
-          </h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Draw Summary</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="text-center p-3 bg-blue-50 rounded-lg">
               <div className="text-2xl font-bold text-blue-600">{participants.length}</div>

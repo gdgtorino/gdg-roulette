@@ -23,13 +23,13 @@ async function getAuthenticatedContext(): Promise<Context | null> {
 
     const mockReq = {
       headers: {
-        get: (name: string) => name === 'authorization' ? `Bearer ${token}` : null,
+        get: (name: string) => (name === 'authorization' ? `Bearer ${token}` : null),
       },
     } as { headers: { get: (name: string) => string | null } };
 
     return {
       req: mockReq,
-      admin
+      admin,
     } as unknown as Context;
   } catch {
     return null;
@@ -59,8 +59,8 @@ export async function getDrawPageData(eventId: string) {
       data: {
         event,
         participants,
-        winners
-      }
+        winners,
+      },
     };
   } catch (error) {
     if (error instanceof TRPCError) {
@@ -78,7 +78,7 @@ export async function getDrawPageData(eventId: string) {
 
 export async function drawWinner(
   _prevState: { success: boolean; error?: string; data?: unknown } | null,
-  eventId: string
+  eventId: string,
 ): Promise<{ success: boolean; error?: string; data?: unknown }> {
   try {
     const ctx = await getAuthenticatedContext();
@@ -105,7 +105,7 @@ export async function drawWinner(
 
 export async function closeEvent(
   prevState: { success: boolean; error: string } | null,
-  eventId: string
+  eventId: string,
 ): Promise<{ success: boolean; error: string }> {
   try {
     const ctx = await getAuthenticatedContext();

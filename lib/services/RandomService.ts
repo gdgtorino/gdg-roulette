@@ -30,12 +30,14 @@ export class RandomService {
 
       // Validate entropy meets security requirements
       if (secure && entropy < RandomService.MIN_ENTROPY_THRESHOLD) {
-        throw new Error(`Insufficient entropy: ${entropy} bits (minimum: ${RandomService.MIN_ENTROPY_THRESHOLD})`);
+        throw new Error(
+          `Insufficient entropy: ${entropy} bits (minimum: ${RandomService.MIN_ENTROPY_THRESHOLD})`,
+        );
       }
 
       // Convert bytes to number in range
       const randomValue = this.bytesToFloat(entropyBytes);
-      const scaledValue = min + (randomValue * (max - min));
+      const scaledValue = min + randomValue * (max - min);
 
       // Create hash for verification
       const timestamp = new Date();
@@ -46,10 +48,12 @@ export class RandomService {
         value: scaledValue,
         entropy,
         timestamp,
-        hash
+        hash,
       };
     } catch (error) {
-      throw new Error(`Failed to generate secure random: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to generate secure random: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -61,7 +65,9 @@ export class RandomService {
       const result = await this.generateSecureRandom({ min, max: max + 1, secure: true });
       return Math.floor(result.value);
     } catch (error) {
-      throw new Error(`Failed to generate secure integer: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to generate secure integer: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -88,7 +94,9 @@ export class RandomService {
 
       return results;
     } catch (error) {
-      throw new Error(`Failed to generate unique integers: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to generate unique integers: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -106,7 +114,9 @@ export class RandomService {
 
       return shuffled;
     } catch (error) {
-      throw new Error(`Failed to shuffle array: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to shuffle array: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -122,7 +132,9 @@ export class RandomService {
       const index = await this.generateSecureInteger(0, array.length - 1);
       return array[index];
     } catch (error) {
-      throw new Error(`Failed to select random element: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to select random element: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -145,7 +157,9 @@ export class RandomService {
       const shuffled = await this.shuffleArray(array);
       return shuffled.slice(0, count);
     } catch (error) {
-      throw new Error(`Failed to select random elements: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to select random elements: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -160,7 +174,9 @@ export class RandomService {
 
       return createHash('sha256').update(seedData).digest('hex');
     } catch (error) {
-      throw new Error(`Failed to generate lottery seed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to generate lottery seed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -185,7 +201,7 @@ export class RandomService {
   getEntropyStats(): { minEntropy: number; defaultEntropy: number } {
     return {
       minEntropy: RandomService.MIN_ENTROPY_THRESHOLD,
-      defaultEntropy: RandomService.DEFAULT_ENTROPY_BYTES * 8
+      defaultEntropy: RandomService.DEFAULT_ENTROPY_BYTES * 8,
     };
   }
 
@@ -203,7 +219,9 @@ export class RandomService {
   /**
    * Test entropy quality
    */
-  async testEntropy(sampleSize: number = 1000): Promise<{ quality: 'good' | 'fair' | 'poor'; chi2: number }> {
+  async testEntropy(
+    sampleSize: number = 1000,
+  ): Promise<{ quality: 'good' | 'fair' | 'poor'; chi2: number }> {
     try {
       const samples: number[] = [];
 
@@ -216,7 +234,7 @@ export class RandomService {
       const expected = sampleSize / 256;
       const buckets = new Array(256).fill(0);
 
-      samples.forEach(sample => buckets[sample]++);
+      samples.forEach((sample) => buckets[sample]++);
 
       const chi2 = buckets.reduce((sum, observed) => {
         const diff = observed - expected;
@@ -230,7 +248,9 @@ export class RandomService {
 
       return { quality, chi2 };
     } catch (error) {
-      throw new Error(`Failed to test entropy: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to test entropy: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 export default function DashboardLoading() {
   return (
@@ -37,7 +37,7 @@ export default function DashboardLoading() {
 
         {/* Events Grid Skeleton */}
         <div className="grid gap-6 lg:grid-cols-2">
-          {[1, 2].map(i => (
+          {[1, 2].map((i) => (
             <Card key={i} className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader>
                 <div className="h-6 bg-gray-200 dark:bg-gray-700 animate-pulse rounded w-32 mb-2"></div>
@@ -45,8 +45,11 @@ export default function DashboardLoading() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[1, 2, 3].map(j => (
-                    <div key={j} className="h-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                  {[1, 2, 3].map((j) => (
+                    <div
+                      key={j}
+                      className="h-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"
+                    ></div>
                   ))}
                 </div>
               </CardContent>

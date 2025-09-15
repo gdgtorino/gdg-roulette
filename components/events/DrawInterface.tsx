@@ -70,9 +70,7 @@ export function DrawInterface({ event }: DrawInterfaceProps) {
   return (
     <div className="bg-white rounded-lg shadow-lg p-8">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          {event.name} - Live Draw
-        </h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">{event.name} - Live Draw</h2>
 
         {!isDrawing && winners.length === 0 && (
           <div className="space-y-6">
@@ -91,11 +89,7 @@ export function DrawInterface({ event }: DrawInterfaceProps) {
               />
             </div>
 
-            <Button
-              onClick={handleExecuteDraw}
-              size="lg"
-              className="px-8 py-4 text-lg"
-            >
+            <Button onClick={handleExecuteDraw} size="lg" className="px-8 py-4 text-lg">
               Start Draw
             </Button>
           </div>
@@ -112,9 +106,7 @@ export function DrawInterface({ event }: DrawInterfaceProps) {
 
         {winners.length > 0 && (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-green-600">
-              🎉 Congratulations! 🎉
-            </h3>
+            <h3 className="text-2xl font-bold text-green-600">🎉 Congratulations! 🎉</h3>
 
             <div className="grid gap-4">
               {winners.map((winner, index) => (
@@ -122,21 +114,15 @@ export function DrawInterface({ event }: DrawInterfaceProps) {
                   key={winner.id}
                   className="p-6 bg-gradient-to-r from-gold-100 to-yellow-100 rounded-lg border border-gold-300"
                 >
-                  <div className="text-xl font-bold text-gray-900">
-                    🏆 Winner #{index + 1}
-                  </div>
-                  <div className="text-lg text-gray-800 mt-2">
-                    {winner.participant.name}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {winner.participant.email}
-                  </div>
+                  <div className="text-xl font-bold text-gray-900">🏆 Winner #{index + 1}</div>
+                  <div className="text-lg text-gray-800 mt-2">{winner.participant.name}</div>
+                  <div className="text-sm text-gray-600">{winner.participant.email}</div>
                 </div>
               ))}
             </div>
 
             <Button
-              onClick={() => window.location.href = `/events/${event.id}/results`}
+              onClick={() => (window.location.href = `/events/${event.id}/results`)}
               size="lg"
               className="px-8"
             >

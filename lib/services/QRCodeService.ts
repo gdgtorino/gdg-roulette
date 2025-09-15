@@ -24,11 +24,11 @@ export class QRCodeService {
     margin: 2,
     color: {
       dark: '#000000',
-      light: '#FFFFFF'
+      light: '#FFFFFF',
     },
     errorCorrectionLevel: 'M',
     type: 'image/png',
-    quality: 0.92
+    quality: 0.92,
   };
 
   /**
@@ -44,7 +44,7 @@ export class QRCodeService {
         color: finalOptions.color,
         errorCorrectionLevel: finalOptions.errorCorrectionLevel,
         type: finalOptions.type,
-        quality: finalOptions.quality
+        quality: finalOptions.quality,
       });
 
       return qrCodeDataURL;
@@ -65,7 +65,7 @@ export class QRCodeService {
         width: finalOptions.width,
         margin: finalOptions.margin,
         color: finalOptions.color,
-        errorCorrectionLevel: finalOptions.errorCorrectionLevel
+        errorCorrectionLevel: finalOptions.errorCorrectionLevel,
       });
 
       return svgString;
@@ -86,7 +86,7 @@ export class QRCodeService {
         margin: finalOptions.margin,
         color: finalOptions.color,
         errorCorrectionLevel: finalOptions.errorCorrectionLevel,
-        type: 'png'
+        type: 'png',
       });
 
       return buffer;
@@ -108,8 +108,8 @@ export class QRCodeService {
         errorCorrectionLevel: 'H', // High error correction for public use
         color: {
           dark: '#1a1a1a',
-          light: '#ffffff'
-        }
+          light: '#ffffff',
+        },
       });
     } catch (error) {
       throw new Error(`Failed to generate event QR code: ${error}`);
@@ -126,7 +126,7 @@ export class QRCodeService {
       backgroundColor?: string;
       size?: number;
       logo?: string;
-    }
+    },
   ): Promise<string> {
     try {
       const options: QRCodeOptions = {
@@ -135,8 +135,8 @@ export class QRCodeService {
         errorCorrectionLevel: 'H',
         color: {
           dark: branding?.primaryColor || '#2563eb',
-          light: branding?.backgroundColor || '#ffffff'
-        }
+          light: branding?.backgroundColor || '#ffffff',
+        },
       };
 
       const qrCodeDataURL = await this.generateQRCode(data, options);
@@ -154,7 +154,7 @@ export class QRCodeService {
    */
   async generateBatchQRCodes(
     dataArray: string[],
-    options?: QRCodeOptions
+    options?: QRCodeOptions,
   ): Promise<Array<{ data: string; qrCode: string; error?: string }>> {
     const results: Array<{ data: string; qrCode: string; error?: string }> = [];
 
@@ -166,7 +166,7 @@ export class QRCodeService {
         results.push({
           data,
           qrCode: '',
-          error: `Failed to generate QR code: ${error}`
+          error: `Failed to generate QR code: ${error}`,
         });
       }
     }
@@ -184,7 +184,8 @@ export class QRCodeService {
       errors.push('Data cannot be empty');
     }
 
-    if (data.length > 2953) { // Maximum capacity for QR code with error correction level L
+    if (data.length > 2953) {
+      // Maximum capacity for QR code with error correction level L
       errors.push('Data too long for QR code generation');
     }
 
@@ -197,7 +198,7 @@ export class QRCodeService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -210,19 +211,19 @@ export class QRCodeService {
       if (!validation.valid) {
         return {
           success: false,
-          error: validation.errors.join('; ')
+          error: validation.errors.join('; '),
         };
       }
 
       const qrCode = await this.generateQRCode(data, options);
       return {
         success: true,
-        data: qrCode
+        data: qrCode,
       };
     } catch (error) {
       return {
         success: false,
-        error: `QR code generation failed: ${error}`
+        error: `QR code generation failed: ${error}`,
       };
     }
   }
@@ -230,7 +231,10 @@ export class QRCodeService {
   /**
    * Get QR code information
    */
-  getQRCodeInfo(data: string, errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H' = 'M'): {
+  getQRCodeInfo(
+    data: string,
+    errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H' = 'M',
+  ): {
     estimatedSize: number;
     recommendedMinSize: number;
     maxCapacity: number;
@@ -241,21 +245,21 @@ export class QRCodeService {
       L: 2953, // Low
       M: 2331, // Medium
       Q: 1663, // Quartile
-      H: 1273  // High
+      H: 1273, // High
     };
 
     const recommendedMinSizes = {
       L: 200,
       M: 250,
       Q: 300,
-      H: 350
+      H: 350,
     };
 
     return {
       estimatedSize: Math.ceil(data.length * 1.1), // Rough estimate
       recommendedMinSize: recommendedMinSizes[errorCorrectionLevel],
       maxCapacity: capacities[errorCorrectionLevel],
-      errorCorrectionLevel: this.getErrorCorrectionDescription(errorCorrectionLevel)
+      errorCorrectionLevel: this.getErrorCorrectionDescription(errorCorrectionLevel),
     };
   }
 
@@ -267,7 +271,7 @@ export class QRCodeService {
       L: 'Low (~7% recovery)',
       M: 'Medium (~15% recovery)',
       Q: 'Quartile (~25% recovery)',
-      H: 'High (~30% recovery)'
+      H: 'High (~30% recovery)',
     };
     return descriptions[level];
   }
@@ -292,12 +296,14 @@ export class QRCodeService {
         contactInfo.phone ? `TEL:${contactInfo.phone}` : '',
         contactInfo.email ? `EMAIL:${contactInfo.email}` : '',
         contactInfo.url ? `URL:${contactInfo.url}` : '',
-        'END:VCARD'
-      ].filter(line => line !== '').join('\n');
+        'END:VCARD',
+      ]
+        .filter((line) => line !== '')
+        .join('\n');
 
       return await this.generateQRCode(vCard, {
         errorCorrectionLevel: 'M',
-        width: 300
+        width: 300,
       });
     } catch (error) {
       throw new Error(`Failed to generate contact QR code: ${error}`);
@@ -321,7 +327,7 @@ export class QRCodeService {
 
       return await this.generateQRCode(wifiString, {
         errorCorrectionLevel: 'M',
-        width: 300
+        width: 300,
       });
     } catch (error) {
       throw new Error(`Failed to generate WiFi QR code: ${error}`);

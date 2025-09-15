@@ -15,7 +15,7 @@ test.describe('Admin Flow E2E Tests', () => {
   test.beforeAll(async ({ browser }) => {
     context = await browser.newContext({
       viewport: { width: 1280, height: 720 },
-      ignoreHTTPSErrors: true
+      ignoreHTTPSErrors: true,
     });
   });
 
@@ -53,7 +53,9 @@ test.describe('Admin Flow E2E Tests', () => {
 
       // Should redirect to admin dashboard
       await expect(page).toHaveURL('/admin/dashboard');
-      await expect(page.locator('[data-testid="welcome-message"]')).toContainText('Welcome, admin1');
+      await expect(page.locator('[data-testid="welcome-message"]')).toContainText(
+        'Welcome, admin1',
+      );
 
       // Verify admin navigation menu is present
       await expect(page.locator('[data-testid="admin-nav"]')).toBeVisible();
@@ -70,7 +72,9 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.click('[data-testid="login-button"]');
 
       // Should show error and remain on login page
-      await expect(page.locator('[data-testid="error-message"]')).toContainText('Invalid credentials');
+      await expect(page.locator('[data-testid="error-message"]')).toContainText(
+        'Invalid credentials',
+      );
       await expect(page).toHaveURL(/\/admin\/login/);
     });
 
@@ -81,8 +85,12 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.click('[data-testid="login-button"]');
 
       // Should show validation errors
-      await expect(page.locator('[data-testid="username-error"]')).toContainText('Username is required');
-      await expect(page.locator('[data-testid="password-error"]')).toContainText('Password is required');
+      await expect(page.locator('[data-testid="username-error"]')).toContainText(
+        'Username is required',
+      );
+      await expect(page.locator('[data-testid="password-error"]')).toContainText(
+        'Password is required',
+      );
 
       // Should not redirect
       await expect(page).toHaveURL(/\/admin\/login/);
@@ -102,7 +110,9 @@ test.describe('Admin Flow E2E Tests', () => {
 
       // Should still be on dashboard and logged in
       await expect(page).toHaveURL('/admin/dashboard');
-      await expect(page.locator('[data-testid="welcome-message"]')).toContainText('Welcome, admin1');
+      await expect(page.locator('[data-testid="welcome-message"]')).toContainText(
+        'Welcome, admin1',
+      );
     });
 
     test('should handle logout correctly', async () => {
@@ -149,11 +159,15 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.click('[data-testid="create-event-submit"]');
 
       // Should show success message and new event in list
-      await expect(page.locator('[data-testid="success-message"]')).toContainText('Event created successfully');
+      await expect(page.locator('[data-testid="success-message"]')).toContainText(
+        'Event created successfully',
+      );
       await expect(page.locator('[data-testid="events-list"]')).toContainText('E2E Test Event');
 
       // New event should be in INIT state
-      const eventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'E2E Test Event' });
+      const eventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'E2E Test Event' });
       await expect(eventCard.locator('[data-testid="event-state"]')).toContainText('INIT');
     });
 
@@ -164,8 +178,12 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.click('[data-testid="create-event-submit"]');
 
       // Should show validation errors
-      await expect(page.locator('[data-testid="name-error"]')).toContainText('Event name is required');
-      await expect(page.locator('[data-testid="description-error"]')).toContainText('Description is required');
+      await expect(page.locator('[data-testid="name-error"]')).toContainText(
+        'Event name is required',
+      );
+      await expect(page.locator('[data-testid="description-error"]')).toContainText(
+        'Description is required',
+      );
 
       // Try with invalid max participants
       await page.fill('[data-testid="event-name-input"]', 'Test Event');
@@ -173,7 +191,9 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.fill('[data-testid="max-participants-input"]', '-1');
       await page.click('[data-testid="create-event-submit"]');
 
-      await expect(page.locator('[data-testid="max-participants-error"]')).toContainText('Must be a positive number');
+      await expect(page.locator('[data-testid="max-participants-error"]')).toContainText(
+        'Must be a positive number',
+      );
     });
 
     test('should transition event through all states', async () => {
@@ -183,7 +203,9 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.fill('[data-testid="event-description-input"]', 'Testing state transitions');
       await page.click('[data-testid="create-event-submit"]');
 
-      const eventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'State Transition Event' });
+      const eventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'State Transition Event' });
 
       // Should start in INIT state
       await expect(eventCard.locator('[data-testid="event-state"]')).toContainText('INIT');
@@ -225,7 +247,9 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.fill('[data-testid="event-description-input"]', 'Testing invalid transitions');
       await page.click('[data-testid="create-event-submit"]');
 
-      const eventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'Invalid Transition Event' });
+      const eventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'Invalid Transition Event' });
 
       // In INIT state, should not be able to start draw directly
       await expect(eventCard.locator('[data-testid="start-draw-button"]')).not.toBeVisible();
@@ -242,14 +266,18 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.fill('[data-testid="event-description-input"]', 'Will be deleted');
       await page.click('[data-testid="create-event-submit"]');
 
-      const eventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'Event to Delete' });
+      const eventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'Event to Delete' });
 
       // Click delete button
       await eventCard.locator('[data-testid="delete-event-button"]').click();
 
       // Should show confirmation dialog
       await expect(page.locator('[data-testid="delete-confirmation-dialog"]')).toBeVisible();
-      await expect(page.locator('[data-testid="delete-warning"]')).toContainText('This action cannot be undone');
+      await expect(page.locator('[data-testid="delete-warning"]')).toContainText(
+        'This action cannot be undone',
+      );
 
       // Cancel first
       await page.click('[data-testid="cancel-delete"]');
@@ -262,8 +290,12 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.click('[data-testid="confirm-delete"]');
 
       // Should show success and remove from list
-      await expect(page.locator('[data-testid="success-message"]')).toContainText('Event deleted successfully');
-      await expect(page.locator('[data-testid="events-list"]')).not.toContainText('Event to Delete');
+      await expect(page.locator('[data-testid="success-message"]')).toContainText(
+        'Event deleted successfully',
+      );
+      await expect(page.locator('[data-testid="events-list"]')).not.toContainText(
+        'Event to Delete',
+      );
     });
   });
 
@@ -281,7 +313,9 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.fill('[data-testid="event-description-input"]', 'Testing lottery functionality');
       await page.click('[data-testid="create-event-submit"]');
 
-      const eventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'Lottery Test Event' });
+      const eventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'Lottery Test Event' });
       await eventCard.locator('[data-testid="open-registration-button"]').click();
 
       // Mock participants being registered
@@ -293,7 +327,7 @@ test.describe('Admin Flow E2E Tests', () => {
           { name: 'Bob Smith', id: 'p2' },
           { name: 'Charlie Brown', id: 'p3' },
           { name: 'Diana Prince', id: 'p4' },
-          { name: 'Eve Wilson', id: 'p5' }
+          { name: 'Eve Wilson', id: 'p5' },
         ];
       });
 
@@ -302,7 +336,9 @@ test.describe('Admin Flow E2E Tests', () => {
     });
 
     test('should execute single winner draw', async () => {
-      const eventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'Lottery Test Event' });
+      const eventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'Lottery Test Event' });
 
       // Click draw single winner
       await eventCard.locator('[data-testid="draw-single-winner-button"]').click();
@@ -313,7 +349,13 @@ test.describe('Admin Flow E2E Tests', () => {
       // Should show winner result
       await expect(page.locator('[data-testid="winner-announcement"]')).toBeVisible();
       const winnerName = await page.locator('[data-testid="winner-name"]').textContent();
-      expect(['Alice Johnson', 'Bob Smith', 'Charlie Brown', 'Diana Prince', 'Eve Wilson']).toContain(winnerName);
+      expect([
+        'Alice Johnson',
+        'Bob Smith',
+        'Charlie Brown',
+        'Diana Prince',
+        'Eve Wilson',
+      ]).toContain(winnerName);
 
       // Should show draw order
       await expect(page.locator('[data-testid="draw-order"]')).toContainText('1');
@@ -323,7 +365,9 @@ test.describe('Admin Flow E2E Tests', () => {
     });
 
     test('should execute draw all remaining participants', async () => {
-      const eventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'Lottery Test Event' });
+      const eventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'Lottery Test Event' });
 
       // Click draw all
       await eventCard.locator('[data-testid="draw-all-button"]').click();
@@ -342,7 +386,9 @@ test.describe('Admin Flow E2E Tests', () => {
 
       // Verify draw order sequence
       for (let i = 1; i <= 5; i++) {
-        await expect(winnerItems.nth(i - 1).locator('[data-testid="draw-position"]')).toContainText(i.toString());
+        await expect(winnerItems.nth(i - 1).locator('[data-testid="draw-position"]')).toContainText(
+          i.toString(),
+        );
       }
 
       // Event should be automatically closed
@@ -350,7 +396,9 @@ test.describe('Admin Flow E2E Tests', () => {
     });
 
     test('should show real-time draw updates', async () => {
-      const eventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'Lottery Test Event' });
+      const eventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'Lottery Test Event' });
 
       // Open event management view
       await eventCard.locator('[data-testid="view-event-button"]').click();
@@ -368,7 +416,9 @@ test.describe('Admin Flow E2E Tests', () => {
       await expect(page.locator('[data-testid="winners-count"]')).toContainText('1');
 
       // Should show winner in live list
-      await expect(page.locator('[data-testid="live-winners-list"] [data-testid="winner-item"]')).toHaveCount(1);
+      await expect(
+        page.locator('[data-testid="live-winners-list"] [data-testid="winner-item"]'),
+      ).toHaveCount(1);
     });
 
     test('should handle draw with no participants', async () => {
@@ -379,7 +429,9 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.fill('[data-testid="event-description-input"]', 'No participants');
       await page.click('[data-testid="create-event-submit"]');
 
-      const emptyEventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'Empty Event' });
+      const emptyEventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'Empty Event' });
       await emptyEventCard.locator('[data-testid="open-registration-button"]').click();
       await emptyEventCard.locator('[data-testid="start-draw-button"]').click();
       await page.click('[data-testid="confirm-start-draw"]');
@@ -388,11 +440,15 @@ test.describe('Admin Flow E2E Tests', () => {
       await emptyEventCard.locator('[data-testid="draw-single-winner-button"]').click();
 
       // Should show error message
-      await expect(page.locator('[data-testid="error-message"]')).toContainText('No participants available for drawing');
+      await expect(page.locator('[data-testid="error-message"]')).toContainText(
+        'No participants available for drawing',
+      );
     });
 
     test('should display winner statistics and analytics', async () => {
-      const eventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'Lottery Test Event' });
+      const eventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'Lottery Test Event' });
 
       // Draw all participants
       await eventCard.locator('[data-testid="draw-all-button"]').click();
@@ -437,7 +493,9 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.click('[data-testid="create-event-submit"]');
 
       // Should show network error
-      await expect(page.locator('[data-testid="network-error"]')).toContainText('Network connection lost');
+      await expect(page.locator('[data-testid="network-error"]')).toContainText(
+        'Network connection lost',
+      );
       await expect(page.locator('[data-testid="retry-button"]')).toBeVisible();
 
       // Restore connection
@@ -445,7 +503,9 @@ test.describe('Admin Flow E2E Tests', () => {
 
       // Retry should work
       await page.click('[data-testid="retry-button"]');
-      await expect(page.locator('[data-testid="success-message"]')).toContainText('Event created successfully');
+      await expect(page.locator('[data-testid="success-message"]')).toContainText(
+        'Event created successfully',
+      );
     });
 
     test('should handle session timeout gracefully', async () => {
@@ -457,7 +517,9 @@ test.describe('Admin Flow E2E Tests', () => {
 
       // Should redirect to login with session expired message
       await expect(page).toHaveURL(/\/admin\/login/);
-      await expect(page.locator('[data-testid="session-expired-message"]')).toContainText('Session expired. Please log in again.');
+      await expect(page.locator('[data-testid="session-expired-message"]')).toContainText(
+        'Session expired. Please log in again.',
+      );
     });
 
     test('should validate browser compatibility', async () => {
@@ -486,24 +548,28 @@ test.describe('Admin Flow E2E Tests', () => {
       const page2 = await context.newPage();
       await page2.goto('/admin/dashboard');
 
-      const eventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'Concurrent Test Event' });
-      const eventCard2 = page2.locator('[data-testid="event-card"]').filter({ hasText: 'Concurrent Test Event' });
+      const eventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'Concurrent Test Event' });
+      const eventCard2 = page2
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'Concurrent Test Event' });
 
       // Try to perform same operation from both tabs
       await Promise.all([
         eventCard.locator('[data-testid="open-registration-button"]').click(),
-        eventCard2.locator('[data-testid="open-registration-button"]').click()
+        eventCard2.locator('[data-testid="open-registration-button"]').click(),
       ]);
 
       // One should succeed, one should show conflict error
       const successMessages = await Promise.all([
         page.locator('[data-testid="success-message"]').isVisible(),
-        page2.locator('[data-testid="success-message"]').isVisible()
+        page2.locator('[data-testid="success-message"]').isVisible(),
       ]);
 
       const conflictMessages = await Promise.all([
         page.locator('[data-testid="conflict-error"]').isVisible(),
-        page2.locator('[data-testid="conflict-error"]').isVisible()
+        page2.locator('[data-testid="conflict-error"]').isVisible(),
       ]);
 
       // Exactly one should succeed and one should show conflict
@@ -530,7 +596,7 @@ test.describe('Admin Flow E2E Tests', () => {
           @media (prefers-contrast: high) {
             * { border: 1px solid red !important; }
           }
-        `
+        `,
       });
 
       // Elements should remain visible and functional
@@ -546,13 +612,17 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.click('[data-testid="create-event-submit"]');
 
       // Should sanitize input and show validation error
-      await expect(page.locator('[data-testid="validation-error"]')).toContainText('Invalid characters detected');
+      await expect(page.locator('[data-testid="validation-error"]')).toContainText(
+        'Invalid characters detected',
+      );
 
       // Test SQL injection prevention
       await page.fill('[data-testid="event-name-input"]', "'; DROP TABLE events; --");
       await page.click('[data-testid="create-event-submit"]');
 
-      await expect(page.locator('[data-testid="validation-error"]')).toContainText('Invalid characters detected');
+      await expect(page.locator('[data-testid="validation-error"]')).toContainText(
+        'Invalid characters detected',
+      );
     });
   });
 
@@ -571,7 +641,7 @@ test.describe('Admin Flow E2E Tests', () => {
           name: `Event ${i}`,
           state: Math.random() > 0.5 ? 'REGISTRATION' : 'CLOSED',
           participantCount: Math.floor(Math.random() * 200),
-          createdAt: new Date()
+          createdAt: new Date(),
         }));
       });
 
@@ -609,7 +679,9 @@ test.describe('Admin Flow E2E Tests', () => {
       await page.fill('[data-testid="event-description-input"]', 'Testing rapid interactions');
       await page.click('[data-testid="create-event-submit"]');
 
-      const eventCard = page.locator('[data-testid="event-card"]').filter({ hasText: 'Rapid Click Test' });
+      const eventCard = page
+        .locator('[data-testid="event-card"]')
+        .filter({ hasText: 'Rapid Click Test' });
 
       // Rapidly click same button multiple times
       const openRegistrationButton = eventCard.locator('[data-testid="open-registration-button"]');
@@ -619,7 +691,7 @@ test.describe('Admin Flow E2E Tests', () => {
         openRegistrationButton.click(),
         openRegistrationButton.click(),
         openRegistrationButton.click(),
-        openRegistrationButton.click()
+        openRegistrationButton.click(),
       ]);
 
       // Should handle gracefully - only one state change should occur

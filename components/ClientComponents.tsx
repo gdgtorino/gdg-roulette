@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import DarkModeToggle from "@/components/DarkModeToggle";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import DarkModeToggle from '@/components/DarkModeToggle';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export function HeaderControls() {
   return (

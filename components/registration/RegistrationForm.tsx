@@ -24,7 +24,7 @@ export function RegistrationForm({
   onRegister,
   onError,
   disabled = false,
-  className = ''
+  className = '',
 }: RegistrationFormProps) {
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,7 +47,11 @@ export function RegistrationForm({
     }
 
     // Check for invalid characters
-    if (!/^[a-zA-Z\s\-'àáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð,.''""]+$/.test(trimmedName)) {
+    if (
+      !/^[a-zA-Z\s\-'àáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð,.''""]+$/.test(
+        trimmedName,
+      )
+    ) {
       return 'Name contains invalid characters';
     }
 
@@ -65,7 +69,7 @@ export function RegistrationForm({
 
     // Clear name error when user starts typing
     if (errors.name) {
-      setErrors(prev => ({ ...prev, name: undefined }));
+      setErrors((prev) => ({ ...prev, name: undefined }));
     }
   };
 
@@ -139,9 +143,7 @@ export function RegistrationForm({
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Register</h2>
         <h3 className="text-lg text-gray-600">{event.name}</h3>
-        {event.description && (
-          <p className="text-sm text-gray-500 mt-2">{event.description}</p>
-        )}
+        {event.description && <p className="text-sm text-gray-500 mt-2">{event.description}</p>}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -171,20 +173,12 @@ export function RegistrationForm({
         </div>
 
         {submitError && (
-          <div
-            className="p-3 bg-red-50 border border-red-200 rounded-md"
-            role="alert"
-          >
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md" role="alert">
             <p className="text-red-800 text-sm">{submitError}</p>
           </div>
         )}
 
-        <Button
-          type="submit"
-          disabled={!isFormValid}
-          className="w-full"
-          size="lg"
-        >
+        <Button type="submit" disabled={!isFormValid} className="w-full" size="lg">
           {isSubmitting ? (
             <>
               <LoadingSpinner className="mr-2 h-4 w-4" />
@@ -200,14 +194,16 @@ export function RegistrationForm({
       <div className="mt-6 pt-4 border-t border-gray-200">
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span>Event Status:</span>
-          <span className={
-            event.registrationOpen ? 'text-green-600' :
-            event.closed ? 'text-red-600' :
-            'text-yellow-600'
-          }>
-            {event.registrationOpen ? 'Open' :
-             event.closed ? 'Closed' :
-             'Pending'}
+          <span
+            className={
+              event.registrationOpen
+                ? 'text-green-600'
+                : event.closed
+                  ? 'text-red-600'
+                  : 'text-yellow-600'
+            }
+          >
+            {event.registrationOpen ? 'Open' : event.closed ? 'Closed' : 'Pending'}
           </span>
         </div>
         {event.registrationOpen && !event.closed && (
@@ -229,12 +225,8 @@ export function RegistrationForm({
 
       {/* Event Details */}
       <div className="mt-4 text-center">
-        <p className="text-xs text-gray-400">
-          Event ID: {event.id}
-        </p>
-        <p className="text-xs text-gray-400">
-          Created: {event.createdAt.toLocaleDateString()}
-        </p>
+        <p className="text-xs text-gray-400">Event ID: {event.id}</p>
+        <p className="text-xs text-gray-400">Created: {event.createdAt.toLocaleDateString()}</p>
       </div>
     </Card>
   );

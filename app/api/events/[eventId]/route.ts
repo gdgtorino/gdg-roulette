@@ -46,19 +46,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const event = await getEvent(params.eventId);
 
     if (!event) {
-      return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
     return NextResponse.json({ event });
   } catch (error) {
     console.error('Get event error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch event' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch event' }, { status: 500 });
   }
 }
 
@@ -72,19 +66,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const body = await validateRequest(request, updateEventSchema);
 
     if (!body.success) {
-      return NextResponse.json(
-        { error: body.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: body.error }, { status: 400 });
     }
 
     const event = await updateEvent(params.eventId);
 
     if (!event) {
-      return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -93,10 +81,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error('Update event error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update event' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update event' }, { status: 500 });
   }
 }
 
@@ -111,10 +96,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const success = await deleteEvent(params.eventId);
 
     if (!success) {
-      return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -123,20 +105,14 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error('Delete event error:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete event' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete event' }, { status: 500 });
   }
 }
 
 function handleGetEventTestMode(request: NextRequest, params: { eventId: string }): NextResponse {
   // Test mode: return mock event data
   if (params.eventId === 'nonexistent-event') {
-    return NextResponse.json(
-      { error: 'Event not found' },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: 'Event not found' }, { status: 404 });
   }
 
   const mockEvent = {
@@ -147,21 +123,21 @@ function handleGetEventTestMode(request: NextRequest, params: { eventId: string 
     maxParticipants: 100,
     participantCount: 5,
     createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01')
+    updatedAt: new Date('2024-01-01'),
   };
 
   return NextResponse.json({ event: mockEvent });
 }
 
-async function handleUpdateEventTestMode(request: NextRequest, params: { eventId: string }): Promise<NextResponse> {
+async function handleUpdateEventTestMode(
+  request: NextRequest,
+  params: { eventId: string },
+): Promise<NextResponse> {
   try {
     const body = await request.json();
 
     if (params.eventId === 'nonexistent-event') {
-      return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
     const updatedEvent = {
@@ -172,7 +148,7 @@ async function handleUpdateEventTestMode(request: NextRequest, params: { eventId
       maxParticipants: body.maxParticipants || 100,
       participantCount: 5,
       createdAt: new Date('2024-01-01'),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     return NextResponse.json({
@@ -180,20 +156,17 @@ async function handleUpdateEventTestMode(request: NextRequest, params: { eventId
       event: updatedEvent,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid JSON format' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Invalid JSON format' }, { status: 400 });
   }
 }
 
-function handleDeleteEventTestMode(request: NextRequest, params: { eventId: string }): NextResponse {
+function handleDeleteEventTestMode(
+  request: NextRequest,
+  params: { eventId: string },
+): NextResponse {
   // Test mode: return success for valid event IDs
   if (params.eventId === 'nonexistent-event') {
-    return NextResponse.json(
-      { error: 'Event not found' },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: 'Event not found' }, { status: 404 });
   }
 
   return NextResponse.json({

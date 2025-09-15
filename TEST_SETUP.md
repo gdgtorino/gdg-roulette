@@ -1,10 +1,12 @@
 # Testing Infrastructure Setup
 
-This document outlines the comprehensive testing infrastructure for The Draw Event Management System with Lottery functionality.
+This document outlines the comprehensive testing infrastructure for The Draw
+Event Management System with Lottery functionality.
 
 ## Overview
 
 The testing infrastructure includes:
+
 - **Jest** with React Testing Library for component unit tests
 - **Playwright** for cross-browser E2E testing
 - **Vitest** for database integration tests
@@ -29,6 +31,7 @@ the_draw/
 ## Environment Variables
 
 ### Test Environment (.env.test)
+
 ```bash
 NODE_ENV=test
 DATABASE_URL=postgresql://test:test@localhost:5432/test_the_draw
@@ -43,6 +46,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3000
 ## Available Test Scripts
 
 ### Root Package Scripts
+
 ```bash
 yarn test              # Run unit + integration tests
 yarn test:unit         # Run Jest unit tests
@@ -56,6 +60,7 @@ yarn test:setup        # Setup test database
 ```
 
 ### Workspace Scripts
+
 ```bash
 # Frontend tests
 yarn workspace @the-draw/frontend test
@@ -71,26 +76,31 @@ yarn workspace @the-draw/backend test:coverage
 ## Test Utilities
 
 ### Custom Render (`__tests__/utils/render.tsx`)
+
 - Wraps components with QueryClientProvider
 - Custom render for Server Components
 - Re-exports all testing-library utilities
 
 ### Database Helpers (`__tests__/utils/database.ts`)
+
 - Test Prisma client setup
 - Database cleanup functions
 - Factory functions for test data creation
 
 ### Authentication Helpers (`__tests__/utils/auth.ts`)
+
 - JWT token creation for tests
 - NextAuth session mocking
 - Authentication header helpers
 
 ### MSW Setup (`__tests__/utils/msw.ts`)
+
 - API endpoint mocking
 - Request/response handlers
 - Server setup and teardown
 
 ### Test Factories (`__tests__/utils/factories.ts`)
+
 - Mock data generators for all entities
 - Complex scenario factories
 - Consistent test data patterns
@@ -98,11 +108,13 @@ yarn workspace @the-draw/backend test:coverage
 ## Database Testing
 
 ### Setup
+
 1. Create test database: `test_the_draw`
 2. Run migrations: `yarn workspace @the-draw/backend prisma migrate deploy`
 3. Seed test data as needed
 
 ### Best Practices
+
 - Use transactions for test isolation
 - Clean up after each test
 - Use factories for consistent test data
@@ -111,6 +123,7 @@ yarn workspace @the-draw/backend test:coverage
 ## E2E Testing with Playwright
 
 ### Browser Support
+
 - Chromium (Desktop)
 - Firefox (Desktop)
 - WebKit/Safari (Desktop)
@@ -118,6 +131,7 @@ yarn workspace @the-draw/backend test:coverage
 - Mobile Safari (iPhone 12)
 
 ### Features
+
 - Cross-browser testing
 - Mobile viewport testing
 - Screenshot on failure
@@ -127,12 +141,14 @@ yarn workspace @the-draw/backend test:coverage
 ## Coverage Requirements
 
 Minimum 80% coverage required for:
+
 - Branches
 - Functions
 - Lines
 - Statements
 
 ### Coverage Reports
+
 - Text output to console
 - HTML report in `coverage/` directory
 - LCOV format for CI/CD integration
@@ -141,12 +157,14 @@ Minimum 80% coverage required for:
 ## CI/CD Integration
 
 ### Test Pipeline
+
 1. **Unit Tests**: Jest with coverage reporting
 2. **Integration Tests**: Vitest for database operations
 3. **E2E Tests**: Playwright across multiple browsers
 4. **Coverage Check**: Enforce 80% minimum threshold
 
 ### Test Artifacts
+
 - Coverage reports
 - Test results (JUnit XML)
 - E2E test videos/screenshots
@@ -155,17 +173,20 @@ Minimum 80% coverage required for:
 ## Development Workflow
 
 ### TDD Workflow
+
 1. Write failing test
 2. Implement minimal code to pass
 3. Refactor while keeping tests green
 4. Repeat
 
 ### Test Organization
+
 - **Unit tests**: Single component/function testing
 - **Integration tests**: Database operations, API endpoints
 - **E2E tests**: Complete user workflows
 
 ### Mocking Strategy
+
 - Mock external APIs with MSW
 - Mock database for unit tests
 - Use real database for integration tests
@@ -182,12 +203,14 @@ Minimum 80% coverage required for:
 ## Troubleshooting
 
 ### Common Issues
+
 - **Database connection**: Ensure PostgreSQL is running
 - **Redis connection**: Ensure Redis is running
 - **Port conflicts**: Check ports 3000/3001 are available
 - **Browser issues**: Run `npx playwright install`
 
 ### Debug Mode
+
 - Jest: `yarn test --verbose`
 - Playwright: `yarn test:e2e --debug`
 - Database: Check logs in `test-results/`

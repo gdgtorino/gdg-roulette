@@ -23,7 +23,7 @@ import {
   QrCode,
   Settings,
   ExternalLink,
-  Users
+  Users,
 } from 'lucide-react';
 
 interface EventControlsProps {
@@ -50,7 +50,7 @@ export function EventControls({
   onCloseEvent,
   onDrawWinner,
   onDeleteEvent,
-  className
+  className,
 }: EventControlsProps) {
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
@@ -66,7 +66,8 @@ export function EventControls({
     }
   };
 
-  const canDrawWinner = !event.registrationOpen && !event.closed && participants.length > winners.length;
+  const canDrawWinner =
+    !event.registrationOpen && !event.closed && participants.length > winners.length;
   const hasParticipants = participants.length > 0;
   const registrationUrl = `${window.location.origin}/register/${event.id}`;
   const qrUrl = `${window.location.origin}/admin/events/${event.id}/qr`;
@@ -86,7 +87,7 @@ export function EventControls({
           <div className="flex flex-wrap gap-2">
             {!event.closed && onToggleRegistration && (
               <Button
-                variant={event.registrationOpen ? "destructive" : "default"}
+                variant={event.registrationOpen ? 'destructive' : 'default'}
                 size="sm"
                 onClick={() => handleAction('toggleRegistration', onToggleRegistration)}
                 disabled={isLoading === 'toggleRegistration'}
@@ -165,11 +166,7 @@ export function EventControls({
             {!event.closed && onCloseEvent && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="gap-2"
-                  >
+                  <Button variant="secondary" size="sm" className="gap-2">
                     <Square className="h-4 w-4" />
                     Complete Event
                   </Button>
@@ -178,8 +175,8 @@ export function EventControls({
                   <AlertDialogHeader>
                     <AlertDialogTitle>Complete Event</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will mark the event as completed and prevent further registrations or drawings.
-                      This action cannot be undone.
+                      This will mark the event as completed and prevent further registrations or
+                      drawings. This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -216,11 +213,7 @@ export function EventControls({
           <h4 className="font-medium text-sm text-red-700">Danger Zone</h4>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button
-                variant="destructive"
-                size="sm"
-                className="gap-2"
-              >
+              <Button variant="destructive" size="sm" className="gap-2">
                 <Trash2 className="h-4 w-4" />
                 Delete Event
               </Button>
@@ -229,8 +222,8 @@ export function EventControls({
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Event</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to delete &quot;{event.name}&quot;? This will permanently remove
-                  the event, all participants, and all winners. This action cannot be undone.
+                  Are you sure you want to delete &quot;{event.name}&quot;? This will permanently
+                  remove the event, all participants, and all winners. This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

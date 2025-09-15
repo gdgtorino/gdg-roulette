@@ -38,14 +38,14 @@ export class SessionManager {
         {
           sessionId,
           adminId,
-          expiresAt: expiresAt.getTime()
+          expiresAt: expiresAt.getTime(),
         },
         this.jwtSecret,
         {
           expiresIn: '24h',
           issuer: 'lottery-app',
-          audience: 'lottery-admin'
-        }
+          audience: 'lottery-admin',
+        },
       );
 
       // Store session in database
@@ -54,8 +54,8 @@ export class SessionManager {
           id: sessionId,
           sessionToken: token,
           userId: adminId,
-          expires: expiresAt
-        }
+          expires: expiresAt,
+        },
       });
 
       return token;
@@ -79,8 +79,8 @@ export class SessionManager {
       // Check if session exists in database and is not expired
       const session = await prisma.session.findUnique({
         where: {
-          sessionToken: token
-        }
+          sessionToken: token,
+        },
       });
 
       if (!session || session.expires < new Date()) {
@@ -96,7 +96,7 @@ export class SessionManager {
         token: session.sessionToken,
         adminId: session.userId,
         expiresAt: session.expires,
-        createdAt: new Date(decoded.iat * 1000)
+        createdAt: new Date(decoded.iat * 1000),
       };
     } catch (error) {
       // Invalid token or other JWT error
@@ -111,8 +111,8 @@ export class SessionManager {
     try {
       const session = await prisma.session.findUnique({
         where: {
-          sessionToken: token
-        }
+          sessionToken: token,
+        },
       });
 
       if (!session) {
@@ -130,7 +130,7 @@ export class SessionManager {
         token: session.sessionToken,
         adminId: session.userId,
         expiresAt: session.expires,
-        createdAt: new Date() // Using current date as we don't store created at
+        createdAt: new Date(), // Using current date as we don't store created at
       };
     } catch (error) {
       throw new Error(`Failed to get session: ${error}`);
@@ -144,8 +144,8 @@ export class SessionManager {
     try {
       await prisma.session.delete({
         where: {
-          sessionToken: token
-        }
+          sessionToken: token,
+        },
       });
       return true;
     } catch (error) {
@@ -163,15 +163,15 @@ export class SessionManager {
         where: {
           userId: adminId,
           expires: {
-            gt: new Date()
-          }
+            gt: new Date(),
+          },
         },
         select: {
-          sessionToken: true
-        }
+          sessionToken: true,
+        },
       });
 
-      return sessions.map(s => s.sessionToken);
+      return sessions.map((s) => s.sessionToken);
     } catch (error) {
       throw new Error(`Failed to get active sessions: ${error}`);
     }
@@ -184,8 +184,8 @@ export class SessionManager {
     try {
       await prisma.session.deleteMany({
         where: {
-          userId: adminId
-        }
+          userId: adminId,
+        },
       });
       return true;
     } catch (error) {
@@ -201,9 +201,9 @@ export class SessionManager {
       const result = await prisma.session.deleteMany({
         where: {
           expires: {
-            lt: new Date()
-          }
-        }
+            lt: new Date(),
+          },
+        },
       });
       return result.count;
     } catch (error) {
@@ -220,11 +220,11 @@ export class SessionManager {
 
       const session = await prisma.session.update({
         where: {
-          sessionToken: token
+          sessionToken: token,
         },
         data: {
-          expires: newExpiresAt
-        }
+          expires: newExpiresAt,
+        },
       });
 
       // Create new JWT token with extended expiration
@@ -233,24 +233,24 @@ export class SessionManager {
         {
           sessionId: session.id,
           adminId: session.userId,
-          expiresAt: newExpiresAt.getTime()
+          expiresAt: newExpiresAt.getTime(),
         },
         this.jwtSecret,
         {
           expiresIn: '24h',
           issuer: 'lottery-app',
-          audience: 'lottery-admin'
-        }
+          audience: 'lottery-admin',
+        },
       );
 
       // Update token in database
       await prisma.session.update({
         where: {
-          id: session.id
+          id: session.id,
         },
         data: {
-          sessionToken: newToken
-        }
+          sessionToken: newToken,
+        },
       });
 
       return {
@@ -258,7 +258,7 @@ export class SessionManager {
         token: newToken,
         adminId: session.userId,
         expiresAt: newExpiresAt,
-        createdAt: new Date(decoded.iat * 1000)
+        createdAt: new Date(decoded.iat * 1000),
       };
     } catch (error) {
       return null;
@@ -280,35 +280,35 @@ export class SessionManager {
       const totalActive = await prisma.session.count({
         where: {
           expires: {
-            gt: now
-          }
-        }
+            gt: now,
+          },
+        },
       });
 
       const expiredToday = await prisma.session.count({
         where: {
           expires: {
             gte: startOfDay,
-            lt: now
-          }
-        }
+            lt: now,
+          },
+        },
       });
 
       const oldestSession = await prisma.session.findFirst({
         where: {
           expires: {
-            gt: now
-          }
+            gt: now,
+          },
         },
         orderBy: {
-          expires: 'asc'
-        }
+          expires: 'asc',
+        },
       });
 
       return {
         totalActive,
         expiredToday,
-        oldestActiveSession: oldestSession?.expires || null
+        oldestActiveSession: oldestSession?.expires || null,
       };
     } catch (error) {
       throw new Error(`Failed to get session stats: ${error}`);

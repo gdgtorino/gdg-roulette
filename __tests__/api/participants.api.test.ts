@@ -8,7 +8,11 @@
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { NextRequest } from 'next/server';
-import { POST as registerParticipantHandler, participantService, setTestServices } from '../../app/api/participants/route';
+import {
+  POST as registerParticipantHandler,
+  participantService,
+  setTestServices,
+} from '../../app/api/participants/route';
 import { EventState } from '../../lib/state/EventStateMachine';
 
 // Mock services
@@ -16,19 +20,19 @@ const mockParticipantService = {
   findByEventAndName: jest.fn(),
   create: jest.fn(),
   delete: jest.fn(),
-  getParticipantCount: jest.fn()
+  getParticipantCount: jest.fn(),
 };
 
 const mockEventService = {
-  findById: jest.fn()
+  findById: jest.fn(),
 };
 
 const mockSessionService = {
-  createUserSession: jest.fn()
+  createUserSession: jest.fn(),
 };
 
 const mockNotificationService = {
-  sendRegistrationConfirmation: jest.fn()
+  sendRegistrationConfirmation: jest.fn(),
 };
 
 // We're using service injection instead of Jest mocks
@@ -41,7 +45,7 @@ function createMockRequest(data: any, headers: Record<string, string> = {}): Nex
       get: (key: string) => headers[key] || null,
     },
     nextUrl: { origin: 'http://localhost' },
-    signal: undefined
+    signal: undefined,
   } as any as NextRequest;
 }
 
@@ -55,7 +59,7 @@ describe('/api/participants API Routes', () => {
       participantService: mockParticipantService as any,
       eventService: mockEventService as any,
       sessionService: mockSessionService as any,
-      notificationService: mockNotificationService as any
+      notificationService: mockNotificationService as any,
     });
   });
 
@@ -68,7 +72,7 @@ describe('/api/participants API Routes', () => {
       // Arrange
       const registrationData = {
         eventId: 'event-123',
-        name: 'John Doe'
+        name: 'John Doe',
       };
 
       const mockEvent = {
@@ -78,7 +82,7 @@ describe('/api/participants API Routes', () => {
         registrationOpen: true,
         closed: false,
         maxParticipants: 100,
-        currentParticipants: 25
+        currentParticipants: 25,
       };
 
       const mockParticipant = {
@@ -86,7 +90,7 @@ describe('/api/participants API Routes', () => {
         eventId: 'event-123',
         name: 'John Doe',
         registeredAt: new Date(),
-        qrCode: 'participant-qr-code'
+        qrCode: 'participant-qr-code',
       };
 
       const mockSession = {
@@ -94,7 +98,7 @@ describe('/api/participants API Routes', () => {
         participantId: 'participant-456',
         eventId: 'event-123',
         token: 'session-token-123',
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -117,9 +121,12 @@ describe('/api/participants API Routes', () => {
       expect(responseData.sessionToken).toBe('session-token-123');
       expect(mockParticipantService.create).toHaveBeenCalledWith({
         eventId: 'event-123',
-        name: 'John Doe'
+        name: 'John Doe',
       });
-      expect(mockSessionService.createUserSession).toHaveBeenCalledWith('participant-456', 'event-123');
+      expect(mockSessionService.createUserSession).toHaveBeenCalledWith(
+        'participant-456',
+        'event-123',
+      );
 
       // Check for secure session cookie
       const setCookieHeader = response.headers.get('Set-Cookie');
@@ -132,7 +139,7 @@ describe('/api/participants API Routes', () => {
       // Arrange
       const registrationData = {
         eventId: 'event-123',
-        name: 'Existing User'
+        name: 'Existing User',
       };
 
       const mockEvent = {
@@ -140,14 +147,14 @@ describe('/api/participants API Routes', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const existingParticipant = {
         id: 'participant-existing',
         eventId: 'event-123',
         name: 'Existing User',
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -175,7 +182,7 @@ describe('/api/participants API Routes', () => {
         { eventId: '', name: 'John Doe' }, // Empty eventId
         { eventId: 'event-123', name: '' }, // Empty name
         { eventId: 'event-123', name: '   ' }, // Whitespace only name
-        {}
+        {},
       ];
 
       // Act & Assert
@@ -199,14 +206,14 @@ describe('/api/participants API Routes', () => {
         '123', // Numbers only
         '@#$%', // Special characters only
         'Name\nWith\nNewlines', // Contains newlines
-        'Name\tWith\tTabs' // Contains tabs
+        'Name\tWith\tTabs', // Contains tabs
       ];
 
       const mockEvent = {
         id: 'event-123',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -215,7 +222,7 @@ describe('/api/participants API Routes', () => {
       for (const invalidName of invalidNames) {
         const registrationData = {
           eventId: 'event-123',
-          name: invalidName
+          name: invalidName,
         };
 
         const request = createMockRequest(registrationData);
@@ -234,18 +241,18 @@ describe('/api/participants API Routes', () => {
       const validNames = [
         'María García',
         'Jean-Pierre Dupont',
-        'O\'Sullivan',
+        "O'Sullivan",
         '李明',
         'Giuseppe Verdi Jr.',
         'Anne-Marie',
-        'José María de la Cruz'
+        'José María de la Cruz',
       ];
 
       const mockEvent = {
         id: 'event-123',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -255,21 +262,21 @@ describe('/api/participants API Routes', () => {
       for (const validName of validNames) {
         const registrationData = {
           eventId: 'event-123',
-          name: validName
+          name: validName,
         };
 
         const mockParticipant = {
           id: `participant-${Math.random()}`,
           eventId: 'event-123',
           name: validName,
-          registeredAt: new Date()
+          registeredAt: new Date(),
         };
 
         const mockSession = {
           id: `session-${Math.random()}`,
           participantId: mockParticipant.id,
           eventId: 'event-123',
-          token: `token-${Math.random()}`
+          token: `token-${Math.random()}`,
         };
 
         mockParticipantService.create.mockResolvedValue(mockParticipant);
@@ -290,7 +297,7 @@ describe('/api/participants API Routes', () => {
       // Arrange
       const registrationData = {
         eventId: 'nonexistent-event',
-        name: 'John Doe'
+        name: 'John Doe',
       };
 
       mockEventService.findById.mockResolvedValue(null);
@@ -313,14 +320,14 @@ describe('/api/participants API Routes', () => {
       const eventStates = [
         { state: EventState.INIT, message: 'Registration is not open for this event' },
         { state: EventState.DRAW, message: 'Registration is closed - draw in progress' },
-        { state: EventState.CLOSED, message: 'Event is closed' }
+        { state: EventState.CLOSED, message: 'Event is closed' },
       ];
 
       // Act & Assert
       for (const { state, message } of eventStates) {
         const registrationData = {
           eventId: 'event-123',
-          name: 'John Doe'
+          name: 'John Doe',
         };
 
         const mockEvent = {
@@ -328,7 +335,7 @@ describe('/api/participants API Routes', () => {
           name: 'Test Event',
           state,
           registrationOpen: false,
-          closed: state === EventState.CLOSED
+          closed: state === EventState.CLOSED,
         };
 
         mockEventService.findById.mockResolvedValue(mockEvent);
@@ -348,7 +355,7 @@ describe('/api/participants API Routes', () => {
       // Arrange
       const registrationData = {
         eventId: 'event-123',
-        name: 'John Doe'
+        name: 'John Doe',
       };
 
       const mockEvent = {
@@ -358,7 +365,7 @@ describe('/api/participants API Routes', () => {
         registrationOpen: true,
         closed: false,
         maxParticipants: 50,
-        currentParticipants: 50
+        currentParticipants: 50,
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -382,27 +389,29 @@ describe('/api/participants API Routes', () => {
       // Arrange
       const registrationData = {
         eventId: 'event-123',
-        name: 'John Doe'
+        name: 'John Doe',
       };
 
       const mockEvent = {
         id: 'event-123',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const mockParticipant = {
         id: 'participant-456',
         eventId: 'event-123',
         name: 'John Doe',
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
       mockParticipantService.findByEventAndName.mockResolvedValue(null);
       mockParticipantService.create.mockResolvedValue(mockParticipant);
-      mockSessionService.createUserSession.mockRejectedValue(new Error('Session service unavailable'));
+      mockSessionService.createUserSession.mockRejectedValue(
+        new Error('Session service unavailable'),
+      );
 
       const request = createMockRequest(registrationData);
 
@@ -422,21 +431,21 @@ describe('/api/participants API Routes', () => {
       // Arrange
       const registrationData = {
         eventId: 'event-123',
-        name: 'John Doe'
+        name: 'John Doe',
       };
 
       const mockEvent = {
         id: 'event-123',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const mockParticipant = {
         id: 'participant-456',
         eventId: 'event-123',
         name: 'John Doe',
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -446,7 +455,7 @@ describe('/api/participants API Routes', () => {
       participantService.delete.mockResolvedValue(true);
 
       const request = createMockRequest(registrationData, {
-        'X-Rollback-On-Failure': 'true'
+        'X-Rollback-On-Failure': 'true',
       });
 
       // Act
@@ -465,7 +474,7 @@ describe('/api/participants API Routes', () => {
       const registrationData = {
         eventId: 'event-123',
         name: 'John Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       };
 
       const mockEvent = {
@@ -473,7 +482,7 @@ describe('/api/participants API Routes', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const mockParticipant = {
@@ -481,12 +490,12 @@ describe('/api/participants API Routes', () => {
         eventId: 'event-123',
         name: 'John Doe',
         email: 'john@example.com',
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       const mockSession = {
         id: 'session-789',
-        token: 'session-token-123'
+        token: 'session-token-123',
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -505,7 +514,7 @@ describe('/api/participants API Routes', () => {
       expect(mockNotificationService.sendRegistrationConfirmation).toHaveBeenCalledWith({
         participant: mockParticipant,
         event: mockEvent,
-        registrationUrl: expect.stringContaining('event-123')
+        registrationUrl: expect.stringContaining('event-123'),
       });
     });
 
@@ -513,14 +522,14 @@ describe('/api/participants API Routes', () => {
       // Arrange
       const registrationData = {
         eventId: 'event-123',
-        name: 'John Doe'
+        name: 'John Doe',
       };
 
       const mockEvent = {
         id: 'event-123',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const mockParticipant = {
@@ -528,12 +537,12 @@ describe('/api/participants API Routes', () => {
         eventId: 'event-123',
         name: 'John Doe',
         registeredAt: new Date(),
-        qrCode: 'data:image/png;base64,participant-qr-code-data'
+        qrCode: 'data:image/png;base64,participant-qr-code-data',
       };
 
       const mockSession = {
         id: 'session-789',
-        token: 'session-token-123'
+        token: 'session-token-123',
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -557,14 +566,14 @@ describe('/api/participants API Routes', () => {
       // Arrange
       const registrationData = {
         eventId: 'event-123',
-        name: 'Popular Name'
+        name: 'Popular Name',
       };
 
       const mockEvent = {
         id: 'event-123',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -574,14 +583,14 @@ describe('/api/participants API Routes', () => {
       mockParticipantService.create.mockResolvedValueOnce({
         id: 'participant-first',
         name: 'Popular Name',
-        eventId: 'event-123'
+        eventId: 'event-123',
       });
 
       // Second concurrent request fails
       mockParticipantService.findByEventAndName.mockResolvedValueOnce({
         id: 'participant-first',
         name: 'Popular Name',
-        eventId: 'event-123'
+        eventId: 'event-123',
       });
 
       const request1 = createMockRequest(registrationData);
@@ -590,7 +599,7 @@ describe('/api/participants API Routes', () => {
       // Act
       const [response1, response2] = await Promise.all([
         registerParticipantHandler(request1),
-        registerParticipantHandler(request2)
+        registerParticipantHandler(request2),
       ]);
 
       // Assert
@@ -605,14 +614,14 @@ describe('/api/participants API Routes', () => {
       // Arrange
       const registrationData = {
         eventId: 'event-123',
-        name: 'Rate Limited User'
+        name: 'Rate Limited User',
       };
 
       const mockEvent = {
         id: 'event-123',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -620,10 +629,11 @@ describe('/api/participants API Routes', () => {
 
       // Act - Make multiple rapid registration attempts from same IP
       const promises = [];
-      for (let i = 0; i < 6; i++) { // Exceed rate limit of 5 attempts per minute
+      for (let i = 0; i < 6; i++) {
+        // Exceed rate limit of 5 attempts per minute
         const request = createMockRequest(
           { ...registrationData, name: `User ${i}` },
-          { 'X-Forwarded-For': '192.168.1.1' }
+          { 'X-Forwarded-For': '192.168.1.1' },
         );
         promises.push(registerParticipantHandler(request));
       }
@@ -635,14 +645,16 @@ describe('/api/participants API Routes', () => {
       // Assert
       expect(lastResponse.status).toBe(429);
       expect(lastResponseData.success).toBe(false);
-      expect(lastResponseData.error).toBe('Too many registration attempts. Please try again later.');
+      expect(lastResponseData.error).toBe(
+        'Too many registration attempts. Please try again later.',
+      );
     });
 
     it('should log registration activities for analytics', async () => {
       // Arrange
       const registrationData = {
         eventId: 'event-123',
-        name: 'Analytics User'
+        name: 'Analytics User',
       };
 
       const mockEvent = {
@@ -650,19 +662,19 @@ describe('/api/participants API Routes', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const mockParticipant = {
         id: 'participant-456',
         eventId: 'event-123',
         name: 'Analytics User',
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       const mockSession = {
         id: 'session-789',
-        token: 'session-token-123'
+        token: 'session-token-123',
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -674,7 +686,7 @@ describe('/api/participants API Routes', () => {
 
       const request = createMockRequest(registrationData, {
         'X-Forwarded-For': '192.168.1.100',
-        'User-Agent': 'Test Browser'
+        'User-Agent': 'Test Browser',
       });
 
       // Act
@@ -690,8 +702,8 @@ describe('/api/participants API Routes', () => {
           participantName: 'Analytics User',
           ip: '192.168.1.100',
           userAgent: 'Test Browser',
-          timestamp: expect.any(Date)
-        })
+          timestamp: expect.any(Date),
+        }),
       );
 
       analyticsLogSpy.mockRestore();
@@ -700,8 +712,8 @@ describe('/api/participants API Routes', () => {
     it('should sanitize input to prevent injection attacks', async () => {
       // Arrange
       const maliciousData = {
-        eventId: 'event-123\'; DROP TABLE participants; --',
-        name: '<script>alert("xss")</script>John Doe'
+        eventId: "event-123'; DROP TABLE participants; --",
+        name: '<script>alert("xss")</script>John Doe',
       };
 
       const request = createMockRequest(maliciousData);
@@ -721,26 +733,26 @@ describe('/api/participants API Routes', () => {
       // Arrange
       const registrationData = {
         eventId: 'event-123',
-        name: 'Consistent User'
+        name: 'Consistent User',
       };
 
       const mockEvent = {
         id: 'event-123',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const mockParticipant = {
         id: 'participant-456',
         eventId: 'event-123',
         name: 'Consistent User',
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       const mockSession = {
         id: 'session-789',
-        token: 'session-token-123'
+        token: 'session-token-123',
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);

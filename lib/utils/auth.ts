@@ -39,7 +39,7 @@ export async function createDefaultAdmin(): Promise<void> {
     id: uuidv4(),
     username,
     password: hashedPassword,
-    createdAt: new Date()
+    createdAt: new Date(),
   };
 
   await redisService.createAdmin(admin);

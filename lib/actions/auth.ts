@@ -9,7 +9,7 @@ import { TRPCError } from '@trpc/server';
 
 export async function login(
   prevState: { success: boolean; error: string } | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ success: boolean; error: string }> {
   try {
     const username = formData.get('username') as string;
@@ -40,7 +40,7 @@ export async function login(
       maxAge: 60 * 60 * 24, // 24 hours
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
+      sameSite: 'lax',
     });
 
     redirect('/admin/dashboard');

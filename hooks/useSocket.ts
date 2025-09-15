@@ -11,14 +11,14 @@ interface UseSocketOptions {
 
 export function useSocket(options: UseSocketOptions = {}): Socket | null {
   const socketRef = useRef<Socket | null>(null);
-  const { eventId, onParticipantRegistered, onRegistrationToggled, onWinnerDrawn, onEventClosed } = options;
+  const { eventId, onParticipantRegistered, onRegistrationToggled, onWinnerDrawn, onEventClosed } =
+    options;
 
   useEffect(() => {
     // Only connect if we don't have a socket or it's disconnected
     if (!socketRef.current || socketRef.current.disconnected) {
-      socketRef.current = io(process.env.NODE_ENV === 'production' 
-        ? window.location.origin 
-        : 'http://localhost:3001'
+      socketRef.current = io(
+        process.env.NODE_ENV === 'production' ? window.location.origin : 'http://localhost:3001',
       );
     }
 
@@ -65,19 +65,19 @@ export function useSocket(options: UseSocketOptions = {}): Socket | null {
     // Add event listeners
     socket.on('connect', handleConnect);
     socket.on('disconnect', handleDisconnect);
-    
+
     if (onParticipantRegistered) {
       socket.on('participantRegistered', handleParticipantRegistered);
     }
-    
+
     if (onRegistrationToggled) {
       socket.on('registrationToggled', handleRegistrationToggled);
     }
-    
+
     if (onWinnerDrawn) {
       socket.on('winnerDrawn', handleWinnerDrawn);
     }
-    
+
     if (onEventClosed) {
       socket.on('eventClosed', handleEventClosed);
     }
@@ -95,7 +95,7 @@ export function useSocket(options: UseSocketOptions = {}): Socket | null {
       socket.off('registrationToggled', handleRegistrationToggled);
       socket.off('winnerDrawn', handleWinnerDrawn);
       socket.off('eventClosed', handleEventClosed);
-      
+
       // Leave event room
       if (eventId) {
         socket.emit('leaveEvent', eventId);

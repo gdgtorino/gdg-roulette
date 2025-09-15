@@ -20,17 +20,13 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
   event,
   enableQRScanner = false,
   accessibilityMode = false,
-  children
+  children,
 }) => {
   return (
     <main aria-label={accessibilityMode ? 'Registration Form' : undefined}>
-      {accessibilityMode && (
-        <h1 role="heading">Register for {event.name}</h1>
-      )}
+      {accessibilityMode && <h1 role="heading">Register for {event.name}</h1>}
 
-      {!accessibilityMode && (
-        <h1>Register for {event.name}</h1>
-      )}
+      {!accessibilityMode && <h1>Register for {event.name}</h1>}
 
       {children}
 

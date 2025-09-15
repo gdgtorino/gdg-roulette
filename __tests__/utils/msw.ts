@@ -1,5 +1,5 @@
-import { setupServer } from 'msw/node'
-import { rest } from 'msw'
+import { setupServer } from 'msw/node';
+import { rest } from 'msw';
 
 // MSW server setup for API mocking
 export const apiHandlers = [
@@ -15,12 +15,12 @@ export const apiHandlers = [
           role: 'USER',
         },
         token: 'mock-jwt-token',
-      })
-    )
+      }),
+    );
   }),
 
   rest.post('/api/auth/signout', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json({ success: true }))
+    return res(ctx.status(200), ctx.json({ success: true }));
   }),
 
   // Event endpoints
@@ -37,8 +37,8 @@ export const apiHandlers = [
           maxParticipants: 100,
           isActive: true,
         },
-      ])
-    )
+      ]),
+    );
   }),
 
   rest.post('/api/events', (req, res, ctx) => {
@@ -52,8 +52,8 @@ export const apiHandlers = [
         endDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         maxParticipants: 100,
         isActive: true,
-      })
-    )
+      }),
+    );
   }),
 
   // Lottery endpoints
@@ -72,12 +72,12 @@ export const apiHandlers = [
           endDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           isActive: true,
         },
-      ])
-    )
+      ]),
+    );
   }),
 
   rest.post('/api/lotteries/:id/entries', (req, res, ctx) => {
-    const lotteryId = req.params.id
+    const lotteryId = req.params.id;
     return res(
       ctx.status(201),
       ctx.json({
@@ -86,8 +86,8 @@ export const apiHandlers = [
         userId: '1',
         ticketNumber: Math.floor(Math.random() * 1000000).toString(),
         createdAt: new Date().toISOString(),
-      })
-    )
+      }),
+    );
   }),
 
   // Admin endpoints
@@ -109,45 +109,42 @@ export const apiHandlers = [
           role: 'ADMIN',
           createdAt: new Date().toISOString(),
         },
-      ])
-    )
+      ]),
+    );
   }),
 
   // Error handlers
   rest.get('/api/error', (req, res, ctx) => {
-    return res(
-      ctx.status(500),
-      ctx.json({ error: 'Internal server error' })
-    )
+    return res(ctx.status(500), ctx.json({ error: 'Internal server error' }));
   }),
-]
+];
 
 // Create and configure the MSW server
-export const server = setupServer(...apiHandlers)
+export const server = setupServer(...apiHandlers);
 
 // Helper functions for test setup
 export function setupMSW() {
   beforeAll(() => {
     server.listen({
       onUnhandledRequest: 'error',
-    })
-  })
+    });
+  });
 
   afterEach(() => {
-    server.resetHandlers()
-  })
+    server.resetHandlers();
+  });
 
   afterAll(() => {
-    server.close()
-  })
+    server.close();
+  });
 }
 
 // Helper to add custom handlers for specific tests
 export function addMockHandler(handler: any) {
-  server.use(handler)
+  server.use(handler);
 }
 
 // Helper to reset all handlers
 export function resetMockHandlers() {
-  server.resetHandlers()
+  server.resetHandlers();
 }

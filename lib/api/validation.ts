@@ -4,25 +4,25 @@ import { NextRequest } from 'next/server';
 // Common validation schemas
 export const LoginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
-  password: z.string().min(1, 'Password is required')
+  password: z.string().min(1, 'Password is required'),
 });
 
 export const CreateEventSchema = z.object({
-  name: z.string().min(1, 'Event name is required').max(100, 'Event name too long')
+  name: z.string().min(1, 'Event name is required').max(100, 'Event name too long'),
 });
 
 export const RegisterParticipantSchema = z.object({
-  name: z.string().min(1).max(50).optional()
+  name: z.string().min(1).max(50).optional(),
 });
 
 export const EventIdSchema = z.object({
-  eventId: z.string().uuid('Invalid event ID')
+  eventId: z.string().uuid('Invalid event ID'),
 });
 
 // API validation helper
 export async function validateRequestBody<T>(
   request: NextRequest,
-  schema: z.ZodSchema<T>
+  schema: z.ZodSchema<T>,
 ): Promise<{ success: true; data: T } | { success: false; error: string }> {
   try {
     const body = await request.json();
@@ -31,18 +31,18 @@ export async function validateRequestBody<T>(
     if (!result.success) {
       return {
         success: false,
-        error: result.error.errors.map(e => e.message).join(', ')
+        error: result.error.errors.map((e) => e.message).join(', '),
       };
     }
 
     return {
       success: true,
-      data: result.data
+      data: result.data,
     };
   } catch {
     return {
       success: false,
-      error: 'Invalid JSON in request body'
+      error: 'Invalid JSON in request body',
     };
   }
 }
@@ -50,20 +50,20 @@ export async function validateRequestBody<T>(
 // URL parameters validation
 export function validateParams<T>(
   params: Record<string, string | string[]>,
-  schema: z.ZodSchema<T>
+  schema: z.ZodSchema<T>,
 ): { success: true; data: T } | { success: false; error: string } {
   const result = schema.safeParse(params);
 
   if (!result.success) {
     return {
       success: false,
-      error: result.error.errors.map(e => e.message).join(', ')
+      error: result.error.errors.map((e) => e.message).join(', '),
     };
   }
 
   return {
     success: true,
-    data: result.data
+    data: result.data,
   };
 }
 
@@ -94,18 +94,12 @@ export function createCorsHeaders(origin?: string) {
 
 // Error response helper
 export function createErrorResponse(message: string, status: number = 400) {
-  return Response.json(
-    { error: message },
-    { status }
-  );
+  return Response.json({ error: message }, { status });
 }
 
 // Success response helper
 export function createSuccessResponse<T>(data: T, status: number = 200) {
-  return Response.json(
-    { data },
-    { status }
-  );
+  return Response.json({ data }, { status });
 }
 
 // Alias for compatibility

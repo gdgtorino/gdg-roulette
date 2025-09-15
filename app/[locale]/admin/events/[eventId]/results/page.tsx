@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTranslation } from "@/hooks/useTranslation";
-import DarkModeToggle from "@/components/DarkModeToggle";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslation } from '@/hooks/useTranslation';
+import DarkModeToggle from '@/components/DarkModeToggle';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 interface Event {
   id: string;
@@ -34,7 +34,7 @@ export default function ResultsPage(): JSX.Element {
   const [mounted, setMounted] = useState(false);
   const params = useParams();
   const eventId = params.eventId as string;
-  
+
   const [event, setEvent] = useState<Event | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [winners, setWinners] = useState<Winner[]>([]);
@@ -42,14 +42,14 @@ export default function ResultsPage(): JSX.Element {
 
   const fetchEventData = useCallback(async (): Promise<void> => {
     try {
-      const token = localStorage.getItem("token");
-      
+      const token = localStorage.getItem('token');
+
       // Fetch event
       const eventResponse = await fetch(`/api/events/${eventId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (eventResponse.ok) {
-        const eventData = await eventResponse.json() as Event;
+        const eventData = (await eventResponse.json()) as Event;
         setEvent(eventData);
       }
 
@@ -58,7 +58,7 @@ export default function ResultsPage(): JSX.Element {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (participantsResponse.ok) {
-        const participantsData = await participantsResponse.json() as Participant[];
+        const participantsData = (await participantsResponse.json()) as Participant[];
         setParticipants(participantsData);
       }
 
@@ -67,11 +67,11 @@ export default function ResultsPage(): JSX.Element {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (winnersResponse.ok) {
-        const winnersData = await winnersResponse.json() as Winner[];
+        const winnersData = (await winnersResponse.json()) as Winner[];
         setWinners(winnersData);
       }
     } catch (error) {
-      console.error("Failed to fetch event data:", error);
+      console.error('Failed to fetch event data:', error);
     } finally {
       setLoading(false);
     }
@@ -98,9 +98,7 @@ export default function ResultsPage(): JSX.Element {
     );
   }
 
-  const nonWinners = participants.filter(
-    p => !winners.some(w => w.participantId === p.id)
-  );
+  const nonWinners = participants.filter((p) => !winners.some((w) => w.participantId === p.id));
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -119,7 +117,7 @@ export default function ResultsPage(): JSX.Element {
               <DarkModeToggle />
               <Button
                 variant="outline"
-                onClick={() => window.location.href = '/admin/dashboard'}
+                onClick={() => (window.location.href = '/admin/dashboard')}
                 className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 {t('admin.backToDashboard')}
@@ -166,9 +164,10 @@ export default function ResultsPage(): JSX.Element {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {participants.length > 0 
-                  ? Math.round((winners.length / participants.length) * 100) 
-                  : 0}%
+                {participants.length > 0
+                  ? Math.round((winners.length / participants.length) * 100)
+                  : 0}
+                %
               </div>
             </CardContent>
           </Card>
@@ -199,9 +198,13 @@ export default function ResultsPage(): JSX.Element {
                       </div>
                     </div>
                     <div className="text-3xl">
-                      {winner.drawOrder === 1 ? '🥇' : 
-                       winner.drawOrder === 2 ? '🥈' : 
-                       winner.drawOrder === 3 ? '🥉' : '🏆'}
+                      {winner.drawOrder === 1
+                        ? '🥇'
+                        : winner.drawOrder === 2
+                          ? '🥈'
+                          : winner.drawOrder === 3
+                            ? '🥉'
+                            : '🏆'}
                     </div>
                   </div>
                 ))}
@@ -225,34 +228,41 @@ export default function ResultsPage(): JSX.Element {
             <CardContent>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {participants.map((participant, index) => {
-                  const isWinner = winners.some(w => w.participantId === participant.id);
-                  const winner = winners.find(w => w.participantId === participant.id);
-                  
+                  const isWinner = winners.some((w) => w.participantId === participant.id);
+                  const winner = winners.find((w) => w.participantId === participant.id);
+
                   return (
                     <div
                       key={participant.id}
                       className={`flex items-center justify-between p-3 border rounded-lg ${
-                        isWinner 
-                          ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700' 
+                        isWinner
+                          ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700'
                           : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
                       }`}
                     >
                       <div>
-                        <div className={`font-medium ${isWinner ? 'text-yellow-800 dark:text-yellow-200' : 'text-gray-900 dark:text-gray-100'}`}>
+                        <div
+                          className={`font-medium ${isWinner ? 'text-yellow-800 dark:text-yellow-200' : 'text-gray-900 dark:text-gray-100'}`}
+                        >
                           #{index + 1} {participant.name}
                         </div>
-                        <div className={`text-sm ${isWinner ? 'text-yellow-600 dark:text-yellow-300' : 'text-gray-500 dark:text-gray-400'}`}>
-                          {t('admin.registered')}: {new Date(participant.registeredAt).toLocaleString()}
+                        <div
+                          className={`text-sm ${isWinner ? 'text-yellow-600 dark:text-yellow-300' : 'text-gray-500 dark:text-gray-400'}`}
+                        >
+                          {t('admin.registered')}:{' '}
+                          {new Date(participant.registeredAt).toLocaleString()}
                         </div>
                         {isWinner && winner && (
                           <div className="text-sm font-semibold text-yellow-700 dark:text-yellow-300">
-                            ✨ {t('admin.winnerPosition').replace('{position}', winner.drawOrder.toString())}
+                            ✨{' '}
+                            {t('admin.winnerPosition').replace(
+                              '{position}',
+                              winner.drawOrder.toString(),
+                            )}
                           </div>
                         )}
                       </div>
-                      <div className="text-lg">
-                        {isWinner ? '🎉' : '👤'}
-                      </div>
+                      <div className="text-lg">{isWinner ? '🎉' : '👤'}</div>
                     </div>
                   );
                 })}
@@ -282,7 +292,9 @@ export default function ResultsPage(): JSX.Element {
                     key={participant.id}
                     className="p-3 border dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-center"
                   >
-                    <div className="font-medium text-gray-700 dark:text-gray-200">{participant.name}</div>
+                    <div className="font-medium text-gray-700 dark:text-gray-200">
+                      {participant.name}
+                    </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
                       {new Date(participant.registeredAt).toLocaleDateString()}
                     </div>

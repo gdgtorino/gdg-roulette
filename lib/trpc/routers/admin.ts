@@ -7,62 +7,64 @@ import { hashPassword } from '../../utils/auth';
 import type { Admin } from '../../types';
 
 const CreateAdminSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters').max(50, 'Username too long'),
-  password: z.string().min(6, 'Password must be at least 6 characters')
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(50, 'Username too long'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 export const adminRouter = router({
   // Get all admins
-  getAll: protectedProcedure
-    .query(async () => {
-      const admins = await redisService.getAllAdmins();
-      // Return admins without passwords
-      return admins.map(admin => ({
-        id: admin.id,
-        username: admin.username,
-        createdAt: admin.createdAt
-      }));
-    }),
+  getAll: protectedProcedure.query(async () => {
+    const admins = await redisService.getAllAdmins();
+    // Return admins without passwords
+    return admins.map((admin) => ({
+      id: admin.id,
+      username: admin.username,
+      createdAt: admin.createdAt,
+    }));
+  }),
 
   // Create new admin
-  create: protectedProcedure
-    .input(CreateAdminSchema)
-    .mutation(async ({ input }) => {
-      const { username, password } = input;
+  create: protectedProcedure.input(CreateAdminSchema).mutation(async ({ input }) => {
+    const { username, password } = input;
 
-      // Check if admin already exists
-      const existingAdmin = await redisService.getAdmin(username);
-      if (existingAdmin) {
-        throw new TRPCError({
-          code: 'CONFLICT',
-          message: 'Admin already exists'
-        });
-      }
+    // Check if admin already exists
+    const existingAdmin = await redisService.getAdmin(username);
+    if (existingAdmin) {
+      throw new TRPCError({
+        code: 'CONFLICT',
+        message: 'Admin already exists',
+      });
+    }
 
-      // Hash password and create admin
-      const hashedPassword = await hashPassword(password);
-      const admin: Admin = {
-        id: uuidv4(),
-        username,
-        password: hashedPassword,
-        createdAt: new Date()
-      };
+    // Hash password and create admin
+    const hashedPassword = await hashPassword(password);
+    const admin: Admin = {
+      id: uuidv4(),
+      username,
+      password: hashedPassword,
+      createdAt: new Date(),
+    };
 
-      await redisService.createAdmin(admin);
+    await redisService.createAdmin(admin);
 
-      // Return admin without password
-      return {
-        id: admin.id,
-        username: admin.username,
-        createdAt: admin.createdAt
-      };
-    }),
+    // Return admin without password
+    return {
+      id: admin.id,
+      username: admin.username,
+      createdAt: admin.createdAt,
+    };
+  }),
 
   // Delete admin
   delete: protectedProcedure
-    .input(z.object({
-      username: z.string()
-    }))
+    .input(
+      z.object({
+        username: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const { username } = input;
 
@@ -70,7 +72,7 @@ export const adminRouter = router({
       if (username === ctx.admin.username) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'Cannot delete yourself'
+          message: 'Cannot delete yourself',
         });
       }
 
@@ -78,11 +80,11 @@ export const adminRouter = router({
       if (!admin) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Admin not found'
+          message: 'Admin not found',
         });
       }
 
       await redisService.deleteAdmin(username);
       return { message: 'Admin deleted successfully' };
-    })
+    }),
 });

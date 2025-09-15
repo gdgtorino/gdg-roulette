@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useTranslation } from "@/hooks/useTranslation";
-import DarkModeToggle from "@/components/DarkModeToggle";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import Link from "next/link";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { useTranslation } from '@/hooks/useTranslation';
+import DarkModeToggle from '@/components/DarkModeToggle';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import Link from 'next/link';
 
 interface Event {
   id: string;
@@ -21,12 +21,12 @@ export default function RegisterPage(): JSX.Element {
   const [mounted, setMounted] = useState(false);
   const params = useParams();
   const eventId = params.eventId as string;
-  
+
   const [event, setEvent] = useState<Event | null>(null);
-  const [name, setName] = useState("");
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [registered] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [nameValidation, setNameValidation] = useState<{
     isChecking: boolean;
     isAvailable: boolean | null;
@@ -34,23 +34,23 @@ export default function RegisterPage(): JSX.Element {
   }>({
     isChecking: false,
     isAvailable: null,
-    message: ""
+    message: '',
   });
-  
+
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   const fetchEvent = useCallback(async (): Promise<void> => {
     try {
       const response = await fetch(`/api/events/${eventId}`);
-      
+
       if (response.ok) {
-        const eventData = await response.json() as Event;
+        const eventData = (await response.json()) as Event;
         setEvent(eventData);
       } else {
         setError(t('registration.notFound'));
       }
     } catch (error) {
-      console.error("Failed to fetch event:", error);
+      console.error('Failed to fetch event:', error);
       setError(t('common.error'));
     }
   }, [eventId, t]);
@@ -58,27 +58,65 @@ export default function RegisterPage(): JSX.Element {
   const generateDefaultName = async (): Promise<string> => {
     // Generate a random passphrase-style name (client-side)
     const adjectives = [
-      'brave', 'bright', 'calm', 'clever', 'cool', 'eager', 'fair', 'gentle', 'happy', 'kind',
-      'lively', 'nice', 'proud', 'quick', 'quiet', 'smart', 'swift', 'warm', 'wise', 'young'
+      'brave',
+      'bright',
+      'calm',
+      'clever',
+      'cool',
+      'eager',
+      'fair',
+      'gentle',
+      'happy',
+      'kind',
+      'lively',
+      'nice',
+      'proud',
+      'quick',
+      'quiet',
+      'smart',
+      'swift',
+      'warm',
+      'wise',
+      'young',
     ];
-    
+
     const nouns = [
-      'tiger', 'eagle', 'wolf', 'bear', 'lion', 'fox', 'deer', 'hawk', 'owl', 'cat',
-      'dog', 'fish', 'bird', 'star', 'moon', 'sun', 'tree', 'rock', 'wind', 'fire'
+      'tiger',
+      'eagle',
+      'wolf',
+      'bear',
+      'lion',
+      'fox',
+      'deer',
+      'hawk',
+      'owl',
+      'cat',
+      'dog',
+      'fish',
+      'bird',
+      'star',
+      'moon',
+      'sun',
+      'tree',
+      'rock',
+      'wind',
+      'fire',
     ];
-    
+
     const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
     const noun = nouns[Math.floor(Math.random() * nouns.length)];
     const number = Math.floor(Math.random() * 999) + 1;
-    
+
     return `${adjective}-${noun}-${number}`;
   };
 
   const checkExistingParticipant = async (participantName: string): Promise<boolean> => {
     try {
-      const response = await fetch(`/api/events/${eventId}/find-participant/${encodeURIComponent(participantName)}`);
+      const response = await fetch(
+        `/api/events/${eventId}/find-participant/${encodeURIComponent(participantName)}`,
+      );
       if (response.ok) {
-        const data = await response.json() as { found: boolean; participantId?: string };
+        const data = (await response.json()) as { found: boolean; participantId?: string };
         if (data.found && data.participantId) {
           // Redirect to existing participant's waiting page
           window.location.href = `/waiting/${eventId}/${data.participantId}`;
@@ -86,61 +124,69 @@ export default function RegisterPage(): JSX.Element {
         }
       }
     } catch (error) {
-      console.error("Failed to check existing participant:", error);
+      console.error('Failed to check existing participant:', error);
     }
     return false; // No existing participant found
   };
 
-  const checkNameAvailability = useCallback(async (participantName: string): Promise<void> => {
-    if (!participantName.trim()) {
-      setNameValidation({
-        isChecking: false,
-        isAvailable: null,
-        message: ""
-      });
-      return;
-    }
-
-    setNameValidation(prev => ({ ...prev, isChecking: true }));
-
-    try {
-      const response = await fetch(`/api/events/${eventId}/check-name/${encodeURIComponent(participantName)}`);
-      if (response.ok) {
-        const data = await response.json() as { available: boolean; reason?: string };
+  const checkNameAvailability = useCallback(
+    async (participantName: string): Promise<void> => {
+      if (!participantName.trim()) {
         setNameValidation({
           isChecking: false,
-          isAvailable: data.available,
-          message: data.available ? "Name is available!" : (data.reason || "Name not available")
+          isAvailable: null,
+          message: '',
+        });
+        return;
+      }
+
+      setNameValidation((prev) => ({ ...prev, isChecking: true }));
+
+      try {
+        const response = await fetch(
+          `/api/events/${eventId}/check-name/${encodeURIComponent(participantName)}`,
+        );
+        if (response.ok) {
+          const data = (await response.json()) as { available: boolean; reason?: string };
+          setNameValidation({
+            isChecking: false,
+            isAvailable: data.available,
+            message: data.available ? 'Name is available!' : data.reason || 'Name not available',
+          });
+        }
+      } catch (error) {
+        console.error('Failed to check name availability:', error);
+        setNameValidation({
+          isChecking: false,
+          isAvailable: null,
+          message: 'Error checking name availability',
         });
       }
-    } catch (error) {
-      console.error("Failed to check name availability:", error);
-      setNameValidation({
-        isChecking: false,
-        isAvailable: null,
-        message: "Error checking name availability"
-      });
-    }
-  }, [eventId]);
+    },
+    [eventId],
+  );
 
-  const debouncedCheckName = useCallback((participantName: string) => {
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-    
-    debounceTimer.current = setTimeout(() => {
-      void checkNameAvailability(participantName);
-    }, 500);
-  }, [checkNameAvailability]);
+  const debouncedCheckName = useCallback(
+    (participantName: string) => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+
+      debounceTimer.current = setTimeout(() => {
+        void checkNameAvailability(participantName);
+      }, 500);
+    },
+    [checkNameAvailability],
+  );
 
   const register = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
-      const registrationName = name.trim() || await generateDefaultName();
-      
+      const registrationName = name.trim() || (await generateDefaultName());
+
       // First check if participant already exists (for redirect system)
       if (name.trim()) {
         const existingFound = await checkExistingParticipant(registrationName);
@@ -148,11 +194,11 @@ export default function RegisterPage(): JSX.Element {
           return; // Stop registration if existing participant was found and redirected
         }
       }
-      
+
       const response = await fetch(`/api/events/${eventId}/participants`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ name: registrationName }),
       });
@@ -162,11 +208,11 @@ export default function RegisterPage(): JSX.Element {
         // Redirect to private waiting page
         window.location.href = `/waiting/${eventId}/${participant.id}`;
       } else {
-        const errorData = await response.json() as { error: string };
+        const errorData = (await response.json()) as { error: string };
         setError(errorData.error || t('registration.error'));
       }
     } catch {
-      setError("Network error. Please try again.");
+      setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -184,10 +230,10 @@ export default function RegisterPage(): JSX.Element {
       setNameValidation({
         isChecking: false,
         isAvailable: null,
-        message: ""
+        message: '',
       });
     }
-    
+
     // Cleanup timer on unmount
     return () => {
       if (debounceTimer.current) {
@@ -225,7 +271,9 @@ export default function RegisterPage(): JSX.Element {
         </div>
         <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <CardTitle className="text-red-600 dark:text-red-400">{t('registration.error')}</CardTitle>
+            <CardTitle className="text-red-600 dark:text-red-400">
+              {t('registration.error')}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-center text-gray-600 dark:text-gray-300 mb-4">{error}</p>
@@ -239,9 +287,11 @@ export default function RegisterPage(): JSX.Element {
   }
 
   if (!event) {
-    return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
-      <div className="text-gray-900 dark:text-white">{t('common.loading')}</div>
-    </div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="text-gray-900 dark:text-white">{t('common.loading')}</div>
+      </div>
+    );
   }
 
   if (registered) {
@@ -253,23 +303,29 @@ export default function RegisterPage(): JSX.Element {
         </div>
         <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <CardTitle className="text-green-600 dark:text-green-400">🎉 {t('registration.alreadyRegistered')}</CardTitle>
-            <CardDescription className="dark:text-gray-300">{t('lottery.description')}</CardDescription>
+            <CardTitle className="text-green-600 dark:text-green-400">
+              🎉 {t('registration.alreadyRegistered')}
+            </CardTitle>
+            <CardDescription className="dark:text-gray-300">
+              {t('lottery.description')}
+            </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <div className="mb-4">
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">Event: {event.name}</p>
-              <p className="text-gray-600 dark:text-gray-300">{t('registration.yourName')}: <span className="font-medium">{name}</span></p>
+              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                Event: {event.name}
+              </p>
+              <p className="text-gray-600 dark:text-gray-300">
+                {t('registration.yourName')}: <span className="font-medium">{name}</span>
+              </p>
             </div>
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
               <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                <strong>Important:</strong> Keep this page open or screenshot it. 
-                The draw will happen when the organizer is ready.
+                <strong>Important:</strong> Keep this page open or screenshot it. The draw will
+                happen when the organizer is ready.
               </p>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t('waiting.goodLuck')}
-            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('waiting.goodLuck')}</p>
           </CardContent>
         </Card>
       </div>
@@ -285,7 +341,9 @@ export default function RegisterPage(): JSX.Element {
         </div>
         <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <CardTitle className="text-red-600 dark:text-red-400">{t('registration.closed')}</CardTitle>
+            <CardTitle className="text-red-600 dark:text-red-400">
+              {t('registration.closed')}
+            </CardTitle>
             <CardDescription className="dark:text-gray-300">{event.name}</CardDescription>
           </CardHeader>
           <CardContent>
@@ -309,7 +367,9 @@ export default function RegisterPage(): JSX.Element {
       </div>
       <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">{t('registration.title')}</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+            {t('registration.title')}
+          </CardTitle>
           <CardDescription className="text-lg dark:text-gray-300">{event.name}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -318,7 +378,7 @@ export default function RegisterPage(): JSX.Element {
               <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
             </div>
           )}
-          
+
           <form onSubmit={register} className="space-y-4">
             <div>
               <div className="relative">
@@ -329,10 +389,10 @@ export default function RegisterPage(): JSX.Element {
                   onChange={(e) => setName(e.target.value)}
                   maxLength={50}
                   className={`text-center dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 ${
-                    nameValidation.isAvailable === false 
-                      ? 'border-red-500 focus:border-red-500' 
-                      : nameValidation.isAvailable === true 
-                        ? 'border-green-500 focus:border-green-500' 
+                    nameValidation.isAvailable === false
+                      ? 'border-red-500 focus:border-red-500'
+                      : nameValidation.isAvailable === true
+                        ? 'border-green-500 focus:border-green-500'
                         : ''
                   }`}
                 />
@@ -352,37 +412,46 @@ export default function RegisterPage(): JSX.Element {
                   </div>
                 )}
               </div>
-              
+
               {nameValidation.message && (
-                <p className={`text-xs mt-1 text-center ${
-                  nameValidation.isAvailable === true 
-                    ? 'text-green-600 dark:text-green-400' 
-                    : nameValidation.isAvailable === false 
-                      ? 'text-red-600 dark:text-red-400' 
-                      : 'text-gray-600 dark:text-gray-400'
-                }`}>
+                <p
+                  className={`text-xs mt-1 text-center ${
+                    nameValidation.isAvailable === true
+                      ? 'text-green-600 dark:text-green-400'
+                      : nameValidation.isAvailable === false
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-gray-600 dark:text-gray-400'
+                  }`}
+                >
                   {nameValidation.message}
                 </p>
               )}
-              
+
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
                 {t('registration.optional')}
               </p>
             </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
-              size="lg" 
-              disabled={loading || (name.trim() && nameValidation.isAvailable === false) || nameValidation.isChecking}
+
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={
+                loading ||
+                (name.trim() && nameValidation.isAvailable === false) ||
+                nameValidation.isChecking
+              }
             >
-              {loading ? t('registration.registering') : 
-               nameValidation.isChecking ? "Checking name..." :
-               (name.trim() && nameValidation.isAvailable === false) ? "Name not available" :
-               t('registration.register') + " 🎯"}
+              {loading
+                ? t('registration.registering')
+                : nameValidation.isChecking
+                  ? 'Checking name...'
+                  : name.trim() && nameValidation.isAvailable === false
+                    ? 'Name not available'
+                    : t('registration.register') + ' 🎯'}
             </Button>
           </form>
-          
+
           <div className="mt-4 text-center">
             <p className="text-xs text-gray-500 dark:text-gray-400">
               By joining, you confirm you&apos;re eligible to participate

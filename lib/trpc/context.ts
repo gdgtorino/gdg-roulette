@@ -29,6 +29,6 @@ export async function createContext({ req }: { req: NextRequest }): Promise<Cont
 
   return {
     req,
-    admin
+    admin,
   };
 }

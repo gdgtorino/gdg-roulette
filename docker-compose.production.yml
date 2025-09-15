@@ -9,21 +9,22 @@ services:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=https://production.thedraw.app/api
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend-prod.rule=Host(`production.thedraw.app`) || Host(`thedraw.app`) || Host(`www.thedraw.app`)"
-      - "traefik.http.routers.frontend-prod.entrypoints=websecure"
-      - "traefik.http.routers.frontend-prod.tls=true"
-      - "traefik.http.routers.frontend-prod.tls.certresolver=letsencrypt"
-      - "traefik.http.services.frontend-prod.loadbalancer.server.port=3000"
-      - "traefik.http.routers.frontend-prod.priority=10"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.frontend-prod.rule=Host(`production.thedraw.app`) ||
+        Host(`thedraw.app`) || Host(`www.thedraw.app`)'
+      - 'traefik.http.routers.frontend-prod.entrypoints=websecure'
+      - 'traefik.http.routers.frontend-prod.tls=true'
+      - 'traefik.http.routers.frontend-prod.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.frontend-prod.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.frontend-prod.priority=10'
       # Security headers
-      - "traefik.http.routers.frontend-prod.middlewares=security-headers"
-      - "traefik.http.middlewares.security-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
-      - "traefik.http.middlewares.security-headers.headers.sslredirect=true"
-      - "traefik.http.middlewares.security-headers.headers.forceSTSHeader=true"
-      - "traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true"
-      - "traefik.http.middlewares.security-headers.headers.stsPreload=true"
-      - "traefik.http.middlewares.security-headers.headers.stsSeconds=31536000"
+      - 'traefik.http.routers.frontend-prod.middlewares=security-headers'
+      - 'traefik.http.middlewares.security-headers.headers.customrequestheaders.X-Forwarded-Proto=https'
+      - 'traefik.http.middlewares.security-headers.headers.sslredirect=true'
+      - 'traefik.http.middlewares.security-headers.headers.forceSTSHeader=true'
+      - 'traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true'
+      - 'traefik.http.middlewares.security-headers.headers.stsPreload=true'
+      - 'traefik.http.middlewares.security-headers.headers.stsSeconds=31536000'
     deploy:
       replicas: 3
       resources:
@@ -45,17 +46,18 @@ services:
       - CORS_ORIGIN=https://production.thedraw.app,https://thedraw.app,https://www.thedraw.app
       - LOG_LEVEL=warn
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend-prod.rule=(Host(`production.thedraw.app`) || Host(`thedraw.app`) || Host(`www.thedraw.app`)) && PathPrefix(`/api`)"
-      - "traefik.http.routers.backend-prod.entrypoints=websecure"
-      - "traefik.http.routers.backend-prod.tls=true"
-      - "traefik.http.routers.backend-prod.tls.certresolver=letsencrypt"
-      - "traefik.http.services.backend-prod.loadbalancer.server.port=3001"
-      - "traefik.http.routers.backend-prod.priority=100"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.backend-prod.rule=(Host(`production.thedraw.app`) ||
+        Host(`thedraw.app`) || Host(`www.thedraw.app`)) && PathPrefix(`/api`)'
+      - 'traefik.http.routers.backend-prod.entrypoints=websecure'
+      - 'traefik.http.routers.backend-prod.tls=true'
+      - 'traefik.http.routers.backend-prod.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.backend-prod.loadbalancer.server.port=3001'
+      - 'traefik.http.routers.backend-prod.priority=100'
       # Rate limiting
-      - "traefik.http.routers.backend-prod.middlewares=api-ratelimit"
-      - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
-      - "traefik.http.middlewares.api-ratelimit.ratelimit.average=50"
+      - 'traefik.http.routers.backend-prod.middlewares=api-ratelimit'
+      - 'traefik.http.middlewares.api-ratelimit.ratelimit.burst=100'
+      - 'traefik.http.middlewares.api-ratelimit.ratelimit.average=50'
     deploy:
       replicas: 3
       resources:
@@ -73,28 +75,28 @@ services:
 
   traefik:
     command:
-      - "--api.dashboard=false"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@thedraw.app}"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-      - "--log.level=WARN"
-      - "--accesslog=true"
-      - "--accesslog.filepath=/var/log/traefik/access.log"
-      - "--accesslog.format=json"
-      - "--metrics.prometheus=true"
-      - "--metrics.prometheus.addrouterslabels=true"
+      - '--api.dashboard=false'
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--entrypoints.web.address=:80'
+      - '--entrypoints.websecure.address=:443'
+      - '--certificatesresolvers.letsencrypt.acme.tlschallenge=true'
+      - '--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@thedraw.app}'
+      - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json'
+      - '--log.level=WARN'
+      - '--accesslog=true'
+      - '--accesslog.filepath=/var/log/traefik/access.log'
+      - '--accesslog.format=json'
+      - '--metrics.prometheus=true'
+      - '--metrics.prometheus.addrouterslabels=true'
       # Security
-      - "--global.sendanonymoususage=false"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - '--global.sendanonymoususage=false'
+      - '--entrypoints.web.http.redirections.entryPoint.to=websecure'
+      - '--entrypoints.web.http.redirections.entryPoint.scheme=https'
+      - '--entrypoints.web.http.redirections.entrypoint.permanent=true'
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-ssl:/letsencrypt
@@ -112,22 +114,13 @@ services:
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-the_draw_production}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}  # Must be set in environment
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD} # Must be set in environment
     command: >
-      postgres
-      -c shared_preload_libraries=pg_stat_statements
-      -c pg_stat_statements.max=10000
-      -c pg_stat_statements.track=all
-      -c max_connections=500
-      -c shared_buffers=512MB
-      -c effective_cache_size=2GB
-      -c work_mem=8MB
-      -c maintenance_work_mem=128MB
-      -c checkpoint_completion_target=0.9
-      -c wal_buffers=16MB
-      -c default_statistics_target=100
-      -c random_page_cost=1.1
-      -c effective_io_concurrency=200
+      postgres -c shared_preload_libraries=pg_stat_statements -c pg_stat_statements.max=10000 -c
+      pg_stat_statements.track=all -c max_connections=500 -c shared_buffers=512MB -c
+      effective_cache_size=2GB -c work_mem=8MB -c maintenance_work_mem=128MB -c
+      checkpoint_completion_target=0.9 -c wal_buffers=16MB -c default_statistics_target=100 -c
+      random_page_cost=1.1 -c effective_io_concurrency=200
     deploy:
       resources:
         limits:
@@ -138,20 +131,13 @@ services:
           cpus: '1'
     # Production backup strategy
     labels:
-      - "backup.enable=true"
-      - "backup.schedule=0 2 * * *"  # Daily at 2 AM
+      - 'backup.enable=true'
+      - 'backup.schedule=0 2 * * *' # Daily at 2 AM
 
   redis:
     command: >
-      redis-server
-      --appendonly yes
-      --maxmemory 1gb
-      --maxmemory-policy allkeys-lru
-      --save 900 1
-      --save 300 10
-      --save 60 10000
-      --tcp-keepalive 300
-      --timeout 0
+      redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru --save 900 1
+      --save 300 10 --save 60 10000 --tcp-keepalive 300 --timeout 0
     deploy:
       resources:
         limits:
@@ -202,11 +188,11 @@ services:
     networks:
       - the-draw-network
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.grafana-prod.rule=Host(`monitoring.thedraw.app`)"
-      - "traefik.http.routers.grafana-prod.entrypoints=websecure"
-      - "traefik.http.routers.grafana-prod.tls=true"
-      - "traefik.http.services.grafana-prod.loadbalancer.server.port=3000"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.grafana-prod.rule=Host(`monitoring.thedraw.app`)'
+      - 'traefik.http.routers.grafana-prod.entrypoints=websecure'
+      - 'traefik.http.routers.grafana-prod.tls=true'
+      - 'traefik.http.services.grafana-prod.loadbalancer.server.port=3000'
 
   # Log aggregation
   loki:

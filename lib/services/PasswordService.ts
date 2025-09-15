@@ -76,7 +76,7 @@ export class PasswordService {
       'admin123',
       'password123',
       'welcome123',
-      'letmein123'
+      'letmein123',
     ];
 
     if (weakPasswords.includes(password.toLowerCase())) {
@@ -95,7 +95,7 @@ export class PasswordService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -135,7 +135,7 @@ export class PasswordService {
       'abcdefghijklmnopqrstuvwxyz',
       'qwertyuiop',
       'asdfghjkl',
-      'zxcvbnm'
+      'zxcvbnm',
     ];
 
     for (const sequence of sequences) {
@@ -143,8 +143,10 @@ export class PasswordService {
         const subseq = sequence.substring(i, i + 3);
         const reverseSubseq = subseq.split('').reverse().join('');
 
-        if (password.toLowerCase().includes(subseq) ||
-            password.toLowerCase().includes(reverseSubseq)) {
+        if (
+          password.toLowerCase().includes(subseq) ||
+          password.toLowerCase().includes(reverseSubseq)
+        ) {
           return true;
         }
       }
@@ -239,7 +241,7 @@ export class PasswordService {
     return {
       score: Math.min(4, Math.max(0, score)),
       feedback,
-      strengthText
+      strengthText,
     };
   }
 }

@@ -8,13 +8,9 @@ module.exports = {
   },
   testMatch: [
     '<rootDir>/__tests__/**/*.(test|spec).{js,jsx,ts,tsx}',
-    '<rootDir>/**/*.(test|spec).{js,jsx,ts,tsx}'
+    '<rootDir>/**/*.(test|spec).{js,jsx,ts,tsx}',
   ],
-  testPathIgnorePatterns: [
-    '<rootDir>/node_modules/',
-    '<rootDir>/.next/',
-    '<rootDir>/e2e/'
-  ],
+  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/e2e/'],
   coverageDirectory: '<rootDir>/coverage',
   collectCoverageFrom: [
     'app/**/*.{js,jsx,ts,tsx}',
@@ -36,22 +32,26 @@ module.exports = {
     },
   },
   transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
-      presets: [
-        ['@babel/preset-env', { targets: { node: 'current' } }],
-        ['@babel/preset-typescript', {
-          allowDeclareFields: true,
-          isTSX: true,
-          allExtensions: true
-        }],
-        ['@babel/preset-react', { runtime: 'automatic' }],
-      ],
-    }],
+    '^.+\\.(js|jsx|ts|tsx)$': [
+      'babel-jest',
+      {
+        presets: [
+          ['@babel/preset-env', { targets: { node: 'current' } }],
+          [
+            '@babel/preset-typescript',
+            {
+              allowDeclareFields: true,
+              isTSX: true,
+              allExtensions: true,
+            },
+          ],
+          ['@babel/preset-react', { runtime: 'automatic' }],
+        ],
+      },
+    ],
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$|@testing-library|@radix-ui|uuid))',
-  ],
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@testing-library|@radix-ui|uuid))'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   roots: ['<rootDir>/app/', '<rootDir>/lib/', '<rootDir>/components/', '<rootDir>/__tests__/'],
   testTimeout: 10000,
-}
+};

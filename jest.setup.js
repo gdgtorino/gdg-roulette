@@ -1,4 +1,4 @@
-require('@testing-library/jest-dom')
+require('@testing-library/jest-dom');
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -25,9 +25,9 @@ jest.mock('next/router', () => ({
       defaultLocale: 'en',
       domainLocales: [],
       isPreview: false,
-    }
+    };
   },
-}))
+}));
 
 // Mock Next.js navigation (App Router)
 jest.mock('next/navigation', () => ({
@@ -39,16 +39,16 @@ jest.mock('next/navigation', () => ({
       back: jest.fn(),
       forward: jest.fn(),
       refresh: jest.fn(),
-    }
+    };
   },
   useSearchParams() {
-    return new URLSearchParams()
+    return new URLSearchParams();
   },
   usePathname() {
-    return '/'
+    return '/';
   },
   redirect: jest.fn(),
-}))
+}));
 
 // Mock Next.js server components (NextResponse)
 jest.mock('next/server', () => ({
@@ -62,7 +62,7 @@ jest.mock('next/server', () => ({
     redirect: jest.fn(),
     rewrite: jest.fn(),
   },
-}))
+}));
 
 // Mock Next.js Image component
 jest.mock('next/image', () => {
@@ -71,10 +71,10 @@ jest.mock('next/image', () => {
     __esModule: true,
     default: (props) => {
       // eslint-disable-next-line @next/next/no-img-element
-      return mockReact.createElement('img', props)
+      return mockReact.createElement('img', props);
     },
-  }
-})
+  };
+});
 
 // Mock environment variables
 process.env = {
@@ -84,19 +84,19 @@ process.env = {
   NEXTAUTH_URL: 'http://localhost:3000',
   DATABASE_URL: 'postgresql://test:test@localhost:5432/test_db',
   REDIS_URL: 'redis://localhost:6379',
-}
+};
 
 // Global test utilities
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
-}))
+}));
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -106,29 +106,29 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
   })),
-})
+});
 
 // Mock IntersectionObserver
 global.IntersectionObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
-}))
+}));
 
 // Mock fetch API for tests
-const { TextEncoder, TextDecoder } = require('util')
-global.TextEncoder = TextEncoder
-global.TextDecoder = TextDecoder
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 
 // Mock streams for MSW
-global.TransformStream = require('stream/web').TransformStream
-global.ReadableStream = require('stream/web').ReadableStream
-global.WritableStream = require('stream/web').WritableStream
+global.TransformStream = require('stream/web').TransformStream;
+global.ReadableStream = require('stream/web').ReadableStream;
+global.WritableStream = require('stream/web').WritableStream;
 
 // Mock fetch for MSW
-require('whatwg-fetch')
+require('whatwg-fetch');
 
 // Clean up after each test
 afterEach(() => {
-  jest.clearAllMocks()
-})
+  jest.clearAllMocks();
+});

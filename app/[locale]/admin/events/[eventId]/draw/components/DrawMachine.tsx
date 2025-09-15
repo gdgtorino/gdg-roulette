@@ -2,10 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { useSocket } from "@/hooks/useSocket";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useSocket } from '@/hooks/useSocket';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface Event {
   id: string;
@@ -40,7 +46,7 @@ export function DrawMachine({
   eventId,
   participants: initialParticipants,
   winners: initialWinners,
-  availableParticipants: initialAvailable
+  availableParticipants: initialAvailable,
 }: DrawMachineProps) {
   const [participants] = useState(initialParticipants);
   const [winners, setWinners] = useState(initialWinners);
@@ -58,14 +64,12 @@ export function DrawMachine({
     open: false,
     title: '',
     message: '',
-    type: 'success'
+    type: 'success',
   });
 
   // Update available participants when winners change
   useEffect(() => {
-    const available = participants.filter(
-      p => !winners.some(w => w.participantId === p.id)
-    );
+    const available = participants.filter((p) => !winners.some((w) => w.participantId === p.id));
     setAvailableParticipants(available);
   }, [participants, winners]);
 
@@ -74,7 +78,7 @@ export function DrawMachine({
     eventId,
     onWinnerDrawn: (winner) => {
       console.log('New winner drawn:', winner);
-      setWinners(prev => [...prev, winner as Winner]);
+      setWinners((prev) => [...prev, winner as Winner]);
     },
   });
 
@@ -86,7 +90,7 @@ export function DrawMachine({
     await confetti({
       particleCount: 100,
       spread: 70,
-      origin: { y: 0.6 }
+      origin: { y: 0.6 },
     });
 
     // Side bursts
@@ -96,7 +100,7 @@ export function DrawMachine({
         angle: 60,
         spread: 55,
         origin: { x: 0, y: 0.7 },
-        colors
+        colors,
       });
     }, 200);
 
@@ -106,7 +110,7 @@ export function DrawMachine({
         angle: 120,
         spread: 55,
         origin: { x: 1, y: 0.7 },
-        colors
+        colors,
       });
     }, 400);
 
@@ -118,9 +122,9 @@ export function DrawMachine({
         spread: 40,
         origin: {
           x: Math.random(),
-          y: 0.8 + Math.random() * 0.2
+          y: 0.8 + Math.random() * 0.2,
         },
-        colors
+        colors,
       });
       count++;
       if (count >= 5) {
@@ -135,7 +139,7 @@ export function DrawMachine({
         open: true,
         title: 'No Participants',
         message: 'No participants available to draw from.',
-        type: 'error'
+        type: 'error',
       });
       return;
     }
@@ -149,16 +153,16 @@ export function DrawMachine({
     setTimeout(async () => {
       try {
         // Get token from localStorage for API call
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
         const response = await fetch(`/api/events/${eventId}/draw`, {
-          method: "POST",
+          method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.ok) {
-          const winner = await response.json() as Winner;
+          const winner = (await response.json()) as Winner;
           setCurrentWinner(winner);
-          setWinners(prev => [...prev, winner]);
+          setWinners((prev) => [...prev, winner]);
 
           // Stop roulette and show winner
           setRouletteSpinning(false);
@@ -166,14 +170,13 @@ export function DrawMachine({
 
           // Trigger confetti
           void fireConfetti();
-
         } else {
-          const error = await response.json() as { error: string };
+          const error = (await response.json()) as { error: string };
           setModal({
             open: true,
             title: 'Draw Failed',
             message: error.error || 'Failed to draw winner',
-            type: 'error'
+            type: 'error',
           });
           setRouletteSpinning(false);
         }
@@ -183,7 +186,7 @@ export function DrawMachine({
           open: true,
           title: 'Error',
           message: 'Network error occurred while drawing',
-          type: 'error'
+          type: 'error',
         });
         setRouletteSpinning(false);
       } finally {
@@ -243,10 +246,7 @@ export function DrawMachine({
                     🎊 Winner Selected! 🎊
                   </div>
                   <div className="flex gap-4 justify-center">
-                    <Button
-                      onClick={resetDraw}
-                      variant="outline"
-                    >
+                    <Button onClick={resetDraw} variant="outline">
                       Draw Another
                     </Button>
                   </div>
@@ -262,19 +262,21 @@ export function DrawMachine({
       </Card>
 
       {/* Modal for notifications */}
-      <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
+      <Dialog open={modal.open} onOpenChange={(open) => setModal((prev) => ({ ...prev, open }))}>
         <DialogContent className="dark:bg-gray-800 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle className={modal.type === 'error' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
+            <DialogTitle
+              className={
+                modal.type === 'error'
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-green-600 dark:text-green-400'
+              }
+            >
               {modal.title}
             </DialogTitle>
-            <DialogDescription className="dark:text-gray-300">
-              {modal.message}
-            </DialogDescription>
+            <DialogDescription className="dark:text-gray-300">{modal.message}</DialogDescription>
           </DialogHeader>
-          <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>
-            OK
-          </Button>
+          <Button onClick={() => setModal((prev) => ({ ...prev, open: false }))}>OK</Button>
         </DialogContent>
       </Dialog>
     </>

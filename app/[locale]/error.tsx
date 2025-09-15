@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Error({
   error,
@@ -28,12 +28,7 @@ export default function Error({
           <p className="text-center text-gray-600 dark:text-gray-400">
             {error.message || 'An unexpected error occurred'}
           </p>
-          <Button
-            onClick={reset}
-            className="w-full"
-            size="lg"
-            variant="outline"
-          >
+          <Button onClick={reset} className="w-full" size="lg" variant="outline">
             Try again
           </Button>
         </CardContent>

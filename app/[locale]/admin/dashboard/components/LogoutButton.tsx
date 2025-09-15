@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from "@/components/ui/button";
-import { useTranslation } from "@/hooks/useTranslation";
+import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/useTranslation';
 import { logout } from '@/lib/actions/auth';
 
 export function LogoutButton() {

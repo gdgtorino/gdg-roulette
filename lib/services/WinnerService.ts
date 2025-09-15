@@ -20,14 +20,16 @@ export class WinnerService {
       const winner: Winner = {
         id: this.generateId(),
         ...winnerData,
-        drawnAt: winnerData.drawnAt || new Date()
+        drawnAt: winnerData.drawnAt || new Date(),
       };
 
       // In a real implementation, this would save to database
       // For now, return the winner object
       return winner;
     } catch (error) {
-      throw new Error(`Failed to record winner: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to record winner: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -47,7 +49,9 @@ export class WinnerService {
       // For now, return empty array
       return [];
     } catch (error) {
-      throw new Error(`Failed to get winners for event: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to get winners for event: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -59,7 +63,9 @@ export class WinnerService {
       const winners = await this.getWinnersByEvent(eventId);
       return winners.length;
     } catch (error) {
-      throw new Error(`Failed to get winner count: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to get winner count: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -72,7 +78,9 @@ export class WinnerService {
       // For now, return null
       return null;
     } catch (error) {
-      throw new Error(`Failed to get winner: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to get winner: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -82,9 +90,11 @@ export class WinnerService {
   async getWinnerByPosition(eventId: string, position: number): Promise<Winner | null> {
     try {
       const winners = await this.getWinnersByEvent(eventId);
-      return winners.find(winner => winner.position === position) || null;
+      return winners.find((winner) => winner.position === position) || null;
     } catch (error) {
-      throw new Error(`Failed to get winner by position: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to get winner by position: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -94,9 +104,11 @@ export class WinnerService {
   async isParticipantWinner(eventId: string, participantId: string): Promise<boolean> {
     try {
       const winners = await this.getWinnersByEvent(eventId);
-      return winners.some(winner => winner.participantId === participantId);
+      return winners.some((winner) => winner.participantId === participantId);
     } catch (error) {
-      throw new Error(`Failed to check winner status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to check winner status: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -109,9 +121,11 @@ export class WinnerService {
       if (winners.length === 0) {
         return 1;
       }
-      return Math.max(...winners.map(w => w.position)) + 1;
+      return Math.max(...winners.map((w) => w.position)) + 1;
     } catch (error) {
-      throw new Error(`Failed to get next position: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to get next position: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -124,7 +138,9 @@ export class WinnerService {
       // For now, return true
       return true;
     } catch (error) {
-      throw new Error(`Failed to delete winner: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to delete winner: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -137,20 +153,27 @@ export class WinnerService {
       // For now, return true
       return true;
     } catch (error) {
-      throw new Error(`Failed to clear event winners: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to clear event winners: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
   /**
    * Update winner metadata
    */
-  async updateWinnerMetadata(winnerId: string, metadata: Record<string, any>): Promise<Winner | null> {
+  async updateWinnerMetadata(
+    winnerId: string,
+    metadata: Record<string, any>,
+  ): Promise<Winner | null> {
     try {
       // In a real implementation, this would update the database
       // For now, return null
       return null;
     } catch (error) {
-      throw new Error(`Failed to update winner metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to update winner metadata: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 

@@ -1,5 +1,5 @@
-import { defineConfig } from 'vitest/config'
-import path from 'path'
+import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
   test: {
@@ -13,13 +13,7 @@ export default defineConfig({
       '**/__tests__/**/*.test.{ts,js}',
       '**/tests/**/*.test.{ts,js}',
     ],
-    exclude: [
-      'node_modules',
-      'dist',
-      '.next',
-      'e2e',
-      '**/frontend/**',
-    ],
+    exclude: ['node_modules', 'dist', '.next', 'e2e', '**/frontend/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -52,4 +46,4 @@ export default defineConfig({
       '@/database': path.resolve(__dirname, './database'),
     },
   },
-})
+});

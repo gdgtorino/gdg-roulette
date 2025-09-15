@@ -1,8 +1,8 @@
-import Link from "next/link";
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HeaderControls } from "@/components/ClientComponents";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { HeaderControls } from '@/components/ClientComponents';
 
 export default function HomePage() {
   const t = useTranslations();

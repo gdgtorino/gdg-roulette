@@ -25,7 +25,7 @@ export class LotteryService {
     private winnerService: WinnerService,
     private notificationService: NotificationService,
     private eventService: EventService,
-    private randomService: RandomService
+    private randomService: RandomService,
   ) {}
 
   /**
@@ -38,14 +38,14 @@ export class LotteryService {
       if (!event) {
         return {
           success: false,
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
       if (event.closed) {
         return {
           success: false,
-          error: 'Cannot draw from a closed event'
+          error: 'Cannot draw from a closed event',
         };
       }
 
@@ -53,7 +53,7 @@ export class LotteryService {
       if (event.state !== 'DRAW') {
         return {
           success: false,
-          error: 'Cannot draw winners - event is not in DRAW state'
+          error: 'Cannot draw winners - event is not in DRAW state',
         };
       }
 
@@ -61,7 +61,7 @@ export class LotteryService {
       if (event.createdBy && event.createdBy !== adminId) {
         return {
           success: false,
-          error: 'Only event creator can draw winners'
+          error: 'Only event creator can draw winners',
         };
       }
 
@@ -71,7 +71,7 @@ export class LotteryService {
       if (currentWinnerCount >= totalParticipants) {
         return {
           success: false,
-          error: 'All participants have already been drawn'
+          error: 'All participants have already been drawn',
         };
       }
 
@@ -80,19 +80,23 @@ export class LotteryService {
       if (availableParticipants.length === 0) {
         return {
           success: false,
-          error: 'No participants available for drawing'
+          error: 'No participants available for drawing',
         };
       }
 
       // Use random service to select winner
-      const selectedParticipant = await this.randomService.selectRandomParticipant(availableParticipants);
+      const selectedParticipant =
+        await this.randomService.selectRandomParticipant(availableParticipants);
 
       // Check if selected participant is already a winner (additional safety check)
-      const isAlreadyWinner = await this.winnerService.isParticipantWinner(eventId, selectedParticipant.id);
+      const isAlreadyWinner = await this.winnerService.isParticipantWinner(
+        eventId,
+        selectedParticipant.id,
+      );
       if (isAlreadyWinner) {
         return {
           success: false,
-          error: 'Selected participant is already a winner'
+          error: 'Selected participant is already a winner',
         };
       }
 
@@ -101,7 +105,7 @@ export class LotteryService {
         eventId,
         participantId: selectedParticipant.id,
         participantName: selectedParticipant.name,
-        drawOrder: currentWinnerCount + 1
+        drawOrder: currentWinnerCount + 1,
       });
 
       // Notify winner and broadcast update
@@ -118,7 +122,7 @@ export class LotteryService {
       return {
         success: true,
         winner,
-        warning
+        warning,
       };
     } catch (error) {
       // Handle specific error types
@@ -126,20 +130,20 @@ export class LotteryService {
         if (error.message.includes('Database') || error.message.includes('database')) {
           return {
             success: false,
-            error: 'Failed to create winner record'
+            error: 'Failed to create winner record',
           };
         }
         if (error.message.includes('Random') || error.message.includes('random')) {
           return {
             success: false,
-            error: 'Failed to select random winner'
+            error: 'Failed to select random winner',
           };
         }
       }
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error during draw'
+        error: error instanceof Error ? error.message : 'Unknown error during draw',
       };
     }
   }
@@ -154,21 +158,21 @@ export class LotteryService {
       if (!event) {
         return {
           success: false,
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
       if (event.closed) {
         return {
           success: false,
-          error: 'Cannot draw from a closed event'
+          error: 'Cannot draw from a closed event',
         };
       }
 
       if (event.registrationOpen) {
         return {
           success: false,
-          error: 'Cannot draw while registration is still open'
+          error: 'Cannot draw while registration is still open',
         };
       }
 
@@ -178,7 +182,7 @@ export class LotteryService {
       if (undrawenParticipants.length === 0) {
         return {
           success: false,
-          error: 'No more participants to draw'
+          error: 'No more participants to draw',
         };
       }
 
@@ -196,8 +200,8 @@ export class LotteryService {
           eventId,
           participantId: selectedParticipant.id,
           participantName: selectedParticipant.name,
-          drawOrder
-        }
+          drawOrder,
+        },
       });
 
       // Send real-time notification
@@ -205,12 +209,12 @@ export class LotteryService {
 
       return {
         success: true,
-        winner
+        winner,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Draw failed: ${error}`
+        error: `Draw failed: ${error}`,
       };
     }
   }
@@ -236,13 +240,13 @@ export class LotteryService {
       return {
         success: winners.length > 0,
         winners,
-        error: errors.length > 0 ? errors.join('; ') : undefined
+        error: errors.length > 0 ? errors.join('; ') : undefined,
       };
     } catch (error) {
       return {
         success: false,
         winners: [],
-        error: `Batch draw failed: ${error}`
+        error: `Batch draw failed: ${error}`,
       };
     }
   }
@@ -258,7 +262,7 @@ export class LotteryService {
         return {
           success: false,
           winners: [],
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
@@ -267,7 +271,7 @@ export class LotteryService {
         return {
           success: false,
           winners: [],
-          error: 'Only event creator can draw winners'
+          error: 'Only event creator can draw winners',
         };
       }
 
@@ -280,7 +284,7 @@ export class LotteryService {
         return {
           success: false,
           winners: [],
-          error: 'All participants have already been drawn'
+          error: 'All participants have already been drawn',
         };
       }
 
@@ -289,14 +293,16 @@ export class LotteryService {
 
       // Draw remaining participants sequentially
       for (let i = 0; i < remainingCount; i++) {
-        const availableParticipants = await this.participantService.getAvailableParticipants(eventId);
+        const availableParticipants =
+          await this.participantService.getAvailableParticipants(eventId);
 
         if (availableParticipants.length === 0) {
           break; // No more participants available
         }
 
         // Select random participant
-        const selectedParticipant = await this.randomService.selectRandomParticipant(availableParticipants);
+        const selectedParticipant =
+          await this.randomService.selectRandomParticipant(availableParticipants);
 
         drawOrder++;
 
@@ -305,7 +311,7 @@ export class LotteryService {
           eventId,
           participantId: selectedParticipant.id,
           participantName: selectedParticipant.name,
-          drawOrder
+          drawOrder,
         });
 
         winners.push(winner);
@@ -317,7 +323,7 @@ export class LotteryService {
             type: 'WINNER_DRAWN',
             winner,
             drawOrder,
-            timestamp: new Date()
+            timestamp: new Date(),
           });
         } catch (notificationError) {
           console.error('Notification failed:', notificationError);
@@ -339,13 +345,13 @@ export class LotteryService {
       return {
         success: true,
         winners,
-        eventClosed
+        eventClosed,
       };
     } catch (error) {
       return {
         success: false,
         winners: [],
-        error: `Draw all failed: ${error instanceof Error ? error.message : error}`
+        error: `Draw all failed: ${error instanceof Error ? error.message : error}`,
       };
     }
   }
@@ -363,8 +369,10 @@ export class LotteryService {
         if (result.success && result.winner) {
           winners.push(result.winner);
         } else {
-          if (result.error === 'All participants have already been drawn' ||
-              result.error === 'No participants available for drawing') {
+          if (
+            result.error === 'All participants have already been drawn' ||
+            result.error === 'No participants available for drawing'
+          ) {
             break; // Stop when no more participants available
           }
           errors.push(result.error || 'Unknown error');
@@ -375,13 +383,13 @@ export class LotteryService {
       return {
         success: winners.length > 0,
         winners,
-        error: errors.length > 0 ? errors.join('; ') : undefined
+        error: errors.length > 0 ? errors.join('; ') : undefined,
       };
     } catch (error) {
       return {
         success: false,
         winners: [],
-        error: `Limited draw failed: ${error instanceof Error ? error.message : error}`
+        error: `Limited draw failed: ${error instanceof Error ? error.message : error}`,
       };
     }
   }
@@ -417,9 +425,9 @@ export class LotteryService {
         where: {
           eventId_drawOrder: {
             eventId,
-            drawOrder
-          }
-        }
+            drawOrder,
+          },
+        },
       });
       return winner;
     } catch (error) {
@@ -475,7 +483,7 @@ export class LotteryService {
         totalParticipants,
         drawnWinners,
         remainingParticipants,
-        drawProgress: Math.round(drawProgress * 100) / 100
+        drawProgress: Math.round(drawProgress * 100) / 100,
       };
     } catch (error) {
       throw new Error(`Failed to get lottery statistics: ${error}`);
@@ -492,27 +500,27 @@ export class LotteryService {
       if (!event) {
         return {
           success: false,
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
       if (event.closed) {
         return {
           success: false,
-          error: 'Cannot reset a closed event'
+          error: 'Cannot reset a closed event',
         };
       }
 
       // Delete all winners for this event
       await prisma.winner.deleteMany({
-        where: { eventId }
+        where: { eventId },
       });
 
       return { success: true };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to reset lottery: ${error}`
+        error: `Failed to reset lottery: ${error}`,
       };
     }
   }
@@ -520,14 +528,16 @@ export class LotteryService {
   /**
    * Get winners with participant details
    */
-  async getWinnersWithDetails(eventId: string): Promise<Array<Winner & { participant: Participant }>> {
+  async getWinnersWithDetails(
+    eventId: string,
+  ): Promise<Array<Winner & { participant: Participant }>> {
     try {
       const winners = await prisma.winner.findMany({
         where: { eventId },
         include: {
-          participant: true
+          participant: true,
         },
-        orderBy: { drawOrder: 'asc' }
+        orderBy: { drawOrder: 'asc' },
       });
       return winners as Array<Winner & { participant: Participant }>;
     } catch (error) {
@@ -560,7 +570,7 @@ export class LotteryService {
       if (!event) {
         return {
           success: false,
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
@@ -573,24 +583,24 @@ export class LotteryService {
           event: {
             id: event.id,
             name: event.name,
-            createdAt: event.createdAt
+            createdAt: event.createdAt,
           },
-          winners: winners.map(winner => ({
+          winners: winners.map((winner) => ({
             drawOrder: winner.drawOrder,
             participantName: winner.participantName,
-            drawnAt: winner.drawnAt
+            drawnAt: winner.drawnAt,
           })),
           stats: {
             totalParticipants: stats.totalParticipants,
             totalWinners: stats.drawnWinners,
-            drawDate: winners.length > 0 ? winners[0].drawnAt : new Date()
-          }
-        }
+            drawDate: winners.length > 0 ? winners[0].drawnAt : new Date(),
+          },
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to export results: ${error}`
+        error: `Failed to export results: ${error}`,
       };
     }
   }
@@ -631,7 +641,7 @@ export class LotteryService {
 
       return {
         valid: errors.length === 0,
-        errors
+        errors,
       };
     } catch (error) {
       errors.push(`Validation failed: ${error}`);
@@ -657,12 +667,14 @@ export class LotteryService {
   /**
    * Get draw history for an event
    */
-  async getDrawHistory(eventId: string): Promise<Array<{
-    drawOrder: number;
-    participantName: string;
-    drawnAt: Date;
-    timeSinceLastDraw?: number; // in seconds
-  }>> {
+  async getDrawHistory(eventId: string): Promise<
+    Array<{
+      drawOrder: number;
+      participantName: string;
+      drawnAt: Date;
+      timeSinceLastDraw?: number; // in seconds
+    }>
+  > {
     try {
       const winners = await this.getWinners(eventId);
 
@@ -672,7 +684,7 @@ export class LotteryService {
         if (index > 0) {
           const previousWinner = winners[index - 1];
           timeSinceLastDraw = Math.floor(
-            (winner.drawnAt.getTime() - previousWinner.drawnAt.getTime()) / 1000
+            (winner.drawnAt.getTime() - previousWinner.drawnAt.getTime()) / 1000,
           );
         }
 
@@ -680,7 +692,7 @@ export class LotteryService {
           drawOrder: winner.drawOrder,
           participantName: winner.participantName,
           drawnAt: winner.drawnAt,
-          timeSinceLastDraw
+          timeSinceLastDraw,
         };
       });
     } catch (error) {

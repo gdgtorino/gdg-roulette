@@ -50,31 +50,39 @@ export function useEventSSE(eventId: string, enabled: boolean = true) {
         // Custom event listeners
         eventSource.addEventListener('participant-joined', (event) => {
           const data = JSON.parse(event.data);
-          setEvents((prev) => [...prev, {
-            type: 'participant-joined',
-            data,
-            timestamp: Date.now(),
-          }]);
+          setEvents((prev) => [
+            ...prev,
+            {
+              type: 'participant-joined',
+              data,
+              timestamp: Date.now(),
+            },
+          ]);
         });
 
         eventSource.addEventListener('draw-started', (event) => {
           const data = JSON.parse(event.data);
-          setEvents((prev) => [...prev, {
-            type: 'draw-started',
-            data,
-            timestamp: Date.now(),
-          }]);
+          setEvents((prev) => [
+            ...prev,
+            {
+              type: 'draw-started',
+              data,
+              timestamp: Date.now(),
+            },
+          ]);
         });
 
         eventSource.addEventListener('winner-drawn', (event) => {
           const data = JSON.parse(event.data);
-          setEvents((prev) => [...prev, {
-            type: 'winner-drawn',
-            data,
-            timestamp: Date.now(),
-          }]);
+          setEvents((prev) => [
+            ...prev,
+            {
+              type: 'winner-drawn',
+              data,
+              timestamp: Date.now(),
+            },
+          ]);
         });
-
       } catch (err) {
         setError(err as Error);
         setIsConnected(false);
@@ -98,7 +106,7 @@ export function useEventSSE(eventId: string, enabled: boolean = true) {
 
   const getLatestEvent = (type?: string) => {
     if (type) {
-      return events.filter(e => e.type === type).slice(-1)[0];
+      return events.filter((e) => e.type === type).slice(-1)[0];
     }
     return events.slice(-1)[0];
   };

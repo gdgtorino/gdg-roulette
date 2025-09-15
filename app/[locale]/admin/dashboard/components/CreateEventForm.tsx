@@ -1,9 +1,9 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useTranslation } from "@/hooks/useTranslation";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useTranslation } from '@/hooks/useTranslation';
 import { createEvent } from '@/lib/actions/events';
 
 type FormState = {
@@ -42,9 +42,7 @@ export function CreateEventForm() {
         maxLength={100}
       />
       <SubmitButton />
-      {state && !state.success && (
-        <div className="text-red-500 text-sm mt-2">{state.error}</div>
-      )}
+      {state && !state.success && <div className="text-red-500 text-sm mt-2">{state.error}</div>}
     </form>
   );
 }

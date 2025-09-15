@@ -20,10 +20,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const body = await validateRequest(request, executeDrawSchema);
 
     if (!body.success) {
-      return NextResponse.json(
-        { error: body.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: body.error }, { status: 400 });
     }
 
     const result = await executeDraw(params.eventId);
@@ -36,15 +33,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     console.error('Execute draw error:', error);
 
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to execute draw' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to execute draw' }, { status: 500 });
   }
 }

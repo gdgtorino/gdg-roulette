@@ -1,11 +1,11 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 
 // Authentication test utilities
 export interface TestUser {
-  id: string
-  email: string
-  name: string
-  role: 'USER' | 'ADMIN'
+  id: string;
+  email: string;
+  name: string;
+  role: 'USER' | 'ADMIN';
 }
 
 export function createTestJWT(user: TestUser): string {
@@ -17,16 +17,16 @@ export function createTestJWT(user: TestUser): string {
       role: user.role,
     },
     process.env.JWT_SECRET || 'test-jwt-secret',
-    { expiresIn: '1h' }
-  )
+    { expiresIn: '1h' },
+  );
 }
 
 export function createAuthHeaders(user: TestUser): Record<string, string> {
-  const token = createTestJWT(user)
+  const token = createTestJWT(user);
   return {
-    'Authorization': `Bearer ${token}`,
+    Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
-  }
+  };
 }
 
 export function mockNextAuthSession(user: TestUser) {
@@ -38,7 +38,7 @@ export function mockNextAuthSession(user: TestUser) {
       role: user.role,
     },
     expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-  }
+  };
 }
 
 // Mock authentication for tests
@@ -51,34 +51,34 @@ export function mockAuthentication() {
     })),
     signIn: jest.fn(),
     signOut: jest.fn(),
-  }))
+  }));
 
   // Mock getServerSession
   jest.mock('next-auth', () => ({
     getServerSession: jest.fn(),
-  }))
+  }));
 }
 
 export function mockAuthenticatedUser(user: TestUser) {
-  const { useSession } = require('next-auth/react')
-  const { getServerSession } = require('next-auth')
+  const { useSession } = require('next-auth/react');
+  const { getServerSession } = require('next-auth');
 
   useSession.mockReturnValue({
     data: mockNextAuthSession(user),
     status: 'authenticated',
-  })
+  });
 
-  getServerSession.mockResolvedValue(mockNextAuthSession(user))
+  getServerSession.mockResolvedValue(mockNextAuthSession(user));
 }
 
 export function mockUnauthenticatedUser() {
-  const { useSession } = require('next-auth/react')
-  const { getServerSession } = require('next-auth')
+  const { useSession } = require('next-auth/react');
+  const { getServerSession } = require('next-auth');
 
   useSession.mockReturnValue({
     data: null,
     status: 'unauthenticated',
-  })
+  });
 
-  getServerSession.mockResolvedValue(null)
+  getServerSession.mockResolvedValue(null);
 }

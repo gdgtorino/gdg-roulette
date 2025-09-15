@@ -1,8 +1,22 @@
 import { EventState } from './EventStateMachine';
 
 export interface UserState {
-  status: 'UNREGISTERED' | 'REGISTERED' | 'SESSION_EXPIRED' | 'WINNER' | 'NOT_WINNER' | 'ERROR' | 'EVENT_CLOSED';
-  screen: 'REGISTRATION' | 'WAITING' | 'LOTTERY_LIVE' | 'WINNER_RESULT' | 'NOT_WINNER_RESULT' | 'ERROR' | 'EVENT_CLOSED';
+  status:
+    | 'UNREGISTERED'
+    | 'REGISTERED'
+    | 'SESSION_EXPIRED'
+    | 'WINNER'
+    | 'NOT_WINNER'
+    | 'ERROR'
+    | 'EVENT_CLOSED';
+  screen:
+    | 'REGISTRATION'
+    | 'WAITING'
+    | 'LOTTERY_LIVE'
+    | 'WINNER_RESULT'
+    | 'NOT_WINNER_RESULT'
+    | 'ERROR'
+    | 'EVENT_CLOSED';
   event?: {
     id: string;
     name: string;
@@ -55,7 +69,7 @@ export class UserStateManager {
     event: any,
     participant?: any,
     session?: any,
-    winner?: any
+    winner?: any,
   ): Promise<UserState> {
     try {
       // Handle event not found
@@ -63,7 +77,7 @@ export class UserStateManager {
         return {
           status: 'ERROR',
           screen: 'ERROR',
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
@@ -75,20 +89,20 @@ export class UserStateManager {
             screen: 'WINNER_RESULT',
             event,
             participant,
-            winner
+            winner,
           };
         } else if (participant) {
           return {
             status: 'NOT_WINNER',
             screen: 'NOT_WINNER_RESULT',
             event,
-            participant
+            participant,
           };
         } else {
           return {
             status: 'EVENT_CLOSED',
             screen: 'EVENT_CLOSED',
-            event
+            event,
           };
         }
       }
@@ -100,7 +114,7 @@ export class UserStateManager {
           screen: 'REGISTRATION',
           event,
           message: 'Your session has expired. Please register again.',
-          action: 'SHOW_REAUTH_FORM'
+          action: 'SHOW_REAUTH_FORM',
         };
       }
 
@@ -113,7 +127,7 @@ export class UserStateManager {
               screen: 'LOTTERY_LIVE',
               event,
               participant,
-              session
+              session,
             };
           } else {
             return {
@@ -121,7 +135,7 @@ export class UserStateManager {
               screen: 'WAITING',
               event,
               participant,
-              session
+              session,
             };
           }
         } else if (event.state === EventState.REGISTRATION) {
@@ -130,7 +144,7 @@ export class UserStateManager {
             screen: 'WAITING',
             event,
             participant,
-            session
+            session,
           };
         }
       }
@@ -140,7 +154,7 @@ export class UserStateManager {
         return {
           status: 'UNREGISTERED',
           screen: 'REGISTRATION',
-          event
+          event,
         };
       }
 
@@ -148,13 +162,13 @@ export class UserStateManager {
       return {
         status: 'UNREGISTERED',
         screen: 'REGISTRATION',
-        event
+        event,
       };
     } catch (error) {
       return {
         status: 'ERROR',
         screen: 'ERROR',
-        error: 'Failed to determine user state'
+        error: 'Failed to determine user state',
       };
     }
   }
@@ -173,7 +187,7 @@ export class UserStateManager {
         sessionId: state.session?.id,
         userStatus: state.status || 'UNREGISTERED',
         participantId: state.participant?.id,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       const key = `${this.STORAGE_PREFIX}${eventId}`;
@@ -241,12 +255,12 @@ export class UserStateManager {
   updateUserStatus(
     currentState: UserState,
     newStatus: UserState['status'],
-    additionalData?: Partial<UserState>
+    additionalData?: Partial<UserState>,
   ): UserState {
     return {
       ...currentState,
       status: newStatus,
-      ...additionalData
+      ...additionalData,
     };
   }
 
@@ -256,7 +270,7 @@ export class UserStateManager {
   getScreenForStatus(
     status: UserState['status'],
     eventState: EventState,
-    hasWinner: boolean = false
+    hasWinner: boolean = false,
   ): UserState['screen'] {
     switch (status) {
       case 'UNREGISTERED':
@@ -319,7 +333,7 @@ export class UserStateManager {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -335,8 +349,8 @@ export class UserStateManager {
         name: 'Unknown Event',
         state: EventState.INIT,
         registrationOpen: false,
-        closed: false
-      }
+        closed: false,
+      },
     };
   }
 
@@ -348,19 +362,19 @@ export class UserStateManager {
     currentEventData: any,
     participantData?: any,
     sessionData?: any,
-    winnerData?: any
+    winnerData?: any,
   ): UserState {
     return {
       status: storedState.userStatus as UserState['status'],
       screen: this.getScreenForStatus(
         storedState.userStatus as UserState['status'],
         currentEventData?.state,
-        !!winnerData
+        !!winnerData,
       ),
       event: currentEventData,
       participant: participantData,
       session: sessionData,
-      winner: winnerData
+      winner: winnerData,
     };
   }
 }

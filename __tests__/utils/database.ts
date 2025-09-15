@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
 // Test database utilities
-let prismaClient: PrismaClient
+let prismaClient: PrismaClient;
 
 export function getTestPrismaClient(): PrismaClient {
   if (!prismaClient) {
@@ -11,25 +11,25 @@ export function getTestPrismaClient(): PrismaClient {
           url: process.env.TEST_DATABASE_URL || process.env.DATABASE_URL,
         },
       },
-    })
+    });
   }
-  return prismaClient
+  return prismaClient;
 }
 
 // Database cleanup helpers
 export async function cleanupDatabase() {
-  const prisma = getTestPrismaClient()
+  const prisma = getTestPrismaClient();
 
   // Clean up in reverse order of dependencies
-  await prisma.lotteryEntry.deleteMany()
-  await prisma.lottery.deleteMany()
-  await prisma.event.deleteMany()
-  await prisma.user.deleteMany()
+  await prisma.lotteryEntry.deleteMany();
+  await prisma.lottery.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.user.deleteMany();
 }
 
 // Database seeding helpers
 export async function createTestUser(data: Partial<any> = {}) {
-  const prisma = getTestPrismaClient()
+  const prisma = getTestPrismaClient();
 
   return prisma.user.create({
     data: {
@@ -38,11 +38,11 @@ export async function createTestUser(data: Partial<any> = {}) {
       role: 'USER',
       ...data,
     },
-  })
+  });
 }
 
 export async function createTestAdmin(data: Partial<any> = {}) {
-  const prisma = getTestPrismaClient()
+  const prisma = getTestPrismaClient();
 
   return prisma.user.create({
     data: {
@@ -51,11 +51,11 @@ export async function createTestAdmin(data: Partial<any> = {}) {
       role: 'ADMIN',
       ...data,
     },
-  })
+  });
 }
 
 export async function createTestEvent(data: Partial<any> = {}) {
-  const prisma = getTestPrismaClient()
+  const prisma = getTestPrismaClient();
 
   return prisma.event.create({
     data: {
@@ -67,11 +67,11 @@ export async function createTestEvent(data: Partial<any> = {}) {
       isActive: true,
       ...data,
     },
-  })
+  });
 }
 
 export async function createTestLottery(eventId: string, data: Partial<any> = {}) {
-  const prisma = getTestPrismaClient()
+  const prisma = getTestPrismaClient();
 
   return prisma.lottery.create({
     data: {
@@ -85,11 +85,15 @@ export async function createTestLottery(eventId: string, data: Partial<any> = {}
       isActive: true,
       ...data,
     },
-  })
+  });
 }
 
-export async function createTestLotteryEntry(lotteryId: string, userId: string, data: Partial<any> = {}) {
-  const prisma = getTestPrismaClient()
+export async function createTestLotteryEntry(
+  lotteryId: string,
+  userId: string,
+  data: Partial<any> = {},
+) {
+  const prisma = getTestPrismaClient();
 
   return prisma.lotteryEntry.create({
     data: {
@@ -98,12 +102,12 @@ export async function createTestLotteryEntry(lotteryId: string, userId: string, 
       ticketNumber: Math.floor(Math.random() * 1000000).toString(),
       ...data,
     },
-  })
+  });
 }
 
 // Disconnect helper for test cleanup
 export async function disconnectTestDatabase() {
   if (prismaClient) {
-    await prismaClient.$disconnect()
+    await prismaClient.$disconnect();
   }
 }

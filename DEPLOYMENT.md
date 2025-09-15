@@ -1,10 +1,13 @@
 # The Draw - Complete CI/CD Deployment Guide
 
-This guide covers the complete CI/CD pipeline setup for The Draw lottery management system, including GitHub Actions workflows, Docker containerization, and multi-environment deployment strategies.
+This guide covers the complete CI/CD pipeline setup for The Draw lottery
+management system, including GitHub Actions workflows, Docker containerization,
+and multi-environment deployment strategies.
 
 ## 📋 Overview
 
 The CI/CD pipeline supports:
+
 - **Testing**: Automated testing with PostgreSQL and Redis services
 - **Building**: Optimized Docker builds with caching
 - **Deployment**: Multi-environment deployment (staging, production)
@@ -30,6 +33,7 @@ The CI/CD pipeline supports:
 **Triggers**: Pull requests and pushes to `dev` branch
 
 **Features**:
+
 - PostgreSQL 15 and Redis 7 services
 - Parallel linting and type checking
 - Database schema validation
@@ -37,6 +41,7 @@ The CI/CD pipeline supports:
 - Comprehensive caching strategy
 
 **Services**:
+
 ```yaml
 postgres:
   image: postgres:15-alpine
@@ -54,6 +59,7 @@ redis:
 **Triggers**: Pushes to `main`/`dev` branches and pull requests to `main`
 
 **Features**:
+
 - Path-based change detection
 - Matrix builds for frontend/backend
 - Docker image building and testing
@@ -61,6 +67,7 @@ redis:
 - Size analysis for frontend builds
 
 **Change Detection**:
+
 ```yaml
 frontend: ['apps/frontend/**', 'package.json', 'yarn.lock']
 backend: ['apps/backend/**', 'package.json', 'yarn.lock']
@@ -70,11 +77,13 @@ docker: ['apps/**/Dockerfile', 'docker-compose*.yml']
 ### 3. Deploy Workflow (`.github/workflows/deploy.yml`)
 
 **Triggers**:
+
 - Pushes to `main` branch
 - Version tags (`v*`)
 - Manual workflow dispatch
 
 **Features**:
+
 - Environment-specific deployments
 - Pre-deployment checks
 - Docker image publishing to GHCR
@@ -86,12 +95,14 @@ docker: ['apps/**/Dockerfile', 'docker-compose*.yml']
 ### Frontend Dockerfile
 
 **Multi-stage build**:
+
 1. **base**: Node.js 20 Alpine with system dependencies
 2. **deps**: Production dependencies only
 3. **builder**: Full build with dev dependencies
 4. **runner**: Optimized production image
 
 **Key Features**:
+
 - Next.js standalone output
 - Non-root user for security
 - Optimized health checks
@@ -101,6 +112,7 @@ docker: ['apps/**/Dockerfile', 'docker-compose*.yml']
 ### Backend Dockerfile
 
 **Features**:
+
 - Prisma client generation
 - Production-only dependencies
 - Health check endpoints
@@ -109,6 +121,7 @@ docker: ['apps/**/Dockerfile', 'docker-compose*.yml']
 ## 🌍 Environment Management
 
 ### Development Environment
+
 ```bash
 # Start development environment
 yarn dev
@@ -118,6 +131,7 @@ yarn docker:up
 ```
 
 ### Staging Environment
+
 ```bash
 # Deploy to staging
 yarn deploy:staging
@@ -127,12 +141,14 @@ docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d
 ```
 
 **Staging Features**:
+
 - SSL termination with Let's Encrypt
 - Prometheus monitoring
 - Resource limits
 - Debug logging enabled
 
 ### Production Environment
+
 ```bash
 # Deploy to production (requires confirmation)
 yarn deploy:production
@@ -142,6 +158,7 @@ yarn deploy:production:force
 ```
 
 **Production Features**:
+
 - Multiple domain support
 - Enhanced security headers
 - Rate limiting
@@ -152,16 +169,19 @@ yarn deploy:production:force
 ## 📊 Monitoring Stack
 
 ### Prometheus Configuration
+
 - Application metrics collection
 - Service discovery
 - Alert rules for critical metrics
 
 ### Grafana Dashboards
+
 - Application performance metrics
 - Infrastructure monitoring
 - Business metrics tracking
 
 ### Logging
+
 - Structured JSON logging
 - Log aggregation with Loki
 - Centralized log analysis
@@ -169,12 +189,14 @@ yarn deploy:production:force
 ## 🔒 Security Features
 
 ### Application Security
+
 - Non-root container execution
 - Security headers (HSTS, CSP, etc.)
 - Rate limiting
 - Input validation
 
 ### Infrastructure Security
+
 - SSL/TLS termination
 - Security scanning in CI
 - Dependency vulnerability checks
@@ -222,6 +244,7 @@ yarn security:audit       # Run security audit
 ### Manual Deployment
 
 Using the deployment script:
+
 ```bash
 # Deploy to staging
 ./scripts/deploy.sh staging
@@ -249,6 +272,7 @@ vercel --prod
 ```
 
 **Vercel Features**:
+
 - Next.js optimized builds
 - API route proxying to backend
 - Security headers
@@ -287,11 +311,13 @@ vercel --prod
 ### Environment Variables
 
 #### Required for All Environments
+
 - `DATABASE_URL`: PostgreSQL connection string
 - `REDIS_URL`: Redis connection string
 - `JWT_SECRET`: JWT signing secret
 
 #### Production Specific
+
 - `POSTGRES_PASSWORD`: Secure database password
 - `ACME_EMAIL`: Let's Encrypt certificate email
 - `GRAFANA_PASSWORD`: Grafana admin password
@@ -299,6 +325,7 @@ vercel --prod
 ### Docker Compose Overrides
 
 Use environment-specific compose files:
+
 ```bash
 # Staging
 docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d
@@ -312,6 +339,7 @@ docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d
 ### Common Issues
 
 1. **Database Connection Failures**
+
    ```bash
    # Check database logs
    docker-compose logs postgres
@@ -321,6 +349,7 @@ docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d
    ```
 
 2. **Build Failures**
+
    ```bash
    # Clear Docker build cache
    docker system prune -a
@@ -339,6 +368,7 @@ docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d
 ### Health Checks
 
 Each service includes health checks:
+
 ```bash
 # Check service health
 docker-compose ps
@@ -350,12 +380,14 @@ docker inspect <container_name> | jq '.[0].State.Health'
 ## 📈 Performance Optimization
 
 ### Build Optimization
+
 - Multi-stage Docker builds
 - Layer caching
 - Dependency optimization
 - Build artifact reuse
 
 ### Runtime Optimization
+
 - Next.js standalone output
 - Resource limits
 - Connection pooling
@@ -364,6 +396,7 @@ docker inspect <container_name> | jq '.[0].State.Health'
 ## 🔄 Update Procedures
 
 ### Application Updates
+
 1. Create feature branch
 2. Run tests locally
 3. Create pull request
@@ -371,6 +404,7 @@ docker inspect <container_name> | jq '.[0].State.Health'
 5. Manual promotion to production
 
 ### Infrastructure Updates
+
 1. Update Docker images
 2. Test in staging environment
 3. Schedule maintenance window
@@ -392,4 +426,5 @@ docker inspect <container_name> | jq '.[0].State.Health'
 
 ---
 
-**Note**: This deployment setup is designed for scalability and security. Always review and adapt configurations for your specific infrastructure requirements.
+**Note**: This deployment setup is designed for scalability and security. Always
+review and adapt configurations for your specific infrastructure requirements.

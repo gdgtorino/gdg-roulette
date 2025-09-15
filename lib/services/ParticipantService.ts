@@ -27,7 +27,7 @@ export class ParticipantService {
 
   constructor(
     private participantRepository: ParticipantRepository,
-    private eventRepository: EventRepository
+    private eventRepository: EventRepository,
   ) {
     this.validationService = new ValidationService();
     this.notificationService = new NotificationService();
@@ -36,7 +36,9 @@ export class ParticipantService {
   /**
    * Register a new participant for an event
    */
-  async registerParticipant(registrationData: ParticipantRegistrationData): Promise<RegistrationResult> {
+  async registerParticipant(
+    registrationData: ParticipantRegistrationData,
+  ): Promise<RegistrationResult> {
     try {
       const { eventId, name } = registrationData;
 
@@ -45,7 +47,7 @@ export class ParticipantService {
       if (!validation.valid) {
         return {
           success: false,
-          error: validation.errors.join('; ')
+          error: validation.errors.join('; '),
         };
       }
 
@@ -54,37 +56,40 @@ export class ParticipantService {
       if (!event) {
         return {
           success: false,
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
       if (!event.registrationOpen) {
         return {
           success: false,
-          error: 'Registration is not open for this event'
+          error: 'Registration is not open for this event',
         };
       }
 
       if (event.closed) {
         return {
           success: false,
-          error: 'Event is closed'
+          error: 'Event is closed',
         };
       }
 
       // Check for duplicate registration
-      const existingParticipant = await this.participantRepository.findByEventIdAndName(eventId, name);
+      const existingParticipant = await this.participantRepository.findByEventIdAndName(
+        eventId,
+        name,
+      );
       if (existingParticipant) {
         return {
           success: false,
-          error: 'A participant with this name is already registered'
+          error: 'A participant with this name is already registered',
         };
       }
 
       // Create participant
       const participant = await this.participantRepository.create({
         eventId,
-        name: name.trim()
+        name: name.trim(),
       });
 
       // Send real-time notification
@@ -92,12 +97,12 @@ export class ParticipantService {
 
       return {
         success: true,
-        participant
+        participant,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Registration failed: ${error}`
+        error: `Registration failed: ${error}`,
       };
     }
   }
@@ -110,12 +115,12 @@ export class ParticipantService {
       const participants = await this.participantRepository.findByEventId(eventId);
       return {
         success: true,
-        participants
+        participants,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to get participants: ${error}`
+        error: `Failed to get participants: ${error}`,
       };
     }
   }
@@ -145,7 +150,10 @@ export class ParticipantService {
   /**
    * Update participant information
    */
-  async updateParticipant(participantId: string, updateData: { name?: string }): Promise<RegistrationResult> {
+  async updateParticipant(
+    participantId: string,
+    updateData: { name?: string },
+  ): Promise<RegistrationResult> {
     try {
       // Validate new name if provided
       if (updateData.name) {
@@ -153,7 +161,7 @@ export class ParticipantService {
         if (!nameValidation.valid) {
           return {
             success: false,
-            error: nameValidation.errors.join('; ')
+            error: nameValidation.errors.join('; '),
           };
         }
 
@@ -162,18 +170,18 @@ export class ParticipantService {
         if (!participant) {
           return {
             success: false,
-            error: 'Participant not found'
+            error: 'Participant not found',
           };
         }
 
         const existingParticipant = await this.participantRepository.findByEventIdAndName(
           participant.eventId,
-          updateData.name
+          updateData.name,
         );
         if (existingParticipant && existingParticipant.id !== participantId) {
           return {
             success: false,
-            error: 'A participant with this name already exists in this event'
+            error: 'A participant with this name already exists in this event',
           };
         }
       }
@@ -181,12 +189,12 @@ export class ParticipantService {
       const updatedParticipant = await this.participantRepository.update(participantId, updateData);
       return {
         success: true,
-        participant: updatedParticipant
+        participant: updatedParticipant,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to update participant: ${error}`
+        error: `Failed to update participant: ${error}`,
       };
     }
   }
@@ -200,7 +208,7 @@ export class ParticipantService {
       if (!participant) {
         return {
           success: false,
-          error: 'Participant not found'
+          error: 'Participant not found',
         };
       }
 
@@ -209,23 +217,23 @@ export class ParticipantService {
       if (!event) {
         return {
           success: false,
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
       if (event.closed) {
         return {
           success: false,
-          error: 'Cannot remove participants from a closed event'
+          error: 'Cannot remove participants from a closed event',
         };
       }
 
       // Check if participant has already been drawn as a winner
-      const hasWon = event.winners?.some(winner => winner.participantId === participantId);
+      const hasWon = event.winners?.some((winner) => winner.participantId === participantId);
       if (hasWon) {
         return {
           success: false,
-          error: 'Cannot remove a participant who has already won'
+          error: 'Cannot remove a participant who has already won',
         };
       }
 
@@ -234,7 +242,7 @@ export class ParticipantService {
     } catch (error) {
       return {
         success: false,
-        error: `Failed to remove participant: ${error}`
+        error: `Failed to remove participant: ${error}`,
       };
     }
   }
@@ -334,7 +342,7 @@ export class ParticipantService {
    */
   async bulkRegisterParticipants(
     eventId: string,
-    participants: { name: string }[]
+    participants: { name: string }[],
   ): Promise<{
     success: boolean;
     registeredCount: number;
@@ -349,7 +357,7 @@ export class ParticipantService {
           success: false,
           registeredCount: 0,
           failedRegistrations: [],
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
@@ -358,7 +366,7 @@ export class ParticipantService {
           success: false,
           registeredCount: 0,
           failedRegistrations: [],
-          error: 'Registration is not open for this event'
+          error: 'Registration is not open for this event',
         };
       }
 
@@ -369,7 +377,7 @@ export class ParticipantService {
         try {
           const result = await this.registerParticipant({
             eventId,
-            name: participantData.name
+            name: participantData.name,
           });
 
           if (result.success) {
@@ -377,13 +385,13 @@ export class ParticipantService {
           } else {
             failedRegistrations.push({
               name: participantData.name,
-              error: result.error || 'Registration failed'
+              error: result.error || 'Registration failed',
             });
           }
         } catch (error) {
           failedRegistrations.push({
             name: participantData.name,
-            error: `Registration failed: ${error}`
+            error: `Registration failed: ${error}`,
           });
         }
       }
@@ -391,14 +399,14 @@ export class ParticipantService {
       return {
         success: registeredCount > 0,
         registeredCount,
-        failedRegistrations
+        failedRegistrations,
       };
     } catch (error) {
       return {
         success: false,
         registeredCount: 0,
         failedRegistrations: [],
-        error: `Bulk registration failed: ${error}`
+        error: `Bulk registration failed: ${error}`,
       };
     }
   }
@@ -428,7 +436,7 @@ export class ParticipantService {
         totalCount,
         undrawenCount,
         winnersCount,
-        registrationRate: Math.round(registrationRate * 100) / 100
+        registrationRate: Math.round(registrationRate * 100) / 100,
       };
     } catch (error) {
       throw new Error(`Failed to get participant statistics: ${error}`);
@@ -445,14 +453,14 @@ export class ParticipantService {
       if (!event) {
         return {
           success: false,
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
       if (event.closed) {
         return {
           success: false,
-          error: 'Cannot clear participants from a closed event'
+          error: 'Cannot clear participants from a closed event',
         };
       }
 
@@ -460,7 +468,7 @@ export class ParticipantService {
       if (event.winners && event.winners.length > 0) {
         return {
           success: false,
-          error: 'Cannot clear participants after winners have been drawn'
+          error: 'Cannot clear participants after winners have been drawn',
         };
       }
 
@@ -469,7 +477,7 @@ export class ParticipantService {
     } catch (error) {
       return {
         success: false,
-        error: `Failed to clear participants: ${error}`
+        error: `Failed to clear participants: ${error}`,
       };
     }
   }

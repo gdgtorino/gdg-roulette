@@ -9,54 +9,48 @@ import type { Event, Participant, Winner } from '../../types';
 import { sse } from '../../sse';
 
 const CreateEventSchema = z.object({
-  name: z.string().min(1, 'Event name is required').max(100, 'Event name too long')
+  name: z.string().min(1, 'Event name is required').max(100, 'Event name too long'),
 });
-
 
 export const eventsRouter = router({
   // Get all events for admin
-  getAdminEvents: protectedProcedure
-    .query(async ({ ctx }) => {
-      return await redisService.getAdminEvents(ctx.admin.adminId);
-    }),
+  getAdminEvents: protectedProcedure.query(async ({ ctx }) => {
+    return await redisService.getAdminEvents(ctx.admin.adminId);
+  }),
 
   // Create new event
-  create: protectedProcedure
-    .input(CreateEventSchema)
-    .mutation(async ({ input, ctx }) => {
-      const { name } = input;
+  create: protectedProcedure.input(CreateEventSchema).mutation(async ({ input, ctx }) => {
+    const { name } = input;
 
-      const eventId = uuidv4();
-      const qrData = `${process.env.CORS_ORIGIN || 'http://localhost:3000'}/register/${eventId}`;
-      const qrCode = await QRCode.toDataURL(qrData);
+    const eventId = uuidv4();
+    const qrData = `${process.env.CORS_ORIGIN || 'http://localhost:3000'}/register/${eventId}`;
+    const qrCode = await QRCode.toDataURL(qrData);
 
-      const event: Event = {
-        id: eventId,
-        name,
-        createdBy: ctx.admin.adminId,
-        createdAt: new Date(),
-        registrationOpen: true,
-        closed: false,
-        qrCode
-      };
+    const event: Event = {
+      id: eventId,
+      name,
+      createdBy: ctx.admin.adminId,
+      createdAt: new Date(),
+      registrationOpen: true,
+      closed: false,
+      qrCode,
+    };
 
-      await redisService.createEvent(event);
-      return event;
-    }),
+    await redisService.createEvent(event);
+    return event;
+  }),
 
   // Get event details (public)
-  getById: publicProcedure
-    .input(z.object({ eventId: z.string() }))
-    .query(async ({ input }) => {
-      const event = await redisService.getEvent(input.eventId);
-      if (!event) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Event not found'
-        });
-      }
-      return event;
-    }),
+  getById: publicProcedure.input(z.object({ eventId: z.string() })).query(async ({ input }) => {
+    const event = await redisService.getEvent(input.eventId);
+    if (!event) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Event not found',
+      });
+    }
+    return event;
+  }),
 
   // Delete event
   delete: protectedProcedure
@@ -66,14 +60,14 @@ export const eventsRouter = router({
       if (!event) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Event not found'
+          message: 'Event not found',
         });
       }
 
       if (event.createdBy !== ctx.admin.adminId) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'Not authorized to delete this event'
+          message: 'Not authorized to delete this event',
         });
       }
 
@@ -89,14 +83,14 @@ export const eventsRouter = router({
       if (!event) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Event not found'
+          message: 'Event not found',
         });
       }
 
       if (event.createdBy !== ctx.admin.adminId) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'Not authorized to modify this event'
+          message: 'Not authorized to modify this event',
         });
       }
 
@@ -107,7 +101,7 @@ export const eventsRouter = router({
       sse.send(input.eventId, {
         type: 'registrationToggled',
         data: { registrationOpen: newStatus },
-        eventId: input.eventId
+        eventId: input.eventId,
       });
 
       return { registrationOpen: newStatus };
@@ -121,14 +115,14 @@ export const eventsRouter = router({
       if (!event) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Event not found'
+          message: 'Event not found',
         });
       }
 
       if (event.createdBy !== ctx.admin.adminId) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'Not authorized to close this event'
+          message: 'Not authorized to close this event',
         });
       }
 
@@ -138,7 +132,7 @@ export const eventsRouter = router({
       sse.send(input.eventId, {
         type: 'eventClosed',
         data: { closed: true },
-        eventId: input.eventId
+        eventId: input.eventId,
       });
 
       return { closed: true };
@@ -152,14 +146,14 @@ export const eventsRouter = router({
       if (!event) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Event not found'
+          message: 'Event not found',
         });
       }
 
       if (event.createdBy !== ctx.admin.adminId) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'Not authorized to view participants'
+          message: 'Not authorized to view participants',
         });
       }
 
@@ -168,10 +162,12 @@ export const eventsRouter = router({
 
   // Get participant details (public)
   getParticipant: publicProcedure
-    .input(z.object({
-      eventId: z.string(),
-      participantId: z.string()
-    }))
+    .input(
+      z.object({
+        eventId: z.string(),
+        participantId: z.string(),
+      }),
+    )
     .query(async ({ input }) => {
       const { eventId, participantId } = input;
 
@@ -179,17 +175,17 @@ export const eventsRouter = router({
       if (!event) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Event not found'
+          message: 'Event not found',
         });
       }
 
       const participants = await redisService.getEventParticipants(eventId);
-      const participant = participants.find(p => p.id === participantId);
+      const participant = participants.find((p) => p.id === participantId);
 
       if (!participant) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Participant not found'
+          message: 'Participant not found',
         });
       }
 
@@ -198,16 +194,18 @@ export const eventsRouter = router({
         id: participant.id,
         name: participant.name,
         eventId: participant.eventId,
-        registeredAt: participant.registeredAt
+        registeredAt: participant.registeredAt,
       };
     }),
 
   // Check if participant is winner (public)
   checkWinner: publicProcedure
-    .input(z.object({
-      eventId: z.string(),
-      participantId: z.string()
-    }))
+    .input(
+      z.object({
+        eventId: z.string(),
+        participantId: z.string(),
+      }),
+    )
     .query(async ({ input }) => {
       const { eventId, participantId } = input;
 
@@ -215,12 +213,12 @@ export const eventsRouter = router({
       if (!event) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Event not found'
+          message: 'Event not found',
         });
       }
 
       const winners = await redisService.getEventWinners(eventId);
-      const winner = winners.find(w => w.participantId === participantId);
+      const winner = winners.find((w) => w.participantId === participantId);
 
       if (winner) {
         return winner;
@@ -231,10 +229,12 @@ export const eventsRouter = router({
 
   // Check if name is available (public)
   checkNameAvailability: publicProcedure
-    .input(z.object({
-      eventId: z.string(),
-      name: z.string()
-    }))
+    .input(
+      z.object({
+        eventId: z.string(),
+        name: z.string(),
+      }),
+    )
     .query(async ({ input }) => {
       const { eventId, name } = input;
 
@@ -242,7 +242,7 @@ export const eventsRouter = router({
       if (!event) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Event not found'
+          message: 'Event not found',
         });
       }
 
@@ -254,16 +254,18 @@ export const eventsRouter = router({
 
       return {
         available: !isNameTaken,
-        reason: isNameTaken ? 'Name already taken' : null
+        reason: isNameTaken ? 'Name already taken' : null,
       };
     }),
 
   // Find participant by name (public)
   findParticipant: publicProcedure
-    .input(z.object({
-      eventId: z.string(),
-      name: z.string()
-    }))
+    .input(
+      z.object({
+        eventId: z.string(),
+        name: z.string(),
+      }),
+    )
     .query(async ({ input }) => {
       const { eventId, name } = input;
 
@@ -271,18 +273,18 @@ export const eventsRouter = router({
       if (!event) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Event not found'
+          message: 'Event not found',
         });
       }
 
       const participants = await redisService.getEventParticipants(eventId);
-      const participant = participants.find(p => p.name.toLowerCase() === name.toLowerCase());
+      const participant = participants.find((p) => p.name.toLowerCase() === name.toLowerCase());
 
       if (participant) {
         return {
           found: true,
           participantId: participant.id,
-          name: participant.name
+          name: participant.name,
         };
       } else {
         return { found: false };
@@ -291,10 +293,12 @@ export const eventsRouter = router({
 
   // Register participant (public)
   registerParticipant: publicProcedure
-    .input(z.object({
-      eventId: z.string(),
-      name: z.string().min(1).max(50).optional()
-    }))
+    .input(
+      z.object({
+        eventId: z.string(),
+        name: z.string().min(1).max(50).optional(),
+      }),
+    )
     .mutation(async ({ input }) => {
       const { eventId } = input;
 
@@ -302,14 +306,14 @@ export const eventsRouter = router({
       if (!event) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Event not found'
+          message: 'Event not found',
         });
       }
 
       if (!event.registrationOpen) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'Registration is closed for this event'
+          message: 'Registration is closed for this event',
         });
       }
 
@@ -320,7 +324,7 @@ export const eventsRouter = router({
       if (isNameTaken) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'Name already taken for this event'
+          message: 'Name already taken for this event',
         });
       }
 
@@ -328,7 +332,7 @@ export const eventsRouter = router({
         id: uuidv4(),
         eventId,
         name: participantName,
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       await redisService.addParticipant(participant);
@@ -337,7 +341,7 @@ export const eventsRouter = router({
       sse.send(eventId, {
         type: 'participantRegistered',
         data: participant,
-        eventId
+        eventId,
       });
 
       return participant;
@@ -351,21 +355,21 @@ export const eventsRouter = router({
       if (!event) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Event not found'
+          message: 'Event not found',
         });
       }
 
       if (event.createdBy !== ctx.admin.adminId) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'Not authorized to draw for this event'
+          message: 'Not authorized to draw for this event',
         });
       }
 
       if (event.registrationOpen) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'Close registration before drawing'
+          message: 'Close registration before drawing',
         });
       }
 
@@ -374,13 +378,13 @@ export const eventsRouter = router({
 
       // Filter out already drawn participants
       const availableParticipants = participants.filter(
-        p => !winners.some(w => w.participantId === p.id)
+        (p) => !winners.some((w) => w.participantId === p.id),
       );
 
       if (availableParticipants.length === 0) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'No participants available to draw'
+          message: 'No participants available to draw',
         });
       }
 
@@ -394,7 +398,7 @@ export const eventsRouter = router({
         participantId: selectedParticipant.id,
         participantName: selectedParticipant.name,
         drawOrder: winners.length + 1,
-        drawnAt: new Date()
+        drawnAt: new Date(),
       };
 
       await redisService.addWinner(winner);
@@ -403,7 +407,7 @@ export const eventsRouter = router({
       sse.send(input.eventId, {
         type: 'winnerDrawn',
         data: winner,
-        eventId: input.eventId
+        eventId: input.eventId,
       });
 
       return winner;
@@ -417,17 +421,17 @@ export const eventsRouter = router({
       if (!event) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Event not found'
+          message: 'Event not found',
         });
       }
 
       if (event.createdBy !== ctx.admin.adminId) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'Not authorized to view winners'
+          message: 'Not authorized to view winners',
         });
       }
 
       return await redisService.getEventWinners(input.eventId);
-    })
+    }),
 });

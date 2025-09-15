@@ -23,13 +23,13 @@ async function getAuthenticatedContext(): Promise<Context | null> {
     // Create mock request for context
     const mockReq = {
       headers: {
-        get: (name: string) => name === 'authorization' ? `Bearer ${token}` : null,
+        get: (name: string) => (name === 'authorization' ? `Bearer ${token}` : null),
       },
     } as { headers: { get: (name: string) => string | null } };
 
     return {
       req: mockReq,
-      admin
+      admin,
     } as unknown as Context;
   } catch {
     return null;
@@ -60,10 +60,10 @@ export async function getEvents() {
               winners: winners.length,
             },
             status: event.closed
-              ? 'completed' as const
+              ? ('completed' as const)
               : event.registrationOpen
-                ? 'registration' as const
-                : 'drawing' as const
+                ? ('registration' as const)
+                : ('drawing' as const),
           };
         } catch {
           // If we can't get counts, return event with zero counts
@@ -74,13 +74,13 @@ export async function getEvents() {
               winners: 0,
             },
             status: event.closed
-              ? 'completed' as const
+              ? ('completed' as const)
               : event.registrationOpen
-                ? 'registration' as const
-                : 'drawing' as const
+                ? ('registration' as const)
+                : ('drawing' as const),
           };
         }
-      })
+      }),
     );
 
     return eventsWithCounts;
@@ -155,7 +155,7 @@ export const getEvent = getEventById;
 
 export async function getActiveEvents() {
   const events = await getEvents();
-  return events.filter(event => !event.closed && event.registrationOpen);
+  return events.filter((event) => !event.closed && event.registrationOpen);
 }
 
 export async function getEventStats(eventId?: string) {
@@ -169,14 +169,14 @@ export async function getEventStats(eventId?: string) {
         totalParticipants: participants.length,
         totalWinners: winners.length,
         registrationOpen: event.registrationOpen,
-        eventClosed: event.closed
+        eventClosed: event.closed,
       };
     } catch {
       return {
         totalParticipants: 0,
         totalWinners: 0,
         registrationOpen: false,
-        eventClosed: true
+        eventClosed: true,
       };
     }
   }
@@ -184,7 +184,7 @@ export async function getEventStats(eventId?: string) {
   // Get stats for all events
   const events = await getEvents();
   const totalEvents = events.length;
-  const activeEvents = events.filter(e => !e.closed).length;
+  const activeEvents = events.filter((e) => !e.closed).length;
   const totalParticipants = events.reduce((sum, e) => sum + (e._count?.participants || 0), 0);
   const totalWinners = events.reduce((sum, e) => sum + (e._count?.winners || 0), 0);
 
@@ -192,6 +192,6 @@ export async function getEventStats(eventId?: string) {
     totalEvents,
     activeEvents,
     totalParticipants,
-    totalWinners
+    totalWinners,
   };
 }

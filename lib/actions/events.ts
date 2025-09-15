@@ -24,13 +24,13 @@ async function getAuthenticatedContext(): Promise<Context | null> {
     // Create mock request for context
     const mockReq = {
       headers: {
-        get: (name: string) => name === 'authorization' ? `Bearer ${token}` : null,
+        get: (name: string) => (name === 'authorization' ? `Bearer ${token}` : null),
       },
     } as { headers: { get: (name: string) => string | null } };
 
     return {
       req: mockReq,
-      admin
+      admin,
     } as unknown as Context;
   } catch {
     return null;
@@ -58,7 +58,7 @@ export async function getEvents() {
 
 export async function createEvent(
   _prevState: { success: boolean; error: string } | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ success: boolean; error: string }> {
   try {
     const ctx = await getAuthenticatedContext();
@@ -89,7 +89,7 @@ export async function createEvent(
 
 export async function deleteEvent(
   prevState: { success: boolean; error?: string; message?: string } | null,
-  eventId: string
+  eventId: string,
 ): Promise<{ success: boolean; error?: string; message?: string }> {
   try {
     const ctx = await getAuthenticatedContext();

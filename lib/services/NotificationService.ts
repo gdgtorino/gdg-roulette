@@ -33,11 +33,13 @@ export class NotificationService extends EventEmitter {
     const stream = new ReadableStream({
       start: (controller) => {
         // Send initial connection message
-        controller.enqueue(this.formatSSEMessage({
-          type: 'connected',
-          data: { clientId, eventId },
-          timestamp: new Date()
-        }));
+        controller.enqueue(
+          this.formatSSEMessage({
+            type: 'connected',
+            data: { clientId, eventId },
+            timestamp: new Date(),
+          }),
+        );
 
         // Store connection
         if (!this.connections.has(eventId)) {
@@ -48,25 +50,27 @@ export class NotificationService extends EventEmitter {
           eventId,
           response: new Response(stream),
           controller,
-          clientId
+          clientId,
         };
 
         this.connections.get(eventId)!.push(connection);
 
         // Send recent events (last 10 events)
         const recentEvents = this.getRecentEvents(eventId, 10);
-        recentEvents.forEach(event => {
+        recentEvents.forEach((event) => {
           controller.enqueue(this.formatSSEMessage(event));
         });
 
         // Set up heartbeat
         const heartbeat = setInterval(() => {
           try {
-            controller.enqueue(this.formatSSEMessage({
-              type: 'heartbeat',
-              data: { timestamp: new Date() },
-              timestamp: new Date()
-            }));
+            controller.enqueue(
+              this.formatSSEMessage({
+                type: 'heartbeat',
+                data: { timestamp: new Date() },
+                timestamp: new Date(),
+              }),
+            );
           } catch (error) {
             clearInterval(heartbeat);
             this.removeConnection(eventId, clientId);
@@ -78,17 +82,17 @@ export class NotificationService extends EventEmitter {
           clearInterval(heartbeat);
           this.removeConnection(eventId, clientId);
         });
-      }
+      },
     });
 
     return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Cache-Control'
-      }
+        'Access-Control-Allow-Headers': 'Cache-Control',
+      },
     });
   }
 
@@ -101,9 +105,9 @@ export class NotificationService extends EventEmitter {
       type: 'participantRegistered',
       data: {
         participant,
-        participantCount: await this.getParticipantCount(eventId)
+        participantCount: await this.getParticipantCount(eventId),
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.broadcastToEvent(eventId, notification);
@@ -119,9 +123,9 @@ export class NotificationService extends EventEmitter {
       type: 'registrationToggled',
       data: {
         registrationOpen: isOpen,
-        timestamp: new Date()
+        timestamp: new Date(),
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.broadcastToEvent(eventId, notification);
@@ -137,9 +141,9 @@ export class NotificationService extends EventEmitter {
       type: 'eventClosed',
       data: {
         closed: true,
-        timestamp: new Date()
+        timestamp: new Date(),
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.broadcastToEvent(eventId, notification);
@@ -155,9 +159,9 @@ export class NotificationService extends EventEmitter {
       type: 'winnerDrawn',
       data: {
         winner,
-        remainingParticipants: await this.getRemainingParticipantCount(eventId)
+        remainingParticipants: await this.getRemainingParticipantCount(eventId),
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.broadcastToEvent(eventId, notification);
@@ -194,7 +198,7 @@ export class NotificationService extends EventEmitter {
       eventId,
       type: type as any,
       data,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.broadcastToEvent(eventId, notification);
@@ -240,7 +244,7 @@ export class NotificationService extends EventEmitter {
     return {
       totalConnections: this.getTotalActiveConnections(),
       eventsWithConnections,
-      connectionsPerEvent
+      connectionsPerEvent,
     };
   }
 
@@ -264,7 +268,7 @@ export class NotificationService extends EventEmitter {
    */
   closeEventConnections(eventId: string): void {
     const connections = this.connections.get(eventId) || [];
-    connections.forEach(connection => {
+    connections.forEach((connection) => {
       try {
         connection.controller.close();
       } catch (error) {
@@ -291,7 +295,7 @@ export class NotificationService extends EventEmitter {
     const message = this.formatSSEMessage(notification);
 
     // Remove dead connections while broadcasting
-    const activeConnections = connections.filter(connection => {
+    const activeConnections = connections.filter((connection) => {
       try {
         connection.controller.enqueue(message);
         return true;
@@ -318,7 +322,7 @@ export class NotificationService extends EventEmitter {
       type: event.type,
       data: event.data,
       timestamp: event.timestamp || new Date(),
-      eventId: event.eventId
+      eventId: event.eventId,
     });
 
     return `data: ${data}\n\n`;
@@ -346,7 +350,7 @@ export class NotificationService extends EventEmitter {
    */
   private removeConnection(eventId: string, clientId: string): void {
     const connections = this.connections.get(eventId) || [];
-    const filteredConnections = connections.filter(conn => conn.clientId !== clientId);
+    const filteredConnections = connections.filter((conn) => conn.clientId !== clientId);
 
     if (filteredConnections.length > 0) {
       this.connections.set(eventId, filteredConnections);
@@ -391,8 +395,10 @@ export class NotificationService extends EventEmitter {
     };
   } {
     const stats = this.getConnectionStats();
-    const eventLogCount = Array.from(this.eventLog.values())
-      .reduce((total, events) => total + events.length, 0);
+    const eventLogCount = Array.from(this.eventLog.values()).reduce(
+      (total, events) => total + events.length,
+      0,
+    );
 
     let status: 'healthy' | 'degraded' | 'unhealthy';
     if (stats.totalConnections < 100 && eventLogCount < 1000) {
@@ -409,8 +415,8 @@ export class NotificationService extends EventEmitter {
       eventsWithConnections: stats.eventsWithConnections,
       memoryUsage: {
         eventLogs: eventLogCount,
-        connections: stats.totalConnections
-      }
+        connections: stats.totalConnections,
+      },
     };
   }
 
@@ -424,7 +430,7 @@ export class NotificationService extends EventEmitter {
     // Clean up old event logs
     for (const [eventId, events] of this.eventLog.entries()) {
       const recentEvents = events.filter(
-        event => now.getTime() - event.timestamp.getTime() < maxAge
+        (event) => now.getTime() - event.timestamp.getTime() < maxAge,
       );
 
       if (recentEvents.length === 0) {
@@ -436,14 +442,16 @@ export class NotificationService extends EventEmitter {
 
     // Test and clean up dead connections
     for (const [eventId, connections] of this.connections.entries()) {
-      const activeConnections = connections.filter(connection => {
+      const activeConnections = connections.filter((connection) => {
         try {
           // Send a test message
-          connection.controller.enqueue(this.formatSSEMessage({
-            type: 'ping',
-            data: { timestamp: now },
-            timestamp: now
-          }));
+          connection.controller.enqueue(
+            this.formatSSEMessage({
+              type: 'ping',
+              data: { timestamp: now },
+              timestamp: now,
+            }),
+          );
           return true;
         } catch (error) {
           return false;
@@ -464,7 +472,7 @@ export class NotificationService extends EventEmitter {
   async sendRegistrationConfirmation(data: {
     participant: any;
     event: any;
-    registrationUrl: string
+    registrationUrl: string;
   }): Promise<boolean> {
     try {
       // In a real implementation, this would send email/SMS/push notification
@@ -473,7 +481,7 @@ export class NotificationService extends EventEmitter {
         participantId: data.participant.id,
         participantName: data.participant.name,
         eventName: data.event.name,
-        registrationUrl: data.registrationUrl
+        registrationUrl: data.registrationUrl,
       });
       return true;
     } catch (error) {

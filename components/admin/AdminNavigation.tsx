@@ -26,10 +26,7 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
               >
                 Dashboard
               </Link>
-              <Link
-                href="/admin/events"
-                className="text-gray-700 hover:text-gray-900 font-medium"
-              >
+              <Link href="/admin/events" className="text-gray-700 hover:text-gray-900 font-medium">
                 Events
               </Link>
               <Link
@@ -42,9 +39,7 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
           </div>
 
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">
-              Welcome, {user.name || user.email}
-            </span>
+            <span className="text-sm text-gray-600">Welcome, {user.name || user.email}</span>
             <form action={signOut}>
               <Button variant="outline" size="sm" type="submit">
                 Logout

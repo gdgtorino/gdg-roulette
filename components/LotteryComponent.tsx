@@ -26,7 +26,7 @@ export const LotteryComponent: React.FC<LotteryComponentProps> = ({
   event,
   winners = [],
   onDrawWinner,
-  onDrawAll
+  onDrawAll,
 }) => {
   const canDraw = event.participantCount > event.winnerCount;
 
@@ -60,13 +60,9 @@ export const LotteryComponent: React.FC<LotteryComponentProps> = ({
 
       {canDraw ? (
         <div>
-          <button onClick={handleDrawWinner}>
-            Draw Winner
-          </button>
+          <button onClick={handleDrawWinner}>Draw Winner</button>
 
-          <button onClick={handleDrawAll}>
-            Draw All
-          </button>
+          <button onClick={handleDrawAll}>Draw All</button>
         </div>
       ) : (
         <p>All participants have been drawn</p>

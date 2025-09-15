@@ -35,10 +35,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Logout error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -52,10 +49,13 @@ async function handleLogoutTestMode(request: NextRequest): Promise<NextResponse>
 
     // Handle case with no session cookie - per test expectations, this should be successful
     if (!sessionToken) {
-      const response = NextResponse.json({
-        success: true,
-        message: 'Already logged out'
-      }, { status: 200 });
+      const response = NextResponse.json(
+        {
+          success: true,
+          message: 'Already logged out',
+        },
+        { status: 200 },
+      );
 
       addSecurityHeaders(response);
       return response;
@@ -70,19 +70,22 @@ async function handleLogoutTestMode(request: NextRequest): Promise<NextResponse>
         adminId: 'admin-123',
         username: 'admin1', // In real implementation, this would come from session
         ip: request.headers.get('X-Forwarded-For') || 'unknown',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      const response = NextResponse.json({
-        success: true,
-        message: 'Logged out successfully'
-      }, { status: 200 });
+      const response = NextResponse.json(
+        {
+          success: true,
+          message: 'Logged out successfully',
+        },
+        { status: 200 },
+      );
 
       // Clear multiple session cookies - format expected by tests
       const cookiesToClear = [
         'sessionToken=; HttpOnly; Secure; Path=/; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT',
         'adminPrefs=; HttpOnly; Secure; Path=/; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT',
-        'csrfToken=; HttpOnly; Secure; Path=/; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        'csrfToken=; HttpOnly; Secure; Path=/; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT',
       ];
       response.headers.set('Set-Cookie', cookiesToClear.join(', '));
 
@@ -90,34 +93,48 @@ async function handleLogoutTestMode(request: NextRequest): Promise<NextResponse>
       return response;
     } catch (serviceError: any) {
       // Handle service failures - return error status as expected by tests
-      if (serviceError.message?.includes('Session service unavailable') ||
-          serviceError.message?.includes('Database connection')) {
-        const response = NextResponse.json({
-          success: false,
-          error: 'Logout failed'
-        }, { status: 500 });
+      if (
+        serviceError.message?.includes('Session service unavailable') ||
+        serviceError.message?.includes('Database connection')
+      ) {
+        const response = NextResponse.json(
+          {
+            success: false,
+            error: 'Logout failed',
+          },
+          { status: 500 },
+        );
 
         addSecurityHeaders(response);
         return response;
       }
 
       // Session not found or already invalidated - still return success
-      const response = NextResponse.json({
-        success: true,
-        message: 'Logged out successfully'
-      }, { status: 200 });
+      const response = NextResponse.json(
+        {
+          success: true,
+          message: 'Logged out successfully',
+        },
+        { status: 200 },
+      );
 
       // Clear session cookies anyway
-      response.headers.set('Set-Cookie', 'sessionToken=; HttpOnly; Secure; Path=/; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT');
+      response.headers.set(
+        'Set-Cookie',
+        'sessionToken=; HttpOnly; Secure; Path=/; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+      );
 
       addSecurityHeaders(response);
       return response;
     }
   } catch (error) {
-    const response = NextResponse.json({
-      success: false,
-      error: 'Internal server error'
-    }, { status: 500 });
+    const response = NextResponse.json(
+      {
+        success: false,
+        error: 'Internal server error',
+      },
+      { status: 500 },
+    );
 
     addSecurityHeaders(response);
     return response;

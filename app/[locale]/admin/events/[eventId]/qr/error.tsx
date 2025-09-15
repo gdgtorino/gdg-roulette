@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { HeaderControls } from '@/components/ClientComponents';
 
 export default function QRPageError({
@@ -40,14 +40,10 @@ export default function QRPageError({
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Error: {error.message}
-            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Error: {error.message}</div>
             <div className="flex gap-4 justify-center">
-              <Button onClick={reset}>
-                Try Again
-              </Button>
-              <Button variant="outline" onClick={() => window.location.href = '/admin/dashboard'}>
+              <Button onClick={reset}>Try Again</Button>
+              <Button variant="outline" onClick={() => (window.location.href = '/admin/dashboard')}>
                 Back to Dashboard
               </Button>
             </div>

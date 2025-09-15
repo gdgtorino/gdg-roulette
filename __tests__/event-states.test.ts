@@ -50,7 +50,7 @@ describe('Event State Machine', () => {
       qrCode: 'qr-code-data',
       createdAt: new Date(),
       participants: [],
-      winners: []
+      winners: [],
     };
   });
 
@@ -63,7 +63,7 @@ describe('Event State Machine', () => {
       // Arrange
       const eventData = {
         name: 'Test Event',
-        createdBy: 'admin-123'
+        createdBy: 'admin-123',
       };
 
       const mockEvent = {
@@ -76,7 +76,7 @@ describe('Event State Machine', () => {
         qrCode: 'qr-code-data',
         createdAt: new Date(),
         participants: [],
-        winners: []
+        winners: [],
       };
 
       eventRepository.create.mockResolvedValue(mockEvent);
@@ -93,7 +93,7 @@ describe('Event State Machine', () => {
         createdBy: 'admin-123',
         state: EventState.INIT,
         registrationOpen: false,
-        closed: false
+        closed: false,
       });
     });
 
@@ -101,7 +101,7 @@ describe('Event State Machine', () => {
       // Arrange
       const eventData = {
         name: 'QR Code Event',
-        createdBy: 'admin-123'
+        createdBy: 'admin-123',
       };
 
       const mockEvent = {
@@ -114,7 +114,7 @@ describe('Event State Machine', () => {
         qrCode: 'generated-qr-code-data',
         createdAt: new Date(),
         participants: [],
-        winners: []
+        winners: [],
       };
 
       eventRepository.create.mockResolvedValue(mockEvent);
@@ -131,17 +131,17 @@ describe('Event State Machine', () => {
       // Arrange
       const eventData = {
         name: 'Unauthorized Event',
-        createdBy: ''
+        createdBy: '',
       };
 
       // Act & Assert
-      await expect(eventStateMachine.createEvent(eventData))
-        .rejects.toThrow('Admin ID is required to create event');
+      await expect(eventStateMachine.createEvent(eventData)).rejects.toThrow(
+        'Admin ID is required to create event',
+      );
     });
   });
 
   describe('State Transitions', () => {
-
     describe('INIT → REGISTRATION Transition', () => {
       it('should transition from INIT to REGISTRATION state', async () => {
         // Arrange
@@ -149,7 +149,7 @@ describe('Event State Machine', () => {
         eventRepository.update.mockResolvedValue({
           ...mockEvent,
           state: EventState.REGISTRATION,
-          registrationOpen: true
+          registrationOpen: true,
         });
 
         // Act
@@ -160,7 +160,7 @@ describe('Event State Machine', () => {
         expect(result.registrationOpen).toBe(true);
         expect(eventRepository.update).toHaveBeenCalledWith('event-123', {
           state: EventState.REGISTRATION,
-          registrationOpen: true
+          registrationOpen: true,
         });
       });
 
@@ -168,13 +168,14 @@ describe('Event State Machine', () => {
         // Arrange
         const registrationEvent = {
           ...mockEvent,
-          state: EventState.REGISTRATION
+          state: EventState.REGISTRATION,
         };
         eventRepository.findById.mockResolvedValue(registrationEvent);
 
         // Act & Assert
-        await expect(eventStateMachine.openRegistration('event-123', 'admin-123'))
-          .rejects.toThrow('Can only open registration from INIT state');
+        await expect(eventStateMachine.openRegistration('event-123', 'admin-123')).rejects.toThrow(
+          'Can only open registration from INIT state',
+        );
       });
 
       it('should verify admin ownership before state transition', async () => {
@@ -182,8 +183,9 @@ describe('Event State Machine', () => {
         eventRepository.findById.mockResolvedValue(mockEvent);
 
         // Act & Assert
-        await expect(eventStateMachine.openRegistration('event-123', 'wrong-admin'))
-          .rejects.toThrow('Only event creator can modify event state');
+        await expect(
+          eventStateMachine.openRegistration('event-123', 'wrong-admin'),
+        ).rejects.toThrow('Only event creator can modify event state');
       });
     });
 
@@ -193,7 +195,7 @@ describe('Event State Machine', () => {
         const registrationEvent = {
           ...mockEvent,
           state: EventState.REGISTRATION,
-          registrationOpen: true
+          registrationOpen: true,
         };
 
         eventRepository.findById.mockResolvedValue(registrationEvent);
@@ -201,7 +203,7 @@ describe('Event State Machine', () => {
         eventRepository.update.mockResolvedValue({
           ...registrationEvent,
           state: EventState.DRAW,
-          registrationOpen: false
+          registrationOpen: false,
         });
 
         // Act
@@ -212,7 +214,7 @@ describe('Event State Machine', () => {
         expect(result.registrationOpen).toBe(false);
         expect(eventRepository.update).toHaveBeenCalledWith('event-123', {
           state: EventState.DRAW,
-          registrationOpen: false
+          registrationOpen: false,
         });
       });
 
@@ -221,28 +223,30 @@ describe('Event State Machine', () => {
         const registrationEvent = {
           ...mockEvent,
           state: EventState.REGISTRATION,
-          registrationOpen: true
+          registrationOpen: true,
         };
 
         eventRepository.findById.mockResolvedValue(registrationEvent);
         participantService.getParticipantCount.mockResolvedValue(0);
 
         // Act & Assert
-        await expect(eventStateMachine.startDraw('event-123', 'admin-123'))
-          .rejects.toThrow('Cannot start draw without participants');
+        await expect(eventStateMachine.startDraw('event-123', 'admin-123')).rejects.toThrow(
+          'Cannot start draw without participants',
+        );
       });
 
       it('should prevent starting draw from invalid state', async () => {
         // Arrange
         const initEvent = {
           ...mockEvent,
-          state: EventState.INIT
+          state: EventState.INIT,
         };
         eventRepository.findById.mockResolvedValue(initEvent);
 
         // Act & Assert
-        await expect(eventStateMachine.startDraw('event-123', 'admin-123'))
-          .rejects.toThrow('Can only start draw from REGISTRATION state');
+        await expect(eventStateMachine.startDraw('event-123', 'admin-123')).rejects.toThrow(
+          'Can only start draw from REGISTRATION state',
+        );
       });
     });
 
@@ -252,14 +256,14 @@ describe('Event State Machine', () => {
         const drawEvent = {
           ...mockEvent,
           state: EventState.DRAW,
-          registrationOpen: false
+          registrationOpen: false,
         };
 
         eventRepository.findById.mockResolvedValue(drawEvent);
         eventRepository.update.mockResolvedValue({
           ...drawEvent,
           state: EventState.CLOSED,
-          closed: true
+          closed: true,
         });
 
         // Act
@@ -270,7 +274,7 @@ describe('Event State Machine', () => {
         expect(result.closed).toBe(true);
         expect(eventRepository.update).toHaveBeenCalledWith('event-123', {
           state: EventState.CLOSED,
-          closed: true
+          closed: true,
         });
       });
 
@@ -282,12 +286,12 @@ describe('Event State Machine', () => {
           registrationOpen: false,
           participants: [
             { id: 'p1', name: 'User 1' },
-            { id: 'p2', name: 'User 2' }
+            { id: 'p2', name: 'User 2' },
           ],
           winners: [
             { id: 'w1', participantId: 'p1', drawOrder: 1 },
-            { id: 'w2', participantId: 'p2', drawOrder: 2 }
-          ]
+            { id: 'w2', participantId: 'p2', drawOrder: 2 },
+          ],
         };
 
         eventRepository.findById.mockResolvedValue(drawEvent);
@@ -296,7 +300,7 @@ describe('Event State Machine', () => {
         eventRepository.update.mockResolvedValue({
           ...drawEvent,
           state: EventState.CLOSED,
-          closed: true
+          closed: true,
         });
 
         // Act
@@ -311,13 +315,14 @@ describe('Event State Machine', () => {
         // Arrange
         const registrationEvent = {
           ...mockEvent,
-          state: EventState.REGISTRATION
+          state: EventState.REGISTRATION,
         };
         eventRepository.findById.mockResolvedValue(registrationEvent);
 
         // Act & Assert
-        await expect(eventStateMachine.closeEvent('event-123', 'admin-123'))
-          .rejects.toThrow('Can only close event from DRAW state');
+        await expect(eventStateMachine.closeEvent('event-123', 'admin-123')).rejects.toThrow(
+          'Can only close event from DRAW state',
+        );
       });
     });
 
@@ -327,8 +332,9 @@ describe('Event State Machine', () => {
         eventRepository.findById.mockResolvedValue(mockEvent);
 
         // Act & Assert
-        await expect(eventStateMachine.startDraw('event-123', 'admin-123'))
-          .rejects.toThrow('Can only start draw from REGISTRATION state');
+        await expect(eventStateMachine.startDraw('event-123', 'admin-123')).rejects.toThrow(
+          'Can only start draw from REGISTRATION state',
+        );
       });
 
       it('should prevent INIT → CLOSED transition', async () => {
@@ -336,34 +342,37 @@ describe('Event State Machine', () => {
         eventRepository.findById.mockResolvedValue(mockEvent);
 
         // Act & Assert
-        await expect(eventStateMachine.closeEvent('event-123', 'admin-123'))
-          .rejects.toThrow('Can only close event from DRAW state');
+        await expect(eventStateMachine.closeEvent('event-123', 'admin-123')).rejects.toThrow(
+          'Can only close event from DRAW state',
+        );
       });
 
       it('should prevent REGISTRATION → CLOSED transition', async () => {
         // Arrange
         const registrationEvent = {
           ...mockEvent,
-          state: EventState.REGISTRATION
+          state: EventState.REGISTRATION,
         };
         eventRepository.findById.mockResolvedValue(registrationEvent);
 
         // Act & Assert
-        await expect(eventStateMachine.closeEvent('event-123', 'admin-123'))
-          .rejects.toThrow('Can only close event from DRAW state');
+        await expect(eventStateMachine.closeEvent('event-123', 'admin-123')).rejects.toThrow(
+          'Can only close event from DRAW state',
+        );
       });
 
       it('should prevent reverse transitions', async () => {
         // Arrange - Event in DRAW state
         const drawEvent = {
           ...mockEvent,
-          state: EventState.DRAW
+          state: EventState.DRAW,
         };
         eventRepository.findById.mockResolvedValue(drawEvent);
 
         // Act & Assert - Try to go back to REGISTRATION
-        await expect(eventStateMachine.openRegistration('event-123', 'admin-123'))
-          .rejects.toThrow('Can only open registration from INIT state');
+        await expect(eventStateMachine.openRegistration('event-123', 'admin-123')).rejects.toThrow(
+          'Can only open registration from INIT state',
+        );
       });
 
       it('should prevent modifications to closed events', async () => {
@@ -371,16 +380,18 @@ describe('Event State Machine', () => {
         const closedEvent = {
           ...mockEvent,
           state: EventState.CLOSED,
-          closed: true
+          closed: true,
         };
         eventRepository.findById.mockResolvedValue(closedEvent);
 
         // Act & Assert
-        await expect(eventStateMachine.openRegistration('event-123', 'admin-123'))
-          .rejects.toThrow('Cannot modify closed event');
+        await expect(eventStateMachine.openRegistration('event-123', 'admin-123')).rejects.toThrow(
+          'Cannot modify closed event',
+        );
 
-        await expect(eventStateMachine.startDraw('event-123', 'admin-123'))
-          .rejects.toThrow('Cannot modify closed event');
+        await expect(eventStateMachine.startDraw('event-123', 'admin-123')).rejects.toThrow(
+          'Cannot modify closed event',
+        );
       });
     });
   });
@@ -392,7 +403,7 @@ describe('Event State Machine', () => {
         const initEvent = {
           id: 'event-123',
           state: EventState.INIT,
-          registrationOpen: false
+          registrationOpen: false,
         };
 
         // Act & Assert
@@ -404,7 +415,7 @@ describe('Event State Machine', () => {
         const initEvent = {
           id: 'event-123',
           state: EventState.INIT,
-          registrationOpen: false
+          registrationOpen: false,
         };
 
         // Act & Assert
@@ -418,7 +429,7 @@ describe('Event State Machine', () => {
         const registrationEvent = {
           id: 'event-123',
           state: EventState.REGISTRATION,
-          registrationOpen: true
+          registrationOpen: true,
         };
 
         // Act & Assert
@@ -430,7 +441,7 @@ describe('Event State Machine', () => {
         const registrationEvent = {
           id: 'event-123',
           state: EventState.REGISTRATION,
-          registrationOpen: true
+          registrationOpen: true,
         };
 
         // Act & Assert
@@ -442,13 +453,13 @@ describe('Event State Machine', () => {
         const registrationEvent = {
           ...mockEvent,
           state: EventState.REGISTRATION,
-          registrationOpen: true
+          registrationOpen: true,
         };
 
         eventRepository.findById.mockResolvedValue(registrationEvent);
         eventRepository.update.mockResolvedValue({
           ...registrationEvent,
-          registrationOpen: false
+          registrationOpen: false,
         });
 
         // Act
@@ -466,7 +477,7 @@ describe('Event State Machine', () => {
         const drawEvent = {
           id: 'event-123',
           state: EventState.DRAW,
-          registrationOpen: false
+          registrationOpen: false,
         };
 
         // Act & Assert
@@ -478,7 +489,7 @@ describe('Event State Machine', () => {
         const drawEvent = {
           id: 'event-123',
           state: EventState.DRAW,
-          registrationOpen: false
+          registrationOpen: false,
         };
 
         // Act & Assert
@@ -493,7 +504,7 @@ describe('Event State Machine', () => {
           id: 'event-123',
           state: EventState.CLOSED,
           closed: true,
-          registrationOpen: false
+          registrationOpen: false,
         };
 
         // Act & Assert
@@ -508,7 +519,7 @@ describe('Event State Machine', () => {
           id: 'event-123',
           state: EventState.CLOSED,
           closed: true,
-          registrationOpen: false
+          registrationOpen: false,
         };
 
         // Act & Assert
@@ -524,8 +535,9 @@ describe('Event State Machine', () => {
       eventRepository.findById.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(eventStateMachine.openRegistration('nonexistent-event', 'admin-123'))
-        .rejects.toThrow('Event not found');
+      await expect(
+        eventStateMachine.openRegistration('nonexistent-event', 'admin-123'),
+      ).rejects.toThrow('Event not found');
     });
 
     it('should handle database errors during state transition', async () => {
@@ -534,8 +546,9 @@ describe('Event State Machine', () => {
       eventRepository.update.mockRejectedValue(new Error('Database connection failed'));
 
       // Act & Assert
-      await expect(eventStateMachine.openRegistration('event-123', 'admin-123'))
-        .rejects.toThrow('Database connection failed');
+      await expect(eventStateMachine.openRegistration('event-123', 'admin-123')).rejects.toThrow(
+        'Database connection failed',
+      );
     });
 
     it('should rollback state on transition failure', async () => {
@@ -543,7 +556,7 @@ describe('Event State Machine', () => {
       const registrationEvent = {
         ...mockEvent,
         state: EventState.REGISTRATION,
-        registrationOpen: true
+        registrationOpen: true,
       };
 
       eventRepository.findById.mockResolvedValue(registrationEvent);
@@ -551,8 +564,9 @@ describe('Event State Machine', () => {
       eventRepository.update.mockRejectedValue(new Error('Update failed'));
 
       // Act & Assert
-      await expect(eventStateMachine.startDraw('event-123', 'admin-123'))
-        .rejects.toThrow('Update failed');
+      await expect(eventStateMachine.startDraw('event-123', 'admin-123')).rejects.toThrow(
+        'Update failed',
+      );
 
       // Verify state wasn't changed
       const currentEvent = await eventRepository.findById('event-123');
@@ -565,7 +579,7 @@ describe('Event State Machine', () => {
       // Arrange
       let currentEvent = {
         ...mockEvent,
-        state: EventState.INIT
+        state: EventState.INIT,
       };
 
       eventRepository.findById.mockImplementation(() => Promise.resolve(currentEvent));
@@ -595,14 +609,15 @@ describe('Event State Machine', () => {
       // Arrange
       const invalidEvent = {
         ...mockEvent,
-        state: 'INVALID_STATE' as EventState
+        state: 'INVALID_STATE' as EventState,
       };
 
       eventRepository.findById.mockResolvedValue(invalidEvent);
 
       // Act & Assert
-      await expect(eventStateMachine.openRegistration('event-123', 'admin-123'))
-        .rejects.toThrow('Invalid event state');
+      await expect(eventStateMachine.openRegistration('event-123', 'admin-123')).rejects.toThrow(
+        'Invalid event state',
+      );
     });
   });
 });

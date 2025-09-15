@@ -20,7 +20,7 @@ const executeDrawSchema = z.object({
 
 export async function executeDrawAction(
   _prevState: { success: boolean; error?: string; winners?: Winner[]; drawId?: string } | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ success: boolean; error?: string; winners?: Winner[]; drawId?: string }> {
   try {
     await requireAdmin();

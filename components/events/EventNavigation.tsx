@@ -29,10 +29,12 @@ export function EventNavigation({ event }: EventNavigationProps) {
               The Draw
             </Link>
             <span className="text-gray-400">/</span>
-            <span className="text-lg font-semibold text-gray-700">
-              {event.name}
-            </span>
-            <Badge className={statusColors[event.status as keyof typeof statusColors] || statusColors.draft}>
+            <span className="text-lg font-semibold text-gray-700">{event.name}</span>
+            <Badge
+              className={
+                statusColors[event.status as keyof typeof statusColors] || statusColors.draft
+              }
+            >
               {event.status}
             </Badge>
           </div>

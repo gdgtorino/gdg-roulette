@@ -1,10 +1,10 @@
 'use client';
 
-import Link from "next/link";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTranslation } from "@/hooks/useTranslation";
+import Link from 'next/link';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslation } from '@/hooks/useTranslation';
 import { deleteEvent } from '@/lib/actions/events';
 import {
   AlertDialog,
@@ -15,7 +15,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 interface Event {
   id: string;
@@ -35,7 +35,10 @@ interface EventsListProps {
 
 export function EventsList({ title, description, events, type }: EventsListProps) {
   const { t } = useTranslation();
-  const [deleteDialog, setDeleteDialog] = useState<{open: boolean; event: Event | null;}>({ open: false, event: null });
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; event: Event | null }>({
+    open: false,
+    event: null,
+  });
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   const openDeleteDialog = (event: Event) => {
@@ -47,7 +50,7 @@ export function EventsList({ title, description, events, type }: EventsListProps
     if (!event) return;
 
     setDeleteDialog({ open: false, event: null });
-    setDeletingIds(prev => new Set([...Array.from(prev), event.id]));
+    setDeletingIds((prev) => new Set([...Array.from(prev), event.id]));
 
     try {
       const result = await deleteEvent(null, event.id);
@@ -58,7 +61,7 @@ export function EventsList({ title, description, events, type }: EventsListProps
     } catch (error) {
       console.error('Delete error:', error);
     } finally {
-      setDeletingIds(prev => {
+      setDeletingIds((prev) => {
         const newSet = new Set(prev);
         newSet.delete(event.id);
         return newSet;
@@ -87,7 +90,9 @@ export function EventsList({ title, description, events, type }: EventsListProps
                 }`}
               >
                 <div className="flex-1">
-                  <div className={`font-medium ${type === 'old' ? 'text-gray-700 dark:text-gray-200' : 'dark:text-white'}`}>
+                  <div
+                    className={`font-medium ${type === 'old' ? 'text-gray-700 dark:text-gray-200' : 'dark:text-white'}`}
+                  >
                     {event.name}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -96,8 +101,16 @@ export function EventsList({ title, description, events, type }: EventsListProps
                   {type === 'current' && (
                     <div className="text-sm dark:text-gray-300">
                       Registration:
-                      <span className={event.registrationOpen ? "text-green-600 dark:text-green-400 ml-1" : "text-red-600 dark:text-red-400 ml-1"}>
-                        {event.registrationOpen ? t('admin.registrationOpen') : t('admin.registrationClosed')}
+                      <span
+                        className={
+                          event.registrationOpen
+                            ? 'text-green-600 dark:text-green-400 ml-1'
+                            : 'text-red-600 dark:text-red-400 ml-1'
+                        }
+                      >
+                        {event.registrationOpen
+                          ? t('admin.registrationOpen')
+                          : t('admin.registrationClosed')}
                       </span>
                     </div>
                   )}
@@ -112,9 +125,7 @@ export function EventsList({ title, description, events, type }: EventsListProps
                       </Link>
                       {!event.registrationOpen && (
                         <Link href={`/admin/events/${event.id}/draw`}>
-                          <Button size="sm">
-                            {t('admin.startDraw')}
-                          </Button>
+                          <Button size="sm">{t('admin.startDraw')}</Button>
                         </Link>
                       )}
                     </>
@@ -131,7 +142,7 @@ export function EventsList({ title, description, events, type }: EventsListProps
                     onClick={() => openDeleteDialog(event)}
                     disabled={deletingIds.has(event.id)}
                   >
-                    {deletingIds.has(event.id) ? "..." : t('admin.deleteEvent')}
+                    {deletingIds.has(event.id) ? '...' : t('admin.deleteEvent')}
                   </Button>
                 </div>
               </div>
@@ -139,9 +150,8 @@ export function EventsList({ title, description, events, type }: EventsListProps
             {events.length === 0 && (
               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 {type === 'current'
-                  ? "No current events. Create one to get started!"
-                  : "No previous events"
-                }
+                  ? 'No current events. Create one to get started!'
+                  : 'No previous events'}
               </div>
             )}
           </div>
@@ -149,17 +159,25 @@ export function EventsList({ title, description, events, type }: EventsListProps
       </Card>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}>
+      <AlertDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog((prev) => ({ ...prev, open }))}
+      >
         <AlertDialogContent className="dark:bg-gray-800 dark:border-gray-700">
           <AlertDialogHeader>
-            <AlertDialogTitle className="dark:text-white">{t('admin.deleteEvent')}</AlertDialogTitle>
+            <AlertDialogTitle className="dark:text-white">
+              {t('admin.deleteEvent')}
+            </AlertDialogTitle>
             <AlertDialogDescription className="dark:text-gray-300">
-              Are you sure you want to delete event &quot;{deleteDialog.event?.name}&quot;? This will also delete all participants and winners. This action cannot be undone.
+              Are you sure you want to delete event &quot;{deleteDialog.event?.name}&quot;? This
+              will also delete all participants and winners. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteEvent}>{t('admin.deleteEvent')}</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDeleteEvent}>
+              {t('admin.deleteEvent')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

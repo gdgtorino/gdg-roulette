@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { useParams } from "next/navigation";
-import confetti from "canvas-confetti";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSocket } from "@/hooks/useSocket";
-import { useTranslation } from "@/hooks/useTranslation";
-import DarkModeToggle from "@/components/DarkModeToggle";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
+import confetti from 'canvas-confetti';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useSocket } from '@/hooks/useSocket';
+import { useTranslation } from '@/hooks/useTranslation';
+import DarkModeToggle from '@/components/DarkModeToggle';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 interface Event {
   id: string;
@@ -34,7 +34,7 @@ export default function WaitingPage(): JSX.Element {
   const eventId = params.eventId as string;
   const participantId = params.participantId as string;
   const { t } = useTranslation();
-  
+
   const [event, setEvent] = useState<Event | null>(null);
   const [participant, setParticipant] = useState<Participant | null>(null);
   const [isWinner, setIsWinner] = useState(false);
@@ -48,31 +48,36 @@ export default function WaitingPage(): JSX.Element {
       // Fetch event details
       const eventResponse = await fetch(`/api/events/${eventId}`);
       if (eventResponse.ok) {
-        const eventData = await eventResponse.json() as Event;
+        const eventData = (await eventResponse.json()) as Event;
         setEvent(eventData);
         setRegistrationOpen(eventData.registrationOpen);
         setEventClosed(eventData.closed);
       }
 
       // Fetch participant details (public endpoint)
-      const participantResponse = await fetch(`/api/events/${eventId}/participants/${participantId}`);
+      const participantResponse = await fetch(
+        `/api/events/${eventId}/participants/${participantId}`,
+      );
       if (participantResponse.ok) {
-        const participantData = await participantResponse.json() as Participant;
+        const participantData = (await participantResponse.json()) as Participant;
         setParticipant(participantData);
       }
 
       // Check if already winner (public endpoint)
-      const winnerResponse = await fetch(`/api/events/${eventId}/participants/${participantId}/winner`);
+      const winnerResponse = await fetch(
+        `/api/events/${eventId}/participants/${participantId}/winner`,
+      );
       if (winnerResponse.ok) {
         const winnerData = await winnerResponse.json();
-        if (winnerData.id) { // If has winner ID, is a winner
+        if (winnerData.id) {
+          // If has winner ID, is a winner
           setIsWinner(true);
           setWinnerDetails(winnerData as Winner);
           await fireConfetti();
         }
       }
     } catch (error) {
-      console.error("Failed to fetch data:", error);
+      console.error('Failed to fetch data:', error);
     } finally {
       setLoading(false);
     }
@@ -81,12 +86,12 @@ export default function WaitingPage(): JSX.Element {
   const fireConfetti = async (): Promise<void> => {
     // Massive confetti celebration for winner!
     const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500'];
-    
+
     // Big center burst
     await confetti({
       particleCount: 200,
       spread: 100,
-      origin: { y: 0.5 }
+      origin: { y: 0.5 },
     });
 
     // Multiple side bursts
@@ -96,7 +101,7 @@ export default function WaitingPage(): JSX.Element {
         angle: 60,
         spread: 70,
         origin: { x: 0, y: 0.6 },
-        colors
+        colors,
       });
     }, 300);
 
@@ -106,7 +111,7 @@ export default function WaitingPage(): JSX.Element {
         angle: 120,
         spread: 70,
         origin: { x: 1, y: 0.6 },
-        colors
+        colors,
       });
     }, 600);
 
@@ -116,11 +121,11 @@ export default function WaitingPage(): JSX.Element {
       void confetti({
         particleCount: 50,
         spread: 60,
-        origin: { 
+        origin: {
           x: Math.random(),
-          y: 0.7 + Math.random() * 0.3 
+          y: 0.7 + Math.random() * 0.3,
         },
-        colors
+        colors,
       });
       count++;
       if (count >= 8) {
@@ -135,7 +140,7 @@ export default function WaitingPage(): JSX.Element {
     onWinnerDrawn: (winner) => {
       const newWinner = winner as Winner;
       console.log('Winner drawn:', newWinner);
-      
+
       // Check if this participant won!
       if (newWinner.participantId === participantId) {
         console.log('I WON!');
@@ -171,7 +176,9 @@ export default function WaitingPage(): JSX.Element {
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-rose-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
         <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <CardTitle className="text-red-600 dark:text-red-400">{t('registration.notFound')}</CardTitle>
+            <CardTitle className="text-red-600 dark:text-red-400">
+              {t('registration.notFound')}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-center text-gray-600 dark:text-gray-300">
@@ -201,16 +208,14 @@ export default function WaitingPage(): JSX.Element {
             <div className="mb-6">
               <div className="text-6xl mb-4">🎯</div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                {participant?.name || "Partecipante"}
+                {participant?.name || 'Partecipante'}
               </h2>
               <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
                 <strong>{t('loser.didntWin')}</strong>
               </p>
-              <p className="text-lg font-semibold text-gray-600 dark:text-gray-400">
-                {event.name}
-              </p>
+              <p className="text-lg font-semibold text-gray-600 dark:text-gray-400">{event.name}</p>
             </div>
-            
+
             <div className="bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg p-4 mb-4">
               <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">
                 {t('loser.sorryMessage')}
@@ -220,9 +225,7 @@ export default function WaitingPage(): JSX.Element {
               </p>
             </div>
 
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {t('loser.tryAgain')}
-            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('loser.tryAgain')}</p>
           </CardContent>
         </Card>
       </div>
@@ -246,21 +249,27 @@ export default function WaitingPage(): JSX.Element {
           <CardContent className="p-8 text-center">
             <div className="mb-6">
               <div className="text-6xl mb-4">
-                {winnerDetails.drawOrder === 1 ? '🥇' : 
-                 winnerDetails.drawOrder === 2 ? '🥈' : 
-                 winnerDetails.drawOrder === 3 ? '🥉' : '🏆'}
+                {winnerDetails.drawOrder === 1
+                  ? '🥇'
+                  : winnerDetails.drawOrder === 2
+                    ? '🥈'
+                    : winnerDetails.drawOrder === 3
+                      ? '🥉'
+                      : '🏆'}
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 {participant?.name || winnerDetails.participantName}
               </h2>
               <p className="text-lg text-gray-700 dark:text-gray-300 mb-2">
-                <strong>{t('winner.position')} #{winnerDetails.drawOrder}</strong>
+                <strong>
+                  {t('winner.position')} #{winnerDetails.drawOrder}
+                </strong>
               </p>
               <p className="text-lg font-semibold text-yellow-700 dark:text-yellow-300">
                 {event.name}
               </p>
             </div>
-            
+
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-700 rounded-lg p-4 mb-4">
               <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
                 🎊 {t('winner.lotteryWon')} 🎊
@@ -294,15 +303,11 @@ export default function WaitingPage(): JSX.Element {
         </CardHeader>
         <CardContent className="text-center">
           <div className="mb-6">
-            <div className="text-4xl mb-4">
-              {registrationOpen ? "✅" : "⏳"}
-            </div>
+            <div className="text-4xl mb-4">{registrationOpen ? '✅' : '⏳'}</div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               {participant?.name || t('waiting.participant')}
             </h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              {t('waiting.registered')}
-            </p>
+            <p className="text-gray-600 dark:text-gray-300">{t('waiting.registered')}</p>
           </div>
 
           {registrationOpen ? (
@@ -326,7 +331,9 @@ export default function WaitingPage(): JSX.Element {
           )}
 
           <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-            <div className={`w-3 h-3 rounded-full animate-pulse ${registrationOpen ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+            <div
+              className={`w-3 h-3 rounded-full animate-pulse ${registrationOpen ? 'bg-green-500' : 'bg-blue-500'}`}
+            ></div>
             <span>{t('waiting.liveUpdates')}</span>
           </div>
 

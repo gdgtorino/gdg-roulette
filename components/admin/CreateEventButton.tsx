@@ -4,7 +4,13 @@ import { useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { useTranslation } from '@/hooks/useTranslation';
 import { createEvent } from '@/lib/actions/events';
 import { Plus } from 'lucide-react';
@@ -26,7 +32,7 @@ interface CreateEventFormProps {
 
 async function createEventAction(
   prevState: { success: boolean; error: string } | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ success: boolean; error: string }> {
   return await createEvent(prevState, formData);
 }
@@ -50,9 +56,7 @@ function CreateEventForm({}: CreateEventFormProps) {
       <div className="flex gap-2">
         <SubmitButton />
       </div>
-      {state && !state.success && (
-        <div className="text-red-500 text-sm">{state.error}</div>
-      )}
+      {state && !state.success && <div className="text-red-500 text-sm">{state.error}</div>}
     </form>
   );
 }

@@ -10,16 +10,10 @@ export function PublicNavigation() {
           </Link>
 
           <div className="flex items-center space-x-6">
-            <Link
-              href="/register"
-              className="text-gray-700 hover:text-gray-900 font-medium"
-            >
+            <Link href="/register" className="text-gray-700 hover:text-gray-900 font-medium">
               Register
             </Link>
-            <Link
-              href="/results"
-              className="text-gray-700 hover:text-gray-900 font-medium"
-            >
+            <Link href="/results" className="text-gray-700 hover:text-gray-900 font-medium">
               Results
             </Link>
           </div>

@@ -28,23 +28,17 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
           POSTGRES_DB: test_db
-          POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+          POSTGRES_INITDB_ARGS: '--encoding=UTF8 --lc-collate=C --lc-ctype=C'
         options: >-
-          --health-cmd "pg_isready -U postgres -d test_db"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          --health-start-period 10s
+          --health-cmd "pg_isready -U postgres -d test_db" --health-interval 10s --health-timeout 5s
+          --health-retries 5 --health-start-period 10s
         ports:
           - 5432:5432
 
       redis:
         image: redis:7-alpine
         options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
           --health-start-period 5s
         ports:
           - 6379:6379
@@ -96,7 +90,9 @@ jobs:
             .next
             dist
             node_modules/.prisma
-          key: ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock', '**/schema.prisma') }}-${{ github.sha }}
+          key:
+            ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock', '**/schema.prisma') }}-${{
+            github.sha }}
           restore-keys: |
             ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock', '**/schema.prisma') }}-
             ${{ runner.os }}-build-

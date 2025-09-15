@@ -9,14 +9,14 @@ export async function setTheme(theme: 'light' | 'dark') {
     maxAge: 60 * 60 * 24 * 365, // 1 year
     httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
+    sameSite: 'lax',
   });
 }
 
 // For forms that use useFormState
 export async function setThemeWithState(
   prevState: { success: boolean; error: string } | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ success: boolean; error: string }> {
   try {
     const theme = formData.get('theme') as 'light' | 'dark';
@@ -30,7 +30,7 @@ export async function setThemeWithState(
       maxAge: 60 * 60 * 24 * 365, // 1 year
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
+      sameSite: 'lax',
     });
 
     return { success: true, error: '' };

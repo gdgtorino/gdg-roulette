@@ -28,8 +28,12 @@ interface EventDetailsProps {
   className?: string;
 }
 
-export function EventDetails({ event, participants = [], winners = [], className }: EventDetailsProps) {
-
+export function EventDetails({
+  event,
+  participants = [],
+  winners = [],
+  className,
+}: EventDetailsProps) {
   const getEventStatus = () => {
     if (event.closed) {
       return { label: 'Completed', color: 'bg-gray-100 text-gray-800' };
@@ -57,14 +61,10 @@ export function EventDetails({ event, participants = [], winners = [], className
               <CardTitle className="text-2xl font-bold">{event.name}</CardTitle>
               <div className="flex items-center gap-2 mt-2">
                 <Calendar className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-600">
-                  Created {formatDate(event.createdAt)}
-                </span>
+                <span className="text-sm text-gray-600">Created {formatDate(event.createdAt)}</span>
               </div>
             </div>
-            <Badge className={status.color}>
-              {status.label}
-            </Badge>
+            <Badge className={status.color}>{status.label}</Badge>
           </div>
         </CardHeader>
         <CardContent>
@@ -175,7 +175,11 @@ export function EventDetails({ event, participants = [], winners = [], className
             <div className="flex justify-between">
               <span className="text-sm font-medium">Status:</span>
               <span className="text-sm text-gray-600">
-                {event.closed ? 'Completed' : event.registrationOpen ? 'Registration Open' : 'Registration Closed'}
+                {event.closed
+                  ? 'Completed'
+                  : event.registrationOpen
+                    ? 'Registration Open'
+                    : 'Registration Closed'}
               </span>
             </div>
             <div className="flex justify-between">

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 export default function QRPageLoading() {
   return (
@@ -49,8 +49,11 @@ export default function QRPageLoading() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"></div>
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"
+                  ></div>
                 ))}
               </div>
             </CardContent>

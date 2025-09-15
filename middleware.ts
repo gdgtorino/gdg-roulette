@@ -45,15 +45,15 @@ export async function middleware(request: NextRequest) {
   }
 
   // Check session for protected API routes
-  if (pathname.startsWith('/api/admin') || (pathname.startsWith('/api/events/') && request.method !== 'GET')) {
+  if (
+    pathname.startsWith('/api/admin') ||
+    (pathname.startsWith('/api/events/') && request.method !== 'GET')
+  ) {
     const token = getAuthToken(request);
 
     if (pathname.includes('/execute') || pathname.includes('/delete')) {
       if (!token || !isValidToken(token)) {
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
     }
   }
@@ -67,7 +67,7 @@ export async function middleware(request: NextRequest) {
     process.env.CORS_ORIGIN,
     process.env.NEXTAUTH_URL,
     'http://localhost:3000',
-    'http://localhost:3001'
+    'http://localhost:3001',
   ].filter(Boolean) as string[];
 
   if (origin && allowedOrigins.includes(origin)) {
@@ -75,13 +75,10 @@ export async function middleware(request: NextRequest) {
   }
 
   response.headers.set('Access-Control-Allow-Credentials', 'true');
-  response.headers.set(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, PATCH, OPTIONS'
-  );
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   response.headers.set(
     'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With'
+    'Content-Type, Authorization, X-Requested-With',
   );
 
   // Security headers (similar to helmet)

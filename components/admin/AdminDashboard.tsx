@@ -42,7 +42,11 @@ interface LotteryControlProps {
   onDrawComplete?: () => void;
 }
 
-export function ParticipantManagement({ eventId, participants, onParticipantUpdate }: ParticipantManagementProps) {
+export function ParticipantManagement({
+  eventId,
+  participants,
+  onParticipantUpdate,
+}: ParticipantManagementProps) {
   return (
     <Card className="p-6">
       <h3 className="text-lg font-semibold mb-4">Participant Management</h3>
@@ -70,11 +74,7 @@ export function LotteryControl({ eventId, onDrawStart, onDrawComplete }: Lottery
     <Card className="p-6">
       <h3 className="text-lg font-semibold mb-4">Lottery Control</h3>
       <div className="space-y-4">
-        <Button
-          onClick={handleDrawStart}
-          disabled={isDrawing}
-          className="w-full"
-        >
+        <Button onClick={handleDrawStart} disabled={isDrawing} className="w-full">
           {isDrawing ? 'Drawing in Progress...' : 'Start Lottery Draw'}
         </Button>
       </div>
@@ -86,7 +86,9 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(data || null);
   const [loading, setLoading] = useState(!data);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'participants' | 'lottery'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'participants' | 'lottery'>(
+    'overview',
+  );
 
   useEffect(() => {
     if (!data) {
@@ -133,9 +135,7 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
           <div className="text-center">
             <h2 className="text-xl font-semibold text-red-600 mb-4">Dashboard Error</h2>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={loadDashboardData}>
-              Retry
-            </Button>
+            <Button onClick={loadDashboardData}>Retry</Button>
           </div>
         </Card>
       </div>
@@ -146,7 +146,7 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
     { id: 'overview', label: 'Overview', icon: '📊' },
     { id: 'events', label: 'Events', icon: '🎟️' },
     { id: 'participants', label: 'Participants', icon: '👥' },
-    { id: 'lottery', label: 'Lottery', icon: '🎲' }
+    { id: 'lottery', label: 'Lottery', icon: '🎲' },
   ] as const;
 
   return (
@@ -160,9 +160,7 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
               <p className="text-sm text-gray-600">Welcome back, {admin.username}</p>
             </div>
             <div className="flex items-center space-x-4">
-              <Badge variant="secondary">
-                Admin
-              </Badge>
+              <Badge variant="secondary">Admin</Badge>
               <AdminNavigation />
             </div>
           </div>
@@ -207,7 +205,9 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
                     </div>
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Total Events</p>
-                      <p className="text-2xl font-bold text-gray-900">{dashboardData.totalEvents}</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {dashboardData.totalEvents}
+                      </p>
                     </div>
                   </div>
                 </Card>
@@ -221,7 +221,9 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
                     </div>
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Active Events</p>
-                      <p className="text-2xl font-bold text-gray-900">{dashboardData.activeEvents}</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {dashboardData.activeEvents}
+                      </p>
                     </div>
                   </div>
                 </Card>
@@ -235,7 +237,9 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
                     </div>
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Total Participants</p>
-                      <p className="text-2xl font-bold text-gray-900">{dashboardData.totalParticipants}</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {dashboardData.totalParticipants}
+                      </p>
                     </div>
                   </div>
                 </Card>
@@ -249,7 +253,9 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
                     </div>
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Completed Draws</p>
-                      <p className="text-2xl font-bold text-gray-900">{dashboardData.completedDraws}</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {dashboardData.completedDraws}
+                      </p>
                     </div>
                   </div>
                 </Card>

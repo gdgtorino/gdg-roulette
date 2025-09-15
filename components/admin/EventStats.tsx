@@ -21,7 +21,7 @@ export async function EventStats() {
     },
     {
       label: 'Completed Draws',
-      value: (stats as unknown as {completedDraws?: number}).completedDraws || 0,
+      value: (stats as unknown as { completedDraws?: number }).completedDraws || 0,
       color: 'text-orange-600',
     },
   ];
@@ -29,18 +29,11 @@ export async function EventStats() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {statItems.map((stat) => (
-        <div
-          key={stat.label}
-          className="bg-white rounded-lg shadow p-6"
-        >
+        <div key={stat.label} className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div>
-              <p className="text-sm font-medium text-gray-600">
-                {stat.label}
-              </p>
-              <p className={`text-2xl font-bold ${stat.color}`}>
-                {stat.value}
-              </p>
+              <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+              <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
             </div>
           </div>
         </div>

@@ -6,7 +6,7 @@ export enum EventState {
   INIT = 'INIT',
   REGISTRATION = 'REGISTRATION',
   DRAW = 'DRAW',
-  CLOSED = 'CLOSED'
+  CLOSED = 'CLOSED',
 }
 
 export interface StateTransitionResult {
@@ -25,7 +25,7 @@ export interface EventCreationData {
 export class EventStateMachine {
   constructor(
     private eventService: EventService,
-    private lotteryService: LotteryService
+    private lotteryService: LotteryService,
   ) {}
 
   /**
@@ -41,12 +41,12 @@ export class EventStateMachine {
       ...eventData,
       state: EventState.INIT,
       registrationOpen: false,
-      closed: false
+      closed: false,
     });
 
     return {
       ...event,
-      state: EventState.INIT
+      state: EventState.INIT,
     };
   }
 
@@ -69,19 +69,22 @@ export class EventStateMachine {
 
     const updatedEvent = await this.eventService.updateEvent(eventId, {
       state: EventState.REGISTRATION,
-      registrationOpen: true
+      registrationOpen: true,
     });
 
     return {
       ...updatedEvent,
-      state: EventState.REGISTRATION
+      state: EventState.REGISTRATION,
     };
   }
 
   /**
    * Close registration (but keep in REGISTRATION state)
    */
-  async closeRegistration(eventId: string, adminId: string): Promise<Event & { state: EventState }> {
+  async closeRegistration(
+    eventId: string,
+    adminId: string,
+  ): Promise<Event & { state: EventState }> {
     const event = await this.validateEventAndOwnership(eventId, adminId);
 
     if (event.closed) {
@@ -94,12 +97,12 @@ export class EventStateMachine {
     }
 
     const updatedEvent = await this.eventService.updateEvent(eventId, {
-      registrationOpen: false
+      registrationOpen: false,
     });
 
     return {
       ...updatedEvent,
-      state: EventState.REGISTRATION
+      state: EventState.REGISTRATION,
     };
   }
 
@@ -126,12 +129,12 @@ export class EventStateMachine {
 
     const updatedEvent = await this.eventService.updateEvent(eventId, {
       state: EventState.DRAW,
-      registrationOpen: false
+      registrationOpen: false,
     });
 
     return {
       ...updatedEvent,
-      state: EventState.DRAW
+      state: EventState.DRAW,
     };
   }
 
@@ -148,12 +151,12 @@ export class EventStateMachine {
 
     const updatedEvent = await this.eventService.updateEvent(eventId, {
       state: EventState.CLOSED,
-      closed: true
+      closed: true,
     });
 
     return {
       ...updatedEvent,
-      state: EventState.CLOSED
+      state: EventState.CLOSED,
     };
   }
 
@@ -170,7 +173,7 @@ export class EventStateMachine {
     if (currentState !== EventState.DRAW) {
       return {
         ...event,
-        state: currentState
+        state: currentState,
       };
     }
 
@@ -181,18 +184,18 @@ export class EventStateMachine {
       // All participants have been drawn, auto-close the event
       const updatedEvent = await this.eventService.updateEvent(eventId, {
         state: EventState.CLOSED,
-        closed: true
+        closed: true,
       });
 
       return {
         ...updatedEvent,
-        state: EventState.CLOSED
+        state: EventState.CLOSED,
       };
     }
 
     return {
       ...event,
-      state: currentState
+      state: currentState,
     };
   }
 

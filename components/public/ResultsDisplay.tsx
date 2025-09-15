@@ -35,15 +35,16 @@ export function ResultsDisplay({
   onEventSelect,
   selectedEvent,
   winners = [],
-  isLoading = false
+  isLoading = false,
 }: ResultsDisplayProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredEvents, setFilteredEvents] = useState(events);
 
   useEffect(() => {
-    const filtered = events.filter(event =>
-      event.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (event.closed || !event.registrationOpen)
+    const filtered = events.filter(
+      (event) =>
+        event.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (event.closed || !event.registrationOpen),
     );
     setFilteredEvents(filtered);
   }, [events, searchTerm]);
@@ -157,9 +158,7 @@ export function ResultsDisplay({
                           #{winner.drawOrder}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">
-                            {winner.participantName}
-                          </h3>
+                          <h3 className="font-semibold text-gray-900">{winner.participantName}</h3>
                           <div className="flex items-center gap-1 text-sm text-gray-600">
                             <Calendar className="h-3 w-3" />
                             <span>Won on {formatDate(winner.drawnAt)}</span>

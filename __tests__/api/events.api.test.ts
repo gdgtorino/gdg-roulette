@@ -8,8 +8,17 @@
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { NextRequest } from 'next/server';
-import { GET as getEventsHandler, POST as createEventHandler, setTestServices as setEventsTestServices } from '../../app/api/events/route';
-import { GET as getEventHandler, PUT as updateEventHandler, DELETE as deleteEventHandler, setTestServices as setEventTestServices } from '../../app/api/events/[eventId]/route';
+import {
+  GET as getEventsHandler,
+  POST as createEventHandler,
+  setTestServices as setEventsTestServices,
+} from '../../app/api/events/route';
+import {
+  GET as getEventHandler,
+  PUT as updateEventHandler,
+  DELETE as deleteEventHandler,
+  setTestServices as setEventTestServices,
+} from '../../app/api/events/[eventId]/route';
 import { POST as executeDrawHandler } from '../../app/api/draws/[eventId]/execute/route';
 import { EventService } from '../../lib/services/EventService';
 import { LotteryService } from '../../lib/services/LotteryService';
@@ -27,20 +36,20 @@ const mockEventService = {
   getEventsForAdmin: jest.fn(),
   createEvent: jest.fn(),
   updateEvent: jest.fn(),
-  deleteEvent: jest.fn()
+  deleteEvent: jest.fn(),
 };
 
 const mockLotteryService = {
   drawSingleWinner: jest.fn(),
   drawAllRemainingParticipants: jest.fn(),
-  getDrawResults: jest.fn()
+  getDrawResults: jest.fn(),
 };
 
 const mockAuthService = {
   validateAdminAccess: jest.fn(),
   login: jest.fn(),
   logout: jest.fn(),
-  validateSession: jest.fn()
+  validateSession: jest.fn(),
 };
 
 describe('/api/events/* API Routes', () => {
@@ -51,12 +60,12 @@ describe('/api/events/* API Routes', () => {
     // Set up test services
     setEventsTestServices({
       eventService: mockEventService as any,
-      authService: mockAuthService as any
+      authService: mockAuthService as any,
     });
 
     setEventTestServices({
       eventService: mockEventService as any,
-      authService: mockAuthService as any
+      authService: mockAuthService as any,
     });
   });
 
@@ -77,7 +86,7 @@ describe('/api/events/* API Routes', () => {
           closed: false,
           createdAt: new Date(),
           participantCount: 25,
-          winnerCount: 0
+          winnerCount: 0,
         },
         {
           id: 'event-2',
@@ -88,8 +97,8 @@ describe('/api/events/* API Routes', () => {
           closed: false,
           createdAt: new Date(),
           participantCount: 50,
-          winnerCount: 5
-        }
+          winnerCount: 5,
+        },
       ];
 
       const mockSessionValidation = {
@@ -97,22 +106,24 @@ describe('/api/events/* API Routes', () => {
         session: {
           id: 'session-123',
           adminId: 'admin-123',
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
-        }
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.getEventsForAdmin.mockResolvedValue({
         success: true,
-        events: mockEvents
+        events: mockEvents,
       });
 
-      const request = new NextRequest(new Request('http://localhost/api/events', {
-        method: 'GET',
-        headers: {
-          'Cookie': 'sessionToken=session-token-123'
-        }
-      }));
+      const request = new NextRequest(
+        new Request('http://localhost/api/events', {
+          method: 'GET',
+          headers: {
+            Cookie: 'sessionToken=session-token-123',
+          },
+        }),
+      );
 
       // Act
       const response = await getEventsHandler(request);
@@ -131,11 +142,11 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       mockAuthService.validateSession.mockResolvedValue({
         valid: false,
-        session: null
+        session: null,
       });
 
       const request = new NextRequest('http://localhost/api/events', {
-        method: 'GET'
+        method: 'GET',
       });
 
       // Act
@@ -157,26 +168,26 @@ describe('/api/events/* API Routes', () => {
           name: 'Active Event',
           state: EventState.REGISTRATION,
           registrationOpen: true,
-          closed: false
-        }
+          closed: false,
+        },
       ];
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.getEventsByState.mockResolvedValue({
         success: true,
-        events: mockActiveEvents
+        events: mockActiveEvents,
       });
 
       const request = new NextRequest('http://localhost/api/events?state=REGISTRATION', {
         method: 'GET',
         headers: {
-          'Cookie': 'sessionToken=session-token-123'
-        }
+          Cookie: 'sessionToken=session-token-123',
+        },
       });
 
       // Act
@@ -187,27 +198,32 @@ describe('/api/events/* API Routes', () => {
       expect(response.status).toBe(200);
       expect(responseData.events).toHaveLength(1);
       expect(responseData.events[0].state).toBe(EventState.REGISTRATION);
-      expect(mockEventService.getEventsByState).toHaveBeenCalledWith('admin-123', EventState.REGISTRATION);
+      expect(mockEventService.getEventsByState).toHaveBeenCalledWith(
+        'admin-123',
+        EventState.REGISTRATION,
+      );
     });
 
     it('should handle pagination parameters', async () => {
       // Arrange
       const mockPaginatedEvents = {
         success: true,
-        events: [/* paginated events */],
+        events: [
+          /* paginated events */
+        ],
         pagination: {
           page: 2,
           pageSize: 10,
           total: 25,
           totalPages: 3,
           hasNext: true,
-          hasPrev: true
-        }
+          hasPrev: true,
+        },
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
@@ -216,8 +232,8 @@ describe('/api/events/* API Routes', () => {
       const request = new NextRequest('http://localhost/api/events?page=2&pageSize=10', {
         method: 'GET',
         headers: {
-          'Cookie': 'sessionToken=session-token-123'
-        }
+          Cookie: 'sessionToken=session-token-123',
+        },
       });
 
       // Act
@@ -231,7 +247,7 @@ describe('/api/events/* API Routes', () => {
       expect(responseData.pagination.total).toBe(25);
       expect(mockEventService.getEventsForAdmin).toHaveBeenCalledWith('admin-123', {
         page: 2,
-        pageSize: 10
+        pageSize: 10,
       });
     });
   });
@@ -242,12 +258,12 @@ describe('/api/events/* API Routes', () => {
       const eventData = {
         name: 'New Test Event',
         description: 'Test event description',
-        maxParticipants: 100
+        maxParticipants: 100,
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       const mockCreatedEvent = {
@@ -260,22 +276,22 @@ describe('/api/events/* API Routes', () => {
         registrationOpen: false,
         closed: false,
         qrCode: 'qr-code-data',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.createEvent.mockResolvedValue({
         success: true,
-        event: mockCreatedEvent
+        event: mockCreatedEvent,
       });
 
       const request = new NextRequest('http://localhost/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(eventData)
+        body: JSON.stringify(eventData),
       });
 
       // Act
@@ -290,7 +306,7 @@ describe('/api/events/* API Routes', () => {
       expect(responseData.event.state).toBe(EventState.INIT);
       expect(mockEventService.createEvent).toHaveBeenCalledWith({
         ...eventData,
-        createdBy: 'admin-123'
+        createdBy: 'admin-123',
       });
     });
 
@@ -300,12 +316,12 @@ describe('/api/events/* API Routes', () => {
         { description: 'Missing name' },
         { name: '', description: 'Empty name' },
         { name: 'Test', maxParticipants: -1 },
-        { name: 'Test', maxParticipants: 'invalid' }
+        { name: 'Test', maxParticipants: 'invalid' },
       ];
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
@@ -316,9 +332,9 @@ describe('/api/events/* API Routes', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Cookie': 'sessionToken=session-token-123'
+            Cookie: 'sessionToken=session-token-123',
           },
-          body: JSON.stringify(invalidData)
+          body: JSON.stringify(invalidData),
         });
 
         const response = await createEventHandler(request);
@@ -334,27 +350,27 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const eventData = {
         name: 'Unauthorized Event',
-        description: 'Should not be created'
+        description: 'Should not be created',
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.createEvent.mockResolvedValue({
         success: false,
-        error: 'Insufficient permissions'
+        error: 'Insufficient permissions',
       });
 
       const request = new NextRequest('http://localhost/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(eventData)
+        body: JSON.stringify(eventData),
       });
 
       // Act
@@ -381,28 +397,28 @@ describe('/api/events/* API Routes', () => {
         closed: false,
         participants: [
           { id: 'p1', name: 'Alice', registeredAt: new Date() },
-          { id: 'p2', name: 'Bob', registeredAt: new Date() }
+          { id: 'p2', name: 'Bob', registeredAt: new Date() },
         ],
         winners: [],
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.getEventDetails.mockResolvedValue({
         success: true,
-        event: mockEvent
+        event: mockEvent,
       });
 
       const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
         method: 'GET',
         headers: {
-          'Cookie': 'sessionToken=session-token-123'
-        }
+          Cookie: 'sessionToken=session-token-123',
+        },
       });
 
       // Act
@@ -423,20 +439,20 @@ describe('/api/events/* API Routes', () => {
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.getEventDetails.mockResolvedValue({
         success: false,
-        error: 'Event not found'
+        error: 'Event not found',
       });
 
       const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
         method: 'GET',
         headers: {
-          'Cookie': 'sessionToken=session-token-123'
-        }
+          Cookie: 'sessionToken=session-token-123',
+        },
       });
 
       // Act
@@ -455,20 +471,20 @@ describe('/api/events/* API Routes', () => {
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-456' } // Different admin
+        session: { adminId: 'admin-456' }, // Different admin
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.getEventDetails.mockResolvedValue({
         success: false,
-        error: 'Access denied - not event creator'
+        error: 'Access denied - not event creator',
       });
 
       const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
         method: 'GET',
         headers: {
-          'Cookie': 'sessionToken=session-token-123'
-        }
+          Cookie: 'sessionToken=session-token-123',
+        },
       });
 
       // Act
@@ -489,12 +505,12 @@ describe('/api/events/* API Routes', () => {
       const updateData = {
         name: 'Updated Event Name',
         description: 'Updated description',
-        maxParticipants: 200
+        maxParticipants: 200,
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       const mockUpdatedEvent = {
@@ -504,22 +520,22 @@ describe('/api/events/* API Routes', () => {
         maxParticipants: 200,
         createdBy: 'admin-123',
         state: EventState.REGISTRATION,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.updateEvent.mockResolvedValue({
         success: true,
-        event: mockUpdatedEvent
+        event: mockUpdatedEvent,
       });
 
       const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(updateData)
+        body: JSON.stringify(updateData),
       });
 
       // Act
@@ -538,27 +554,27 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const eventId = 'event-123';
       const updateData = {
-        name: 'Should not update'
+        name: 'Should not update',
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.updateEvent.mockResolvedValue({
         success: false,
-        error: 'Cannot modify closed event'
+        error: 'Cannot modify closed event',
       });
 
       const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(updateData)
+        body: JSON.stringify(updateData),
       });
 
       // Act
@@ -575,27 +591,27 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const eventId = 'event-123';
       const invalidStateUpdate = {
-        state: EventState.CLOSED // Invalid direct transition
+        state: EventState.CLOSED, // Invalid direct transition
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.updateEvent.mockResolvedValue({
         success: false,
-        error: 'Invalid state transition'
+        error: 'Invalid state transition',
       });
 
       const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(invalidStateUpdate)
+        body: JSON.stringify(invalidStateUpdate),
       });
 
       // Act
@@ -616,20 +632,20 @@ describe('/api/events/* API Routes', () => {
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.deleteEvent.mockResolvedValue({
         success: true,
-        message: 'Event deleted successfully'
+        message: 'Event deleted successfully',
       });
 
       const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
         method: 'DELETE',
         headers: {
-          'Cookie': 'sessionToken=session-token-123'
-        }
+          Cookie: 'sessionToken=session-token-123',
+        },
       });
 
       // Act
@@ -649,20 +665,20 @@ describe('/api/events/* API Routes', () => {
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.deleteEvent.mockResolvedValue({
         success: false,
-        error: 'Cannot delete event with registered participants'
+        error: 'Cannot delete event with registered participants',
       });
 
       const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
         method: 'DELETE',
         headers: {
-          'Cookie': 'sessionToken=session-token-123'
-        }
+          Cookie: 'sessionToken=session-token-123',
+        },
       });
 
       // Act
@@ -681,7 +697,7 @@ describe('/api/events/* API Routes', () => {
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       // Request without confirmation
@@ -690,9 +706,9 @@ describe('/api/events/* API Routes', () => {
       const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
         method: 'DELETE',
         headers: {
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
           // Missing confirmation header
-        }
+        },
       });
 
       // Act
@@ -711,12 +727,12 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const eventId = 'event-123';
       const drawRequest = {
-        type: 'single'
+        type: 'single',
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       const mockDrawResult = {
@@ -726,8 +742,8 @@ describe('/api/events/* API Routes', () => {
           participantId: 'participant-456',
           participantName: 'Alice',
           drawOrder: 1,
-          drawnAt: new Date()
-        }
+          drawnAt: new Date(),
+        },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
@@ -737,9 +753,9 @@ describe('/api/events/* API Routes', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(drawRequest)
+        body: JSON.stringify(drawRequest),
       });
 
       // Act
@@ -758,12 +774,12 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const eventId = 'event-123';
       const drawRequest = {
-        type: 'all'
+        type: 'all',
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       const mockDrawAllResult = {
@@ -772,21 +788,21 @@ describe('/api/events/* API Routes', () => {
           {
             id: 'winner-1',
             participantName: 'Alice',
-            drawOrder: 1
+            drawOrder: 1,
           },
           {
             id: 'winner-2',
             participantName: 'Bob',
-            drawOrder: 2
+            drawOrder: 2,
           },
           {
             id: 'winner-3',
             participantName: 'Charlie',
-            drawOrder: 3
-          }
+            drawOrder: 3,
+          },
         ],
         totalDrawn: 3,
-        eventClosed: true
+        eventClosed: true,
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
@@ -796,9 +812,9 @@ describe('/api/events/* API Routes', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(drawRequest)
+        body: JSON.stringify(drawRequest),
       });
 
       // Act
@@ -818,27 +834,27 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const eventId = 'event-123';
       const drawRequest = {
-        type: 'single'
+        type: 'single',
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockLotteryService.drawSingleWinner.mockResolvedValue({
         success: false,
-        error: 'Cannot draw winners - event is not in DRAW state'
+        error: 'Cannot draw winners - event is not in DRAW state',
       });
 
       const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(drawRequest)
+        body: JSON.stringify(drawRequest),
       });
 
       // Act
@@ -855,27 +871,27 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const eventId = 'event-123';
       const drawRequest = {
-        type: 'single'
+        type: 'single',
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockLotteryService.drawSingleWinner.mockResolvedValue({
         success: false,
-        error: 'No participants available for drawing'
+        error: 'No participants available for drawing',
       });
 
       const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(drawRequest)
+        body: JSON.stringify(drawRequest),
       });
 
       // Act
@@ -892,12 +908,12 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const eventId = 'event-123';
       const invalidDrawRequest = {
-        type: 'invalid-type'
+        type: 'invalid-type',
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
@@ -906,9 +922,9 @@ describe('/api/events/* API Routes', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(invalidDrawRequest)
+        body: JSON.stringify(invalidDrawRequest),
       });
 
       // Act
@@ -925,12 +941,12 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const eventId = 'event-123';
       const drawRequest = {
-        type: 'single'
+        type: 'single',
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       const mockDrawResult = {
@@ -938,8 +954,8 @@ describe('/api/events/* API Routes', () => {
         winner: {
           id: 'winner-1',
           participantName: 'Alice',
-          drawOrder: 1
-        }
+          drawOrder: 1,
+        },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
@@ -953,9 +969,9 @@ describe('/api/events/* API Routes', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(drawRequest)
+        body: JSON.stringify(drawRequest),
       });
 
       // Act
@@ -966,7 +982,7 @@ describe('/api/events/* API Routes', () => {
       expect(mockBroadcast).toHaveBeenCalledWith(eventId, {
         type: 'WINNER_DRAWN',
         winner: mockDrawResult.winner,
-        timestamp: expect.any(Date)
+        timestamp: expect.any(Date),
       });
     });
   });
@@ -976,18 +992,20 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.getEventsForAdmin.mockRejectedValue(new Error('Database connection failed'));
 
-      const request = new NextRequest(new Request('http://localhost/api/events', {
-        method: 'GET',
-        headers: {
-          'Cookie': 'sessionToken=session-token-123'
-        }
-      }));
+      const request = new NextRequest(
+        new Request('http://localhost/api/events', {
+          method: 'GET',
+          headers: {
+            Cookie: 'sessionToken=session-token-123',
+          },
+        }),
+      );
 
       // Act
       const response = await getEventsHandler(request);
@@ -1003,7 +1021,7 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
@@ -1012,9 +1030,9 @@ describe('/api/events/* API Routes', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: 'invalid-json{'
+        body: 'invalid-json{',
       });
 
       // Act
@@ -1031,27 +1049,27 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const eventId = 'event-123';
       const drawRequest = {
-        type: 'single'
+        type: 'single',
       };
 
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockLotteryService.drawSingleWinner.mockResolvedValue({
         success: false,
-        error: 'Draw operation already in progress'
+        error: 'Draw operation already in progress',
       });
 
       const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Cookie': 'sessionToken=session-token-123'
+          Cookie: 'sessionToken=session-token-123',
         },
-        body: JSON.stringify(drawRequest)
+        body: JSON.stringify(drawRequest),
       });
 
       // Act
@@ -1068,13 +1086,13 @@ describe('/api/events/* API Routes', () => {
       // Arrange
       const mockSessionValidation = {
         valid: true,
-        session: { adminId: 'admin-123' }
+        session: { adminId: 'admin-123' },
       };
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.getEventsForAdmin.mockResolvedValue({
         success: true,
-        events: []
+        events: [],
       });
 
       const auditLogSpy = jest.spyOn(console, 'info').mockImplementation();
@@ -1082,10 +1100,10 @@ describe('/api/events/* API Routes', () => {
       const request = new NextRequest('http://localhost/api/events', {
         method: 'GET',
         headers: {
-          'Cookie': 'sessionToken=session-token-123',
+          Cookie: 'sessionToken=session-token-123',
           'User-Agent': 'Test Browser',
-          'X-Forwarded-For': '192.168.1.100'
-        }
+          'X-Forwarded-For': '192.168.1.100',
+        },
       });
 
       // Act
@@ -1100,8 +1118,8 @@ describe('/api/events/* API Routes', () => {
           adminId: 'admin-123',
           ip: '192.168.1.100',
           userAgent: 'Test Browser',
-          timestamp: expect.any(Date)
-        })
+          timestamp: expect.any(Date),
+        }),
       );
 
       auditLogSpy.mockRestore();

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSocket } from "@/hooks/useSocket";
+import { useSocket } from '@/hooks/useSocket';
 
 interface Participant {
   id: string;
@@ -23,7 +23,7 @@ export function ParticipantsListLive({ eventId, initialParticipants }: Participa
     eventId,
     onParticipantRegistered: (participant) => {
       console.log('New participant registered:', participant);
-      setParticipants(prev => [...prev, participant as Participant]);
+      setParticipants((prev) => [...prev, participant as Participant]);
     },
   });
 
@@ -40,7 +40,9 @@ export function ParticipantsListLive({ eventId, initialParticipants }: Participa
           className="flex items-center justify-between p-3 border dark:border-gray-600 dark:bg-gray-700 rounded-lg"
         >
           <div>
-            <div className="font-medium dark:text-white">#{index + 1} {participant.name}</div>
+            <div className="font-medium dark:text-white">
+              #{index + 1} {participant.name}
+            </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">
               {new Date(participant.registeredAt).toLocaleString()}
             </div>

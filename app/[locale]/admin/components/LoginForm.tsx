@@ -1,15 +1,15 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useTranslation } from "@/hooks/useTranslation";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useTranslation } from '@/hooks/useTranslation';
 import { login } from '@/lib/actions/auth';
 
 // Wrapper action for useFormState
 async function loginWithState(
   prevState: { success: boolean; error: string } | null,
-  formData: FormData
+  formData: FormData,
 ) {
   return login(prevState, formData);
 }
@@ -51,9 +51,7 @@ export function LoginForm() {
       </div>
       <SubmitButton />
       {state && !state.success && (
-        <div className="text-red-500 text-sm text-center mt-2">
-          {state.error}
-        </div>
+        <div className="text-red-500 text-sm text-center mt-2">{state.error}</div>
       )}
     </form>
   );

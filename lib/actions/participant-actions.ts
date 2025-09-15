@@ -14,7 +14,7 @@ const registerSchema = z.object({
 
 export async function registerParticipantAction(
   prevState: { success: boolean; error: string } | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ success: boolean; error: string }> {
   try {
     const rawData = {

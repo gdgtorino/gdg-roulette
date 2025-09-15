@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HeaderControls } from "@/components/ClientComponents";
-import { LoginForm } from "./components/LoginForm";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { HeaderControls } from '@/components/ClientComponents';
+import { LoginForm } from './components/LoginForm';
 
 export default function AdminPage() {
   const t = useTranslations();

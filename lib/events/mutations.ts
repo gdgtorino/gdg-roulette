@@ -23,13 +23,13 @@ async function getAuthenticatedContext(): Promise<Context | null> {
     // Create mock request for context
     const mockReq = {
       headers: {
-        get: (name: string) => name === 'authorization' ? `Bearer ${token}` : null,
+        get: (name: string) => (name === 'authorization' ? `Bearer ${token}` : null),
       },
     } as { headers: { get: (name: string) => string | null } };
 
     return {
       req: mockReq,
-      admin
+      admin,
     } as unknown as Context;
   } catch {
     return null;
@@ -107,7 +107,7 @@ export async function registerParticipant(eventId: string, name?: string) {
     const caller = appRouter.createCaller({} as Context); // Public endpoint
     const participant = await caller.events.registerParticipant({
       eventId,
-      name
+      name,
     });
 
     return participant;

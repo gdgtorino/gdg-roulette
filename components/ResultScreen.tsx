@@ -64,7 +64,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   showPosition = false,
   showStats = false,
   onShare,
-  onNavigateBack
+  onNavigateBack,
 }) => {
   // Trigger confetti for winners
   useEffect(() => {
@@ -98,31 +98,37 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           <h1>Congratulations!</h1>
           <h2>{winner.participantName}</h2>
 
-          {showPosition && (
-            <p>Position: {getPositionText(winner.drawOrder)}</p>
-          )}
+          {showPosition && <p>Position: {getPositionText(winner.drawOrder)}</p>}
 
           {showTimestamp && winner.drawnAt && (
             <div>
-              <p>{winner.drawnAt.toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-              })}</p>
-              <p>{winner.drawnAt.toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit'
-              })}</p>
+              <p>
+                {winner.drawnAt.toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </p>
+              <p>
+                {winner.drawnAt.toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
+              </p>
             </div>
           )}
 
           {onShare && (
-            <button onClick={() => onShare({
-              type: 'WINNER',
-              participantName: winner.participantName,
-              eventName: winner.eventName,
-              drawOrder: winner.drawOrder
-            })}>
+            <button
+              onClick={() =>
+                onShare({
+                  type: 'WINNER',
+                  participantName: winner.participantName,
+                  eventName: winner.eventName,
+                  drawOrder: winner.drawOrder,
+                })
+              }
+            >
               Share
             </button>
           )}
@@ -130,9 +136,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       ) : (
         <div>
           <h1>Thank you for participating</h1>
-          {participant && (
-            <h2>{participant.name}</h2>
-          )}
+          {participant && <h2>{participant.name}</h2>}
           <p>Better luck next time!</p>
         </div>
       )}
@@ -153,11 +157,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         </div>
       )}
 
-      {onNavigateBack && (
-        <button onClick={() => onNavigateBack('/events')}>
-          Back to events
-        </button>
-      )}
+      {onNavigateBack && <button onClick={() => onNavigateBack('/events')}>Back to events</button>}
     </div>
   );
 };

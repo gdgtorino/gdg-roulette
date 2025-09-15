@@ -31,32 +31,32 @@ export async function EventOverview({ event }: EventOverviewProps) {
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-4">
             <h1 className="text-3xl font-bold text-gray-900">{event.name}</h1>
-            <Badge className={statusColors[event.status as keyof typeof statusColors] || statusColors.draft}>
+            <Badge
+              className={
+                statusColors[event.status as keyof typeof statusColors] || statusColors.draft
+              }
+            >
               {event.status}
             </Badge>
           </div>
 
-          {event.description && (
-            <p className="text-gray-600 text-lg mb-6">{event.description}</p>
-          )}
+          {event.description && <p className="text-gray-600 text-lg mb-6">{event.description}</p>}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">
-                {participantCount}
-              </div>
+              <div className="text-2xl font-bold text-blue-600">{participantCount}</div>
               <div className="text-sm text-gray-600">Participants</div>
-              {(event as unknown as {maxParticipants?: number}).maxParticipants && (
+              {(event as unknown as { maxParticipants?: number }).maxParticipants && (
                 <div className="text-xs text-gray-500">
-                  Max: {(event as unknown as {maxParticipants?: number}).maxParticipants}
+                  Max: {(event as unknown as { maxParticipants?: number }).maxParticipants}
                 </div>
               )}
             </div>
 
-            {(event as unknown as {prizePool?: number}).prizePool && (
+            {(event as unknown as { prizePool?: number }).prizePool && (
               <div className="text-center p-4 bg-green-50 rounded-lg">
                 <div className="text-2xl font-bold text-green-600">
-                  ${(event as unknown as {prizePool?: number}).prizePool}
+                  ${(event as unknown as { prizePool?: number }).prizePool}
                 </div>
                 <div className="text-sm text-gray-600">Prize Pool</div>
               </div>

@@ -23,19 +23,15 @@ export const WaitingScreen: React.FC<WaitingScreenProps> = ({
   event,
   participant,
   participantCount = 0,
-  liveUpdates = false
+  liveUpdates = false,
 }) => {
   return (
     <div>
-      {participant && (
-        <h2>Welcome, {participant.name}</h2>
-      )}
+      {participant && <h2>Welcome, {participant.name}</h2>}
 
       <h3>{event.name}</h3>
 
-      {participantCount > 0 && (
-        <p>{participantCount} participants registered</p>
-      )}
+      {participantCount > 0 && <p>{participantCount} participants registered</p>}
 
       <p>Waiting for draw to begin</p>
       <p>You will be notified when the draw starts</p>

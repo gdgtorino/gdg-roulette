@@ -6,7 +6,7 @@ class RedisService {
 
   constructor() {
     this.client = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379'
+      url: process.env.REDIS_URL || 'redis://localhost:6379',
     });
 
     this.client.on('error', (err) => console.error('Redis Client Error', err));
@@ -33,7 +33,7 @@ class RedisService {
       id: admin.id,
       username: admin.username,
       password: admin.password,
-      createdAt: new Date(admin.createdAt)
+      createdAt: new Date(admin.createdAt),
     };
   }
 
@@ -42,7 +42,7 @@ class RedisService {
       id: admin.id,
       username: admin.username,
       password: admin.password,
-      createdAt: admin.createdAt.toISOString()
+      createdAt: admin.createdAt.toISOString(),
     });
 
     // Add to admins list for easier listing
@@ -86,7 +86,7 @@ class RedisService {
       createdAt: event.createdAt.toISOString(),
       registrationOpen: event.registrationOpen.toString(),
       closed: event.closed.toString(),
-      qrCode: event.qrCode
+      qrCode: event.qrCode,
     });
 
     // Add to admin's events list
@@ -104,7 +104,7 @@ class RedisService {
       createdAt: new Date(event.createdAt),
       registrationOpen: event.registrationOpen === 'true',
       closed: event.closed === 'true',
-      qrCode: event.qrCode
+      qrCode: event.qrCode,
     };
   }
 
@@ -157,7 +157,7 @@ class RedisService {
       id: participant.id,
       eventId: participant.eventId,
       name: participant.name,
-      registeredAt: participant.registeredAt.toISOString()
+      registeredAt: participant.registeredAt.toISOString(),
     });
 
     await this.client.sAdd(`event:${participant.eventId}:participants`, participant.id);
@@ -174,7 +174,7 @@ class RedisService {
           id: participant.id,
           eventId: participant.eventId,
           name: participant.name,
-          registeredAt: new Date(participant.registeredAt)
+          registeredAt: new Date(participant.registeredAt),
         });
       }
     }
@@ -184,7 +184,7 @@ class RedisService {
 
   async isParticipantNameTaken(eventId: string, name: string): Promise<boolean> {
     const participants = await this.getEventParticipants(eventId);
-    return participants.some(p => p.name.toLowerCase() === name.toLowerCase());
+    return participants.some((p) => p.name.toLowerCase() === name.toLowerCase());
   }
 
   async removeParticipant(participantId: string): Promise<void> {
@@ -203,7 +203,7 @@ class RedisService {
       participantId: winner.participantId,
       participantName: winner.participantName,
       drawOrder: winner.drawOrder.toString(),
-      drawnAt: winner.drawnAt.toISOString()
+      drawnAt: winner.drawnAt.toISOString(),
     });
 
     await this.client.sAdd(`event:${winner.eventId}:winners`, winner.id);
@@ -222,7 +222,7 @@ class RedisService {
           participantId: winner.participantId,
           participantName: winner.participantName,
           drawOrder: parseInt(winner.drawOrder),
-          drawnAt: new Date(winner.drawnAt)
+          drawnAt: new Date(winner.drawnAt),
         });
       }
     }

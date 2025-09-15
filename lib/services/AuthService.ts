@@ -35,7 +35,7 @@ export class AuthService {
   constructor(
     private sessionManager: SessionManager,
     private passwordService: PasswordService,
-    private adminRepository: AdminRepository
+    private adminRepository: AdminRepository,
   ) {}
 
   /**
@@ -57,7 +57,7 @@ export class AuthService {
       if (!admin) {
         return {
           success: false,
-          error: 'Invalid credentials'
+          error: 'Invalid credentials',
         };
       }
 
@@ -66,7 +66,7 @@ export class AuthService {
       if (!isPasswordValid) {
         return {
           success: false,
-          error: 'Invalid credentials'
+          error: 'Invalid credentials',
         };
       }
 
@@ -84,7 +84,7 @@ export class AuthService {
       return {
         success: true,
         sessionToken,
-        admin
+        admin,
       };
     } catch (error) {
       throw error;
@@ -99,12 +99,12 @@ export class AuthService {
       const session = await this.sessionManager.validateSession(token);
       return {
         valid: session !== null,
-        session
+        session,
       };
     } catch (error) {
       return {
         valid: false,
-        session: null
+        session: null,
       };
     }
   }
@@ -116,12 +116,12 @@ export class AuthService {
     try {
       const success = await this.sessionManager.destroySession(sessionToken);
       return {
-        success
+        success,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Logout failed: ${error}`
+        error: `Logout failed: ${error}`,
       };
     }
   }
@@ -135,7 +135,7 @@ export class AuthService {
       if (!validationResult.valid || !validationResult.session) {
         return {
           success: false,
-          error: 'Invalid or expired session'
+          error: 'Invalid or expired session',
         };
       }
 
@@ -144,18 +144,18 @@ export class AuthService {
       if (!admin) {
         return {
           success: false,
-          error: 'Admin account not found'
+          error: 'Admin account not found',
         };
       }
 
       return {
         success: true,
-        admin
+        admin,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Session recovery failed: ${error}`
+        error: `Session recovery failed: ${error}`,
       };
     }
   }
@@ -166,7 +166,7 @@ export class AuthService {
   async changePassword(
     adminId: string,
     currentPassword: string,
-    newPassword: string
+    newPassword: string,
   ): Promise<ChangePasswordResult> {
     try {
       // Find admin
@@ -174,19 +174,19 @@ export class AuthService {
       if (!admin) {
         return {
           success: false,
-          error: 'Admin not found'
+          error: 'Admin not found',
         };
       }
 
       // Verify current password
       const isCurrentPasswordValid = await this.passwordService.verify(
         currentPassword,
-        admin.password
+        admin.password,
       );
       if (!isCurrentPasswordValid) {
         return {
           success: false,
-          error: 'Current password is incorrect'
+          error: 'Current password is incorrect',
         };
       }
 
@@ -195,7 +195,7 @@ export class AuthService {
       if (!validation || !validation.valid) {
         return {
           success: false,
-          error: validation?.errors?.join('; ') || 'Invalid password complexity'
+          error: validation?.errors?.join('; ') || 'Invalid password complexity',
         };
       }
 
@@ -209,12 +209,12 @@ export class AuthService {
       await this.sessionManager.destroyAllSessionsForAdmin(adminId);
 
       return {
-        success: true
+        success: true,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Password change failed: ${error}`
+        error: `Password change failed: ${error}`,
       };
     }
   }
@@ -295,13 +295,13 @@ export class AuthService {
       return {
         activeSessions: sessionStats.totalActive,
         expiredToday: sessionStats.expiredToday,
-        totalAdmins: allAdmins.length
+        totalAdmins: allAdmins.length,
       };
     } catch (error) {
       return {
         activeSessions: 0,
         expiredToday: 0,
-        totalAdmins: 0
+        totalAdmins: 0,
       };
     }
   }

@@ -37,36 +37,36 @@ const ROLE_OPTIONS = [
     label: 'Super Admin',
     description: 'Full access to all features',
     permissions: ['*'],
-    badge: 'danger'
+    badge: 'danger',
   },
   {
     value: 'ADMIN',
     label: 'Admin',
     description: 'Create events, manage users, view analytics',
     permissions: ['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS'],
-    badge: 'primary'
+    badge: 'primary',
   },
   {
     value: 'MODERATOR',
     label: 'Moderator',
     description: 'View events and analytics only',
     permissions: ['VIEW_EVENTS', 'VIEW_ANALYTICS'],
-    badge: 'secondary'
-  }
+    badge: 'secondary',
+  },
 ] as const;
 
 export function CreateAdminForm({
   onAdminCreated,
   onCancel,
   creatorAdmin,
-  className = ''
+  className = '',
 }: CreateAdminFormProps) {
   const [formData, setFormData] = useState<FormData>({
     username: '',
     password: '',
     confirmPassword: '',
     email: '',
-    role: 'ADMIN'
+    role: 'ADMIN',
   });
 
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -79,7 +79,8 @@ export function CreateAdminForm({
     if (!trimmed) return 'Username is required';
     if (trimmed.length < 3) return 'Username must be at least 3 characters';
     if (trimmed.length > 50) return 'Username must be less than 50 characters';
-    if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) return 'Username can only contain letters, numbers, underscores, and hyphens';
+    if (!/^[a-zA-Z0-9_-]+$/.test(trimmed))
+      return 'Username can only contain letters, numbers, underscores, and hyphens';
 
     return undefined;
   };
@@ -90,7 +91,8 @@ export function CreateAdminForm({
     if (!/(?=.*[a-z])/.test(password)) return 'Password must contain at least one lowercase letter';
     if (!/(?=.*[A-Z])/.test(password)) return 'Password must contain at least one uppercase letter';
     if (!/(?=.*\d)/.test(password)) return 'Password must contain at least one number';
-    if (!/(?=.*[!@#$%^&*])/.test(password)) return 'Password must contain at least one special character';
+    if (!/(?=.*[!@#$%^&*])/.test(password))
+      return 'Password must contain at least one special character';
 
     return undefined;
   };
@@ -124,17 +126,17 @@ export function CreateAdminForm({
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     setSubmitError('');
 
     // Clear field-specific error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
 
     // Clear confirm password error when password is changed
     if (field === 'password' && errors.confirmPassword) {
-      setErrors(prev => ({ ...prev, confirmPassword: undefined }));
+      setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
     }
   };
 
@@ -161,7 +163,7 @@ export function CreateAdminForm({
           username: formData.username.trim(),
           password: formData.password,
           email: formData.email.trim(),
-          role: formData.role
+          role: formData.role,
         }),
       });
 
@@ -177,21 +179,22 @@ export function CreateAdminForm({
         password: '',
         confirmPassword: '',
         email: '',
-        role: 'ADMIN'
+        role: 'ADMIN',
       });
 
       if (onAdminCreated) {
         onAdminCreated(result.admin);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create admin account';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to create admin account';
       setSubmitError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const selectedRole = ROLE_OPTIONS.find(role => role.value === formData.role);
+  const selectedRole = ROLE_OPTIONS.find((role) => role.value === formData.role);
 
   return (
     <Card className={`w-full max-w-2xl p-6 ${className}`}>
@@ -201,9 +204,7 @@ export function CreateAdminForm({
           Create a new administrator account with specific permissions and access levels.
         </p>
         {creatorAdmin && (
-          <p className="text-sm text-gray-500 mt-2">
-            Creating as: {creatorAdmin.username}
-          </p>
+          <p className="text-sm text-gray-500 mt-2">Creating as: {creatorAdmin.username}</p>
         )}
       </div>
 
@@ -301,9 +302,7 @@ export function CreateAdminForm({
 
         {/* Role Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Admin Role *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-3">Admin Role *</label>
           <div className="space-y-3">
             {ROLE_OPTIONS.map((role) => (
               <div key={role.value} className="flex items-start">
@@ -320,10 +319,7 @@ export function CreateAdminForm({
                 <label htmlFor={role.value} className="ml-3 flex-1">
                   <div className="flex items-center space-x-2 mb-1">
                     <span className="font-medium text-gray-900">{role.label}</span>
-                    <Badge
-                      variant={role.badge as any}
-                      className="text-xs"
-                    >
+                    <Badge variant={role.badge as any} className="text-xs">
                       {role.value.replace('_', ' ')}
                     </Badge>
                   </div>
@@ -348,11 +344,7 @@ export function CreateAdminForm({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full sm:w-auto"
-          >
+          <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
             {isSubmitting ? (
               <>
                 <LoadingSpinner className="mr-2 h-4 w-4" />

@@ -39,10 +39,13 @@ describe('Authentication System', () => {
       // Mock implementation based on actual password validation logic
       const errors: string[] = [];
       if (password.length < 8) errors.push('Password must be at least 8 characters long');
-      if (!/[A-Z]/.test(password)) errors.push('Password must contain at least one uppercase letter');
-      if (!/[a-z]/.test(password)) errors.push('Password must contain at least one lowercase letter');
+      if (!/[A-Z]/.test(password))
+        errors.push('Password must contain at least one uppercase letter');
+      if (!/[a-z]/.test(password))
+        errors.push('Password must contain at least one lowercase letter');
       if (!/\d/.test(password)) errors.push('Password must contain at least one number');
-      if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) errors.push('Password must contain at least one special character');
+      if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password))
+        errors.push('Password must contain at least one special character');
 
       const weakPasswords = ['password', '12345678', 'qwerty123', 'admin123', 'password123'];
       if (weakPasswords.includes(password.toLowerCase())) {
@@ -51,7 +54,7 @@ describe('Authentication System', () => {
 
       return {
         valid: errors.length === 0,
-        errors
+        errors,
       };
     });
     passwordService.hash = jest.fn();
@@ -70,14 +73,14 @@ describe('Authentication System', () => {
       // Arrange
       const validCredentials = {
         username: 'admin1',
-        password: 'SecurePass123!'
+        password: 'SecurePass123!',
       };
 
       const mockAdmin = {
         id: 'admin-123',
         username: 'admin1',
         password: 'hashed-password',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findByUsername.mockResolvedValue(mockAdmin);
@@ -100,13 +103,16 @@ describe('Authentication System', () => {
       // Arrange
       const invalidCredentials = {
         username: 'nonexistent',
-        password: 'password123'
+        password: 'password123',
       };
 
       adminRepository.findByUsername.mockResolvedValue(null);
 
       // Act
-      const result = await authService.login(invalidCredentials.username, invalidCredentials.password);
+      const result = await authService.login(
+        invalidCredentials.username,
+        invalidCredentials.password,
+      );
 
       // Assert
       expect(result.success).toBe(false);
@@ -121,21 +127,24 @@ describe('Authentication System', () => {
       // Arrange
       const invalidCredentials = {
         username: 'admin1',
-        password: 'wrongpassword'
+        password: 'wrongpassword',
       };
 
       const mockAdmin = {
         id: 'admin-123',
         username: 'admin1',
         password: 'hashed-password',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findByUsername.mockResolvedValue(mockAdmin);
       passwordService.verify.mockResolvedValue(false);
 
       // Act
-      const result = await authService.login(invalidCredentials.username, invalidCredentials.password);
+      const result = await authService.login(
+        invalidCredentials.username,
+        invalidCredentials.password,
+      );
 
       // Assert
       expect(result.success).toBe(false);
@@ -148,8 +157,12 @@ describe('Authentication System', () => {
     it('should handle login with empty credentials', async () => {
       // Act & Assert
       await expect(authService.login('', '')).rejects.toThrow('Username and password are required');
-      await expect(authService.login('admin1', '')).rejects.toThrow('Username and password are required');
-      await expect(authService.login('', 'password')).rejects.toThrow('Username and password are required');
+      await expect(authService.login('admin1', '')).rejects.toThrow(
+        'Username and password are required',
+      );
+      await expect(authService.login('', 'password')).rejects.toThrow(
+        'Username and password are required',
+      );
     });
   });
 
@@ -160,7 +173,7 @@ describe('Authentication System', () => {
         id: 'admin-123',
         username: 'admin1',
         password: 'hashed-password',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findByUsername.mockResolvedValue(mockAdmin);
@@ -171,7 +184,7 @@ describe('Authentication System', () => {
         token: 'session-token-123',
         adminId: 'admin-123',
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
       // Act
@@ -191,7 +204,7 @@ describe('Authentication System', () => {
         token: 'valid-token',
         adminId: 'admin-123',
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       sessionManager.validateSession.mockResolvedValue(mockSession);
@@ -211,7 +224,7 @@ describe('Authentication System', () => {
         token: 'expired-token',
         adminId: 'admin-123',
         expiresAt: new Date(Date.now() - 1000), // Expired
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       sessionManager.validateSession.mockResolvedValue(null);
@@ -245,7 +258,7 @@ describe('Authentication System', () => {
         token: sessionToken,
         adminId: 'admin-123',
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       sessionManager.validateSession.mockResolvedValue(mockSession);
@@ -253,7 +266,7 @@ describe('Authentication System', () => {
         id: 'admin-123',
         username: 'admin1',
         password: 'hashed-password',
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
       // Act
@@ -269,31 +282,23 @@ describe('Authentication System', () => {
   describe('Password Security', () => {
     it('should enforce password complexity requirements', async () => {
       // Arrange
-      const weakPasswords = [
-        'weak',
-        '123456',
-        'password',
-        'admin123',
-        'short'
-      ];
+      const weakPasswords = ['weak', '123456', 'password', 'admin123', 'short'];
 
       // Act & Assert
       for (const password of weakPasswords) {
         const isValid = passwordService.validateComplexity(password);
         expect(isValid.valid).toBe(false);
-        expect(isValid.errors.some(error =>
-          /complexity|length|uppercase|lowercase|number|special/i.test(error)
-        )).toBe(true);
+        expect(
+          isValid.errors.some((error) =>
+            /complexity|length|uppercase|lowercase|number|special/i.test(error),
+          ),
+        ).toBe(true);
       }
     });
 
     it('should accept strong passwords', async () => {
       // Arrange
-      const strongPasswords = [
-        'StrongPass123!',
-        'MyS3cur3P@ssw0rd',
-        'C0mpl3x!ty2024'
-      ];
+      const strongPasswords = ['StrongPass123!', 'MyS3cur3P@ssw0rd', 'C0mpl3x!ty2024'];
 
       // Act & Assert
       for (const password of strongPasswords) {
@@ -325,14 +330,14 @@ describe('Authentication System', () => {
         id: 'admin-1',
         username: 'admin1',
         password: 'hashed-pass-1',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       const admin2 = {
         id: 'admin-2',
         username: 'admin2',
         password: 'hashed-pass-2',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findByUsername.mockImplementation((username) => {
@@ -366,7 +371,7 @@ describe('Authentication System', () => {
         id: 'admin-1',
         username: 'admin1',
         password: 'hashed-pass',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findByUsername.mockResolvedValue(admin);
@@ -396,7 +401,7 @@ describe('Authentication System', () => {
         id: adminId,
         username: 'admin1',
         password: 'hashed-old-password',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findById.mockResolvedValue(mockAdmin);
@@ -424,7 +429,7 @@ describe('Authentication System', () => {
         id: adminId,
         username: 'admin1',
         password: 'hashed-old-password',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findById.mockResolvedValue(mockAdmin);
@@ -450,7 +455,7 @@ describe('Authentication System', () => {
         id: adminId,
         username: 'admin1',
         password: 'hashed-old-password',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findById.mockResolvedValue(mockAdmin);
@@ -474,7 +479,9 @@ describe('Authentication System', () => {
       adminRepository.findByUsername.mockRejectedValue(new Error('Database connection failed'));
 
       // Act & Assert
-      await expect(authService.login('admin1', 'password123')).rejects.toThrow('Database connection failed');
+      await expect(authService.login('admin1', 'password123')).rejects.toThrow(
+        'Database connection failed',
+      );
     });
 
     it('should handle session storage errors', async () => {
@@ -483,7 +490,7 @@ describe('Authentication System', () => {
         id: 'admin-123',
         username: 'admin1',
         password: 'hashed-password',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findByUsername.mockResolvedValue(mockAdmin);
@@ -491,7 +498,9 @@ describe('Authentication System', () => {
       sessionManager.createSession.mockRejectedValue(new Error('Session storage failed'));
 
       // Act & Assert
-      await expect(authService.login('admin1', 'password123')).rejects.toThrow('Session storage failed');
+      await expect(authService.login('admin1', 'password123')).rejects.toThrow(
+        'Session storage failed',
+      );
     });
 
     it('should handle password hashing errors', async () => {

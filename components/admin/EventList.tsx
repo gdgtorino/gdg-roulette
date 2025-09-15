@@ -34,23 +34,19 @@ export async function EventList() {
           >
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {event.name}
-                </h3>
-                <Badge className={statusColors[event.status]}>
-                  {event.status}
-                </Badge>
+                <h3 className="text-lg font-semibold text-gray-900">{event.name}</h3>
+                <Badge className={statusColors[event.status]}>{event.status}</Badge>
               </div>
-              {event.description && (
-                <p className="text-gray-600 mt-1">{event.description}</p>
-              )}
+              {event.description && <p className="text-gray-600 mt-1">{event.description}</p>}
               <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                 <span>Participants: {event._count?.participants || 0}</span>
-                {(event as unknown as {maxParticipants?: number}).maxParticipants && (
-                  <span>Max: {(event as unknown as {maxParticipants?: number}).maxParticipants}</span>
+                {(event as unknown as { maxParticipants?: number }).maxParticipants && (
+                  <span>
+                    Max: {(event as unknown as { maxParticipants?: number }).maxParticipants}
+                  </span>
                 )}
-                {(event as unknown as {prizePool?: number}).prizePool && (
-                  <span>Prize: ${(event as unknown as {prizePool?: number}).prizePool}</span>
+                {(event as unknown as { prizePool?: number }).prizePool && (
+                  <span>Prize: ${(event as unknown as { prizePool?: number }).prizePool}</span>
                 )}
               </div>
             </div>

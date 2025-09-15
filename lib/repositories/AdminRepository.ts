@@ -7,7 +7,7 @@ export class AdminRepository {
   async findById(id: string): Promise<Admin | null> {
     try {
       const admin = await prisma.admin.findUnique({
-        where: { id }
+        where: { id },
       });
       return admin;
     } catch (error) {
@@ -18,7 +18,7 @@ export class AdminRepository {
   async findByUsername(username: string): Promise<Admin | null> {
     try {
       const admin = await prisma.admin.findUnique({
-        where: { username }
+        where: { username },
       });
       return admin;
     } catch (error) {
@@ -48,8 +48,8 @@ export class AdminRepository {
       const admin = await prisma.admin.create({
         data: {
           username: adminData.username,
-          password: adminData.password
-        }
+          password: adminData.password,
+        },
       });
       return admin;
     } catch (error) {
@@ -61,7 +61,7 @@ export class AdminRepository {
     try {
       await prisma.admin.update({
         where: { id: adminId },
-        data: { password: hashedPassword }
+        data: { password: hashedPassword },
       });
       return true;
     } catch (error) {
@@ -80,7 +80,7 @@ export class AdminRepository {
       return {
         ...admin,
         permissions,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       } as Admin & { permissions: string[]; updatedAt: Date };
     } catch (error) {
       throw new Error(`Failed to update permissions: ${error}`);
@@ -90,7 +90,7 @@ export class AdminRepository {
   async delete(adminId: string): Promise<boolean> {
     try {
       await prisma.admin.delete({
-        where: { id: adminId }
+        where: { id: adminId },
       });
       return true;
     } catch (error) {
@@ -101,7 +101,7 @@ export class AdminRepository {
   async getAll(): Promise<Admin[]> {
     try {
       const admins = await prisma.admin.findMany({
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       });
       return admins;
     } catch (error) {

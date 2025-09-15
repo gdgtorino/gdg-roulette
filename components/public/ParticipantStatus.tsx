@@ -12,7 +12,7 @@ import {
   RefreshCw,
   AlertCircle,
   Calendar,
-  Users
+  Users,
 } from 'lucide-react';
 
 interface ParticipantStatusProps {
@@ -46,7 +46,7 @@ export function ParticipantStatus({
   totalParticipants = 0,
   totalWinners = 0,
   isLoading = false,
-  onRefresh
+  onRefresh,
 }: ParticipantStatusProps) {
   const [timeElapsed, setTimeElapsed] = useState<string>('');
 
@@ -89,7 +89,7 @@ export function ParticipantStatus({
       return {
         label: 'Event Completed',
         color: 'bg-gray-100 text-gray-800',
-        icon: CheckCircle
+        icon: CheckCircle,
       };
     }
 
@@ -97,14 +97,14 @@ export function ParticipantStatus({
       return {
         label: 'Registration Open',
         color: 'bg-green-100 text-green-800',
-        icon: CheckCircle
+        icon: CheckCircle,
       };
     }
 
     return {
       label: 'Drawing Phase',
       color: 'bg-yellow-100 text-yellow-800',
-      icon: Clock
+      icon: Clock,
     };
   };
 
@@ -129,12 +129,8 @@ export function ParticipantStatus({
         <Card className="border-yellow-200 bg-gradient-to-r from-yellow-50 to-yellow-100">
           <CardContent className="text-center py-8">
             <Trophy className="h-12 w-12 mx-auto mb-4 text-yellow-500" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Congratulations!
-            </h2>
-            <p className="text-lg text-gray-700 mb-2">
-              You are winner #{winner.drawOrder}
-            </p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Congratulations!</h2>
+            <p className="text-lg text-gray-700 mb-2">You are winner #{winner.drawOrder}</p>
             <div className="flex items-center justify-center gap-1 text-sm text-gray-600">
               <Calendar className="h-4 w-4" />
               <span>Won on {formatDate(winner.drawnAt)}</span>
@@ -151,12 +147,7 @@ export function ParticipantStatus({
               <User className="h-5 w-5" />
               Your Registration Status
             </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onRefresh}
-              disabled={isLoading}
-            >
+            <Button variant="outline" size="sm" onClick={onRefresh} disabled={isLoading}>
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
           </div>
@@ -164,9 +155,7 @@ export function ParticipantStatus({
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {participant.name}
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900">{participant.name}</h3>
               <div className="flex items-center gap-1 text-sm text-gray-600">
                 <Clock className="h-4 w-4" />
                 <span>Registered {timeElapsed}</span>
@@ -203,18 +192,20 @@ export function ParticipantStatus({
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {event.name}
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{event.name}</h3>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-blue-500" />
-                <span>{totalParticipants} Participant{totalParticipants !== 1 ? 's' : ''}</span>
+                <span>
+                  {totalParticipants} Participant{totalParticipants !== 1 ? 's' : ''}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Trophy className="h-4 w-4 text-yellow-500" />
-                <span>{totalWinners} Winner{totalWinners !== 1 ? 's' : ''}</span>
+                <span>
+                  {totalWinners} Winner{totalWinners !== 1 ? 's' : ''}
+                </span>
               </div>
             </div>
           </div>

@@ -31,7 +31,7 @@ export default async function EventPage({ params }: EventPageProps) {
   const [event, participants, winners] = await Promise.all([
     getEvent(params.eventId),
     getEventParticipants(params.eventId).catch(() => []),
-    getEventWinners(params.eventId).catch(() => [])
+    getEventWinners(params.eventId).catch(() => []),
   ]);
 
   if (!event) {
@@ -45,11 +45,7 @@ export default async function EventPage({ params }: EventPageProps) {
           <h1 className="text-3xl font-bold text-gray-900">{event.name}</h1>
           <p className="text-gray-600 mt-2">{event.description}</p>
         </div>
-        <EventControls
-          event={event}
-          participants={participants}
-          winners={winners}
-        />
+        <EventControls event={event} participants={participants} winners={winners} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -65,11 +61,7 @@ export default async function EventPage({ params }: EventPageProps) {
 
         <div>
           <Suspense fallback={<LoadingSpinner />}>
-            <EventDetails
-              event={event}
-              participants={participants}
-              winners={winners}
-            />
+            <EventDetails event={event} participants={participants} winners={winners} />
           </Suspense>
         </div>
       </div>

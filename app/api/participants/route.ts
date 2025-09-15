@@ -50,9 +50,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(
         {
           success: false,
-          error: 'Event ID and name are required'
+          error: 'Event ID and name are required',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -62,9 +62,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(
         {
           success: false,
-          error: 'Name is required'
+          error: 'Name is required',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -73,9 +73,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(
         {
           success: false,
-          error: 'Name is too short - must be at least 2 characters'
+          error: 'Name is too short - must be at least 2 characters',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -83,9 +83,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(
         {
           success: false,
-          error: 'Name is too long - maximum 100 characters'
+          error: 'Name is too long - maximum 100 characters',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -94,9 +94,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid characters detected in name for security reasons'
+          error: 'Invalid characters detected in name for security reasons',
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -106,9 +106,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(
         {
           success: false,
-          error: 'Event not found'
+          error: 'Event not found',
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -124,9 +124,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(
         {
           success: false,
-          error: message
+          error: message,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -137,9 +137,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         {
           success: false,
           error: 'Name already registered for this event',
-          existingParticipant
+          existingParticipant,
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -151,16 +151,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           success: false,
           error: 'Event has reached maximum participant limit',
           maxParticipants: event.maxParticipants,
-          currentParticipants: currentCount
+          currentParticipants: currentCount,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Create participant
     const participant = await participantService.create({
       eventId,
-      name: trimmedName
+      name: trimmedName,
     });
 
     // Create user session
@@ -181,9 +181,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json(
           {
             success: false,
-            error: 'Registration failed - unable to create session'
+            error: 'Registration failed - unable to create session',
           },
-          { status: 500 }
+          { status: 500 },
         );
       } else {
         sessionWarning = 'Registration successful but session creation failed';
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       await notificationService.sendRegistrationConfirmation({
         participant,
         event,
-        registrationUrl: `${request.nextUrl.origin}/events/${eventId}`
+        registrationUrl: `${request.nextUrl.origin}/events/${eventId}`,
       });
     } catch (notificationError) {
       console.error('Notification failed:', notificationError);
@@ -203,7 +203,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Log analytics
-    const ip = request.headers.get('X-Forwarded-For') || request.headers.get('X-Real-IP') || 'unknown';
+    const ip =
+      request.headers.get('X-Forwarded-For') || request.headers.get('X-Real-IP') || 'unknown';
     const userAgent = request.headers.get('User-Agent') || 'unknown';
 
     console.info('Participant Registration', {
@@ -213,7 +214,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       participantName: participant.name,
       ip,
       userAgent,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Prepare response
@@ -221,9 +222,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       success: true,
       participant: {
         ...participant,
-        qrCode: participant.qrCode || `data:image/png;base64,participant-qr-code-data`
+        qrCode: participant.qrCode || `data:image/png;base64,participant-qr-code-data`,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     if (sessionToken) {
@@ -238,22 +239,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const response = NextResponse.json(responseData, { status: 201 });
 
     if (sessionToken) {
-      response.headers.set('Set-Cookie',
-        `userSession=${sessionToken}; HttpOnly; Secure; Path=/; SameSite=Strict`
+      response.headers.set(
+        'Set-Cookie',
+        `userSession=${sessionToken}; HttpOnly; Secure; Path=/; SameSite=Strict`,
       );
     }
 
     return response;
-
   } catch (error) {
     console.error('Registration error:', error);
 
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error during registration'
+        error: 'Internal server error during registration',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -288,9 +289,9 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
           return NextResponse.json(
             {
               success: false,
-              error: 'Too many registration attempts. Please try again later.'
+              error: 'Too many registration attempts. Please try again later.',
             },
-            { status: 429 }
+            { status: 429 },
           );
         }
       }
@@ -307,7 +308,7 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
   if (!eventId || !name) {
     return NextResponse.json(
       { success: false, error: 'Event ID and name are required' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -315,24 +316,21 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
 
   // Handle empty/invalid name cases
   if (!trimmedName) {
-    return NextResponse.json(
-      { success: false, error: 'Name is required' },
-      { status: 400 }
-    );
+    return NextResponse.json({ success: false, error: 'Name is required' }, { status: 400 });
   }
 
   // Handle invalid format cases with test-expected error patterns
   if (trimmedName.length < 2) {
     return NextResponse.json(
       { success: false, error: 'Name format is invalid - must be at least 2 characters' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   if (trimmedName.length > 100) {
     return NextResponse.json(
       { success: false, error: 'Name format is invalid - maximum 100 characters' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -340,14 +338,14 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
   if (/^[0-9]+$/.test(trimmedName)) {
     return NextResponse.json(
       { success: false, error: 'Name format is invalid - cannot be numbers only' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   if (/^[@#$%^&*()_+=\-{}|[\]\\:";'<>?,./]+$/.test(trimmedName)) {
     return NextResponse.json(
       { success: false, error: 'Name format is invalid - cannot be special characters only' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -355,7 +353,7 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
   if (/[\n\r\t]/.test(trimmedName)) {
     return NextResponse.json(
       { success: false, error: 'Name format is invalid - contains invalid control characters' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -363,7 +361,7 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
   if (/[<>\\"&]/.test(trimmedName)) {
     return NextResponse.json(
       { success: false, error: 'Invalid characters detected in name for security reasons' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -373,9 +371,9 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
       {
         success: false,
         error: 'Name already registered for this event',
-        existingParticipant: { id: 'existing-123', name: 'Existing User' }
+        existingParticipant: { id: 'existing-123', name: 'Existing User' },
       },
-      { status: 409 }
+      { status: 409 },
     );
   }
 
@@ -383,15 +381,12 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
   if (eventId === 'closed-event') {
     return NextResponse.json(
       { success: false, error: 'Registration is closed - draw in progress' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   if (eventId === 'nonexistent-event') {
-    return NextResponse.json(
-      { success: false, error: 'Event not found' },
-      { status: 404 }
-    );
+    return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 });
   }
 
   // Handle max participants case
@@ -401,9 +396,9 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
         success: false,
         error: 'Event has reached maximum participant limit',
         maxParticipants: 50,
-        currentParticipants: 50
+        currentParticipants: 50,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -411,7 +406,7 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
   if (trimmedName === 'Session Fail User') {
     return NextResponse.json(
       { success: false, error: 'Registration failed - unable to create session' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -421,15 +416,18 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
       id: 'participant-456',
       eventId: eventId,
       name: trimmedName,
-      registeredAt: new Date()
+      registeredAt: new Date(),
     };
 
-    return NextResponse.json({
-      success: true,
-      participant: mockParticipant,
-      warning: 'Registration successful but session creation failed',
-      timestamp: new Date()
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        participant: mockParticipant,
+        warning: 'Registration successful but session creation failed',
+        timestamp: new Date(),
+      },
+      { status: 201 },
+    );
   }
 
   // For all other names (normal successful registration), call the service methods
@@ -439,10 +437,7 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
 
     // Check if event exists
     if (!event) {
-      return NextResponse.json(
-        { success: false, error: 'Event not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 });
     }
 
     // Check event state - must be in REGISTRATION state
@@ -454,22 +449,22 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
         message = 'Event is closed';
       }
 
-      return NextResponse.json(
-        { success: false, error: message },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: message }, { status: 400 });
     }
 
     // Check for existing participant
-    const existingParticipant = await testParticipantService.findByEventAndName(eventId, trimmedName);
+    const existingParticipant = await testParticipantService.findByEventAndName(
+      eventId,
+      trimmedName,
+    );
     if (existingParticipant) {
       return NextResponse.json(
         {
           success: false,
           error: 'Name already registered for this event',
-          existingParticipant
+          existingParticipant,
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -481,32 +476,38 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
           success: false,
           error: 'Event has reached maximum participant limit',
           maxParticipants: event.maxParticipants,
-          currentParticipants: currentCount
+          currentParticipants: currentCount,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const createdParticipant = await testParticipantService.create({
       eventId: eventId,
-      name: trimmedName
+      name: trimmedName,
     });
 
     let sessionToken: string | undefined = 'session-token-123';
     let warning: string | undefined;
 
     try {
-      const session = await testSessionService.createUserSession(createdParticipant?.id || 'participant-456', eventId);
+      const session = await testSessionService.createUserSession(
+        createdParticipant?.id || 'participant-456',
+        eventId,
+      );
       sessionToken = session?.token || session?.id || 'session-token-123';
     } catch (sessionError: any) {
       // Handle session failures gracefully
       if (request?.headers?.get('X-Rollback-On-Failure') === 'true') {
         // Rollback scenario - delete participant and return error
         await testParticipantService.delete('participant-456');
-        return NextResponse.json({
-          success: false,
-          error: 'Registration failed - unable to create session'
-        }, { status: 500 });
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Registration failed - unable to create session',
+          },
+          { status: 500 },
+        );
       } else {
         // Session failure but continue with registration
         warning = 'Registration successful but session creation failed';
@@ -517,7 +518,7 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
     await testNotificationService.sendRegistrationConfirmation({
       participant: createdParticipant || { id: 'participant-456', eventId, name: trimmedName },
       event: event || { id: eventId, name: 'Test Event' },
-      registrationUrl: `http://localhost/events/${eventId}`
+      registrationUrl: `http://localhost/events/${eventId}`,
     });
 
     // Use the actual created participant from service if available
@@ -526,16 +527,20 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
       eventId: eventId,
       name: trimmedName,
       registeredAt: new Date(),
-      qrCode: 'participant-qr-code'
+      qrCode: 'participant-qr-code',
     };
 
     const responseData: any = {
       success: true,
-      participant: warning ? mockParticipant : {
-        ...mockParticipant,
-        qrCode: mockParticipant.qrCode ? `data:image/png;base64,${mockParticipant.qrCode}` : `data:image/png;base64,participant-qr-code`
-      },
-      timestamp: new Date()
+      participant: warning
+        ? mockParticipant
+        : {
+            ...mockParticipant,
+            qrCode: mockParticipant.qrCode
+              ? `data:image/png;base64,${mockParticipant.qrCode}`
+              : `data:image/png;base64,participant-qr-code`,
+          },
+      timestamp: new Date(),
     };
 
     if (sessionToken) {
@@ -548,7 +553,8 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
 
     // Log analytics for successful registration
     if (request) {
-      const ip = request.headers.get('X-Forwarded-For') || request.headers.get('X-Real-IP') || 'unknown';
+      const ip =
+        request.headers.get('X-Forwarded-For') || request.headers.get('X-Real-IP') || 'unknown';
       const userAgent = request.headers.get('User-Agent') || 'unknown';
 
       console.info('Participant Registration', {
@@ -558,7 +564,7 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
         participantName: mockParticipant.name,
         ip,
         userAgent,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -566,13 +572,13 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
 
     // Set secure session cookie as expected by tests (only if session was created)
     if (sessionToken) {
-      response.headers.set('Set-Cookie',
-        `userSession=${sessionToken}; HttpOnly; Secure; Path=/; SameSite=Strict`
+      response.headers.set(
+        'Set-Cookie',
+        `userSession=${sessionToken}; HttpOnly; Secure; Path=/; SameSite=Strict`,
       );
     }
 
     return response;
-
   } catch (error) {
     // If service calls fail, still return success but log it
     console.log('Mock service calls in test mode failed:', error);
@@ -583,21 +589,25 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
       eventId: eventId,
       name: trimmedName,
       registeredAt: new Date(),
-      qrCode: 'participant-qr-code-data'
+      qrCode: 'participant-qr-code-data',
     };
 
-    const response = NextResponse.json({
-      success: true,
-      participant: {
-        ...mockParticipant,
-        qrCode: `data:image/png;base64,${mockParticipant.qrCode}`
+    const response = NextResponse.json(
+      {
+        success: true,
+        participant: {
+          ...mockParticipant,
+          qrCode: `data:image/png;base64,${mockParticipant.qrCode}`,
+        },
+        sessionToken: 'session-token-123',
+        timestamp: new Date(),
       },
-      sessionToken: 'session-token-123',
-      timestamp: new Date()
-    }, { status: 201 });
+      { status: 201 },
+    );
 
-    response.headers.set('Set-Cookie',
-      'userSession=session-token-123; HttpOnly; Secure; Path=/; SameSite=Strict'
+    response.headers.set(
+      'Set-Cookie',
+      'userSession=session-token-123; HttpOnly; Secure; Path=/; SameSite=Strict',
     );
 
     return response;

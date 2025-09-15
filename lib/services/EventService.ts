@@ -39,7 +39,7 @@ export class EventService {
 
   constructor(
     private eventRepository: EventRepository,
-    private participantService: ParticipantService
+    private participantService: ParticipantService,
   ) {
     this.qrCodeService = new QRCodeService();
   }
@@ -60,7 +60,7 @@ export class EventService {
         state: eventData.state,
         registrationOpen: eventData.registrationOpen ?? true,
         closed: eventData.closed ?? false,
-        qrCode
+        qrCode,
       });
 
       return event;
@@ -80,7 +80,7 @@ export class EventService {
         createdBy: eventData.createdBy,
         state: eventData.state,
         registrationOpen: eventData.registrationOpen ?? false,
-        closed: eventData.closed ?? false
+        closed: eventData.closed ?? false,
       });
 
       return event;
@@ -234,7 +234,7 @@ export class EventService {
         winnersCount,
         registrationOpen: event.registrationOpen,
         closed: event.closed,
-        createdAt: event.createdAt
+        createdAt: event.createdAt,
       };
     } catch (error) {
       throw new Error(`Failed to get event statistics: ${error}`);
@@ -252,8 +252,8 @@ export class EventService {
   }> {
     try {
       const allEvents = await this.getAllEvents();
-      const activeEvents = allEvents.filter(e => !e.closed);
-      const closedEvents = allEvents.filter(e => e.closed);
+      const activeEvents = allEvents.filter((e) => !e.closed);
+      const closedEvents = allEvents.filter((e) => e.closed);
 
       let totalParticipants = 0;
       for (const event of allEvents) {
@@ -264,7 +264,7 @@ export class EventService {
         totalEvents: allEvents.length,
         activeEvents: activeEvents.length,
         closedEvents: closedEvents.length,
-        totalParticipants
+        totalParticipants,
       };
     } catch (error) {
       throw new Error(`Failed to get dashboard data: ${error}`);
@@ -301,9 +301,7 @@ export class EventService {
   async getRecentEvents(adminId: string, limit: number = 5): Promise<Event[]> {
     try {
       const events = await this.getEventsForAdmin(adminId);
-      return events
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        .slice(0, limit);
+      return events.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, limit);
     } catch (error) {
       throw new Error(`Failed to get recent events: ${error}`);
     }
@@ -321,9 +319,7 @@ export class EventService {
         events = await this.getAllEvents();
       }
 
-      return events.filter(event =>
-        event.name.toLowerCase().includes(name.toLowerCase())
-      );
+      return events.filter((event) => event.name.toLowerCase().includes(name.toLowerCase()));
     } catch (error) {
       throw new Error(`Failed to search events: ${error}`);
     }
@@ -367,7 +363,7 @@ export class EventService {
         participantCount,
         winnersCount,
         status,
-        createdAt: event.createdAt
+        createdAt: event.createdAt,
       };
     } catch (error) {
       throw new Error(`Failed to get event summary: ${error}`);

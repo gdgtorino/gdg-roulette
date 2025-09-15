@@ -41,10 +41,7 @@ export async function GET() {
     return NextResponse.json({ events });
   } catch (error) {
     console.error('Get events error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch events' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 });
   }
 }
 
@@ -58,10 +55,7 @@ export async function POST(request: NextRequest) {
     const body = await validateRequest(request, createEventSchema);
 
     if (!body.success) {
-      return NextResponse.json(
-        { error: body.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: body.error }, { status: 400 });
     }
 
     const event = await createEvent(body.data.name);
@@ -72,10 +66,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Create event error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create event' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create event' }, { status: 500 });
   }
 }
 
@@ -89,7 +80,7 @@ function handleGetEventsTestMode(): NextResponse {
       maxParticipants: 100,
       participantCount: 5,
       createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
+      updatedAt: new Date('2024-01-01'),
     },
     {
       id: 'event-2',
@@ -99,13 +90,13 @@ function handleGetEventsTestMode(): NextResponse {
       maxParticipants: 50,
       participantCount: 50,
       createdAt: new Date('2024-01-02'),
-      updatedAt: new Date('2024-01-02')
-    }
+      updatedAt: new Date('2024-01-02'),
+    },
   ];
 
   return NextResponse.json({
     success: true,
-    events: mockEvents
+    events: mockEvents,
   });
 }
 
@@ -116,34 +107,22 @@ async function handleCreateEventTestMode(request: NextRequest): Promise<NextResp
 
     // Handle validation cases
     if (!name || typeof name !== 'string') {
-      return NextResponse.json(
-        { error: 'Event name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Event name is required' }, { status: 400 });
     }
 
     if (name.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'Event name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Event name is required' }, { status: 400 });
     }
 
     // Handle authorization cases
     const cookies = request.headers.get('Cookie') || '';
     if (!cookies.includes('sessionToken')) {
-      return NextResponse.json(
-        { error: 'Unauthorized - admin access required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized - admin access required' }, { status: 401 });
     }
 
     // Handle duplicate event name
     if (name === 'Existing Event') {
-      return NextResponse.json(
-        { error: 'Event name already exists' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'Event name already exists' }, { status: 409 });
     }
 
     // Handle successful event creation
@@ -157,18 +136,14 @@ async function handleCreateEventTestMode(request: NextRequest): Promise<NextResp
       scheduledStart: null,
       participantCount: 0,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     return NextResponse.json({
       success: true,
-      event: mockEvent
+      event: mockEvent,
     });
-
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid JSON format' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Invalid JSON format' }, { status: 400 });
   }
 }

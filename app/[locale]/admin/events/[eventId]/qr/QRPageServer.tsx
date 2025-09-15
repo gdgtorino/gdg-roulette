@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { getEventWithParticipants } from '@/lib/actions/qr';
 import { HeaderControls } from '@/components/ClientComponents';
 import { QRCodeDisplay } from './components/QRCodeDisplay';
@@ -26,9 +26,9 @@ async function EventData({ eventId }: { eventId: string }) {
   const { event, participants } = result.data;
 
   // Serialize dates for client components
-  const serializedParticipants = participants.map(p => ({
+  const serializedParticipants = participants.map((p) => ({
     ...p,
-    registeredAt: p.registeredAt.toISOString()
+    registeredAt: p.registeredAt.toISOString(),
   }));
 
   return (
@@ -49,9 +49,7 @@ async function EventData({ eventId }: { eventId: string }) {
           {!event.registrationOpen && (
             <div className="mt-4 text-center">
               <Link href={`/admin/events/${eventId}/draw`}>
-                <Button size="lg">
-                  Go to Draw Page
-                </Button>
+                <Button size="lg">Go to Draw Page</Button>
               </Link>
             </div>
           )}
@@ -67,10 +65,7 @@ async function EventData({ eventId }: { eventId: string }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ParticipantsListLive
-            eventId={eventId}
-            initialParticipants={serializedParticipants}
-          />
+          <ParticipantsListLive eventId={eventId} initialParticipants={serializedParticipants} />
         </CardContent>
       </Card>
     </div>
@@ -86,7 +81,9 @@ async function EventHeader({ eventId }: { eventId: string }) {
         <div className="mx-auto max-w-4xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Event Not Found</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                Event Not Found
+              </h1>
               <p className="text-gray-600 dark:text-gray-400">The event could not be loaded</p>
             </div>
             <HeaderControls />
@@ -142,32 +139,36 @@ async function EventHeader({ eventId }: { eventId: string }) {
 export default function QRPageServer({ eventId }: QRPageServerProps) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Suspense fallback={
-        <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
-          <div className="mx-auto max-w-4xl px-6 py-4">
-            <div className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+      <Suspense
+        fallback={
+          <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
+            <div className="mx-auto max-w-4xl px-6 py-4">
+              <div className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+            </div>
           </div>
-        </div>
-      }>
+        }
+      >
         <EventHeader eventId={eventId} />
       </Suspense>
 
       <div className="mx-auto max-w-4xl px-6 py-6">
-        <Suspense fallback={
-          <div className="grid gap-6 lg:grid-cols-2">
-            {[1, 2].map(i => (
-              <Card key={i} className="dark:bg-gray-800 dark:border-gray-700">
-                <CardHeader>
-                  <div className="h-6 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mb-2"></div>
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 animate-pulse rounded w-2/3"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div className="grid gap-6 lg:grid-cols-2">
+              {[1, 2].map((i) => (
+                <Card key={i} className="dark:bg-gray-800 dark:border-gray-700">
+                  <CardHeader>
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 animate-pulse rounded w-2/3"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          }
+        >
           <EventData eventId={eventId} />
         </Suspense>
       </div>

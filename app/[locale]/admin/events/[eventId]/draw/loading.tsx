@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 export default function DrawPageLoading() {
   return (
@@ -43,8 +43,11 @@ export default function DrawPageLoading() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"></div>
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"
+                  ></div>
                 ))}
               </div>
             </CardContent>
@@ -58,8 +61,11 @@ export default function DrawPageLoading() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="h-8 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className="h-8 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"
+                  ></div>
                 ))}
               </div>
             </CardContent>

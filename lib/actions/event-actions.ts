@@ -24,7 +24,7 @@ const updateEventSchema = z.object({
 
 export async function createEventAction(
   prevState: { success: boolean; error: string } | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ success: boolean; error: string }> {
   try {
     await requireAdmin();
@@ -32,7 +32,9 @@ export async function createEventAction(
     const rawData = {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
-      maxParticipants: formData.get('maxParticipants') ? Number(formData.get('maxParticipants')) : undefined,
+      maxParticipants: formData.get('maxParticipants')
+        ? Number(formData.get('maxParticipants'))
+        : undefined,
       prizePool: formData.get('prizePool') ? Number(formData.get('prizePool')) : undefined,
       scheduledStart: formData.get('scheduledStart') as string,
     };
@@ -54,7 +56,7 @@ export async function createEventAction(
 export async function updateEventAction(
   prevState: { success: boolean; error: string } | null,
   eventId: string,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ success: boolean; error: string }> {
   try {
     await requireAdmin();
@@ -62,7 +64,9 @@ export async function updateEventAction(
     const rawData = {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
-      maxParticipants: formData.get('maxParticipants') ? Number(formData.get('maxParticipants')) : undefined,
+      maxParticipants: formData.get('maxParticipants')
+        ? Number(formData.get('maxParticipants'))
+        : undefined,
       prizePool: formData.get('prizePool') ? Number(formData.get('prizePool')) : undefined,
       status: formData.get('status') as 'draft' | 'registration' | 'drawing' | 'completed',
     };
@@ -85,7 +89,7 @@ export async function updateEventAction(
 
 export async function deleteEventAction(
   prevState: { success: boolean; error: string } | null,
-  eventId: string
+  eventId: string,
 ): Promise<{ success: boolean; error: string }> {
   try {
     await requireAdmin();
@@ -107,7 +111,7 @@ export async function updateEventStatusAction(
   prevState: { success: boolean; error: string } | null,
   eventId: string,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _status: 'draft' | 'registration' | 'drawing' | 'completed'
+  _status: 'draft' | 'registration' | 'drawing' | 'completed',
 ): Promise<{ success: boolean; error: string }> {
   try {
     await requireAdmin();

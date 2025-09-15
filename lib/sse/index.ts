@@ -26,7 +26,7 @@ class SSEService {
     const clients = this.clients.get(eventId);
     if (!clients) return;
 
-    const index = clients.findIndex(client => client.clientId === clientId);
+    const index = clients.findIndex((client) => client.clientId === clientId);
     if (index !== -1) {
       clients.splice(index, 1);
       console.log(`Client ${clientId} left event ${eventId}. Remaining clients: ${clients.length}`);
@@ -50,7 +50,7 @@ class SSEService {
     const chunk = encoder.encode(message);
 
     // Send to all clients, removing any that are closed
-    const activeClients = clients.filter(client => {
+    const activeClients = clients.filter((client) => {
       try {
         client.controller.enqueue(chunk);
         return true;
@@ -88,7 +88,7 @@ class SSEService {
     const clients = this.clients.get(eventId);
     if (!clients) return;
 
-    clients.forEach(client => {
+    clients.forEach((client) => {
       try {
         client.controller.close();
       } catch (error) {

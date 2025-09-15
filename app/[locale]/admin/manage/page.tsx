@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useTranslation } from "@/hooks/useTranslation";
-import DarkModeToggle from "@/components/DarkModeToggle";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { useTranslation } from '@/hooks/useTranslation';
+import DarkModeToggle from '@/components/DarkModeToggle';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +24,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 interface Admin {
   id: string;
@@ -36,26 +36,34 @@ export default function ManageAdminPage(): JSX.Element {
   const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [admins, setAdmins] = useState<Admin[]>([]);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
-  const [modal, setModal] = useState<{open: boolean; title: string; message: string; type: 'success' | 'error';}>({ open: false, title: '', message: '', type: 'success' });
-  const [deleteDialog, setDeleteDialog] = useState<{open: boolean; admin: Admin | null;}>({ open: false, admin: null });
+  const [modal, setModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error';
+  }>({ open: false, title: '', message: '', type: 'success' });
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; admin: Admin | null }>({
+    open: false,
+    admin: null,
+  });
 
   const fetchAdmins = async (): Promise<void> => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/admin", {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       if (response.ok) {
-        const data = await response.json() as Admin[];
+        const data = (await response.json()) as Admin[];
         setAdmins(data);
       }
     } catch {
-      console.error("Failed to fetch admins");
+      console.error('Failed to fetch admins');
     }
   };
 
@@ -64,27 +72,42 @@ export default function ManageAdminPage(): JSX.Element {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/admin", {
-        method: "POST",
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ username, password }),
       });
 
       if (response.ok) {
-        setUsername("");
-        setPassword("");
+        setUsername('');
+        setPassword('');
         await fetchAdmins();
-        setModal({ open: true, title: t('common.success'), message: t('admin.adminCreated'), type: 'success' });
+        setModal({
+          open: true,
+          title: t('common.success'),
+          message: t('admin.adminCreated'),
+          type: 'success',
+        });
       } else {
-        const errorData = await response.json() as { error: string };
-        setModal({ open: true, title: t('common.error'), message: errorData.error || t('admin.failedToCreate'), type: 'error' });
+        const errorData = (await response.json()) as { error: string };
+        setModal({
+          open: true,
+          title: t('common.error'),
+          message: errorData.error || t('admin.failedToCreate'),
+          type: 'error',
+        });
       }
     } catch {
-      setModal({ open: true, title: t('common.error'), message: t('common.networkError'), type: 'error' });
+      setModal({
+        open: true,
+        title: t('common.error'),
+        message: t('common.networkError'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }
@@ -101,21 +124,36 @@ export default function ManageAdminPage(): JSX.Element {
     setDeleteDialog({ open: false, admin: null });
     setDeleteLoading(admin.username);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await fetch(`/api/admin/${admin.username}`, {
-        method: "DELETE",
+        method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
         await fetchAdmins();
-        setModal({ open: true, title: t('common.success'), message: t('admin.adminDeleted'), type: 'success' });
+        setModal({
+          open: true,
+          title: t('common.success'),
+          message: t('admin.adminDeleted'),
+          type: 'success',
+        });
       } else {
-        const errorData = await response.json() as { error: string };
-        setModal({ open: true, title: t('common.error'), message: errorData.error || t('admin.failedToDelete'), type: 'error' });
+        const errorData = (await response.json()) as { error: string };
+        setModal({
+          open: true,
+          title: t('common.error'),
+          message: errorData.error || t('admin.failedToDelete'),
+          type: 'error',
+        });
       }
     } catch {
-      setModal({ open: true, title: t('common.error'), message: t('common.networkError'), type: 'error' });
+      setModal({
+        open: true,
+        title: t('common.error'),
+        message: t('common.networkError'),
+        type: 'error',
+      });
     } finally {
       setDeleteLoading(null);
     }
@@ -142,7 +180,9 @@ export default function ManageAdminPage(): JSX.Element {
       </div>
       <div className="mx-auto max-w-4xl">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('admin.manageAdmins')}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            {t('admin.manageAdmins')}
+          </h1>
           <p className="text-gray-600 dark:text-gray-400">{t('admin.manageDescription')}</p>
         </div>
 
@@ -151,7 +191,9 @@ export default function ManageAdminPage(): JSX.Element {
           <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
               <CardTitle className="dark:text-white">{t('admin.createAdmin')}</CardTitle>
-              <CardDescription className="dark:text-gray-300">{t('admin.createDescription')}</CardDescription>
+              <CardDescription className="dark:text-gray-300">
+                {t('admin.createDescription')}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={createAdmin} className="space-y-4">
@@ -188,7 +230,9 @@ export default function ManageAdminPage(): JSX.Element {
           <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
               <CardTitle className="dark:text-white">{t('admin.existingAdmins')}</CardTitle>
-              <CardDescription className="dark:text-gray-300">{t('admin.manageExisting')}</CardDescription>
+              <CardDescription className="dark:text-gray-300">
+                {t('admin.manageExisting')}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -209,7 +253,9 @@ export default function ManageAdminPage(): JSX.Element {
                       onClick={() => openDeleteDialog(admin)}
                       disabled={deleteLoading === admin.username}
                     >
-                      {deleteLoading === admin.username ? t('admin.deleting') : t('admin.deleteAdmin')}
+                      {deleteLoading === admin.username
+                        ? t('admin.deleting')
+                        : t('admin.deleteAdmin')}
                     </Button>
                   </div>
                 ))}
@@ -235,32 +281,42 @@ export default function ManageAdminPage(): JSX.Element {
       </div>
 
       {/* Success/Error Modal */}
-      <Dialog open={modal.open} onOpenChange={(open) => setModal(prev => ({ ...prev, open }))}>
+      <Dialog open={modal.open} onOpenChange={(open) => setModal((prev) => ({ ...prev, open }))}>
         <DialogContent className="dark:bg-gray-800 dark:border-gray-700">
           <DialogHeader>
             <DialogTitle className="dark:text-white">{modal.title}</DialogTitle>
-            <DialogDescription className="dark:text-gray-300">
-              {modal.message}
-            </DialogDescription>
+            <DialogDescription className="dark:text-gray-300">{modal.message}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => setModal(prev => ({ ...prev, open: false }))}>{t('common.ok')}</Button>
+            <Button onClick={() => setModal((prev) => ({ ...prev, open: false }))}>
+              {t('common.ok')}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}>
+      <AlertDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog((prev) => ({ ...prev, open }))}
+      >
         <AlertDialogContent className="dark:bg-gray-800 dark:border-gray-700">
           <AlertDialogHeader>
-            <AlertDialogTitle className="dark:text-white">{t('admin.deleteAdmin')}</AlertDialogTitle>
+            <AlertDialogTitle className="dark:text-white">
+              {t('admin.deleteAdmin')}
+            </AlertDialogTitle>
             <AlertDialogDescription className="dark:text-gray-300">
-              {t('admin.confirmDelete')} &quot;{deleteDialog.admin?.username}&quot;? {t('admin.cannotUndo')}
+              {t('admin.confirmDelete')} &quot;{deleteDialog.admin?.username}&quot;?{' '}
+              {t('admin.cannotUndo')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => void confirmDeleteAdmin()}>{t('admin.deleteAdmin')}</AlertDialogAction>
+            <AlertDialogCancel className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => void confirmDeleteAdmin()}>
+              {t('admin.deleteAdmin')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

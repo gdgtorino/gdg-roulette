@@ -58,7 +58,7 @@ export class RegistrationService {
   constructor(
     private participantService: ParticipantService,
     private eventService: EventService,
-    private sessionService: SessionService
+    private sessionService: SessionService,
   ) {}
 
   // QRCodeService can be injected later if needed
@@ -70,7 +70,7 @@ export class RegistrationService {
   async registerParticipant(
     eventId: string,
     name: string,
-    options?: { rollbackOnSessionFailure?: boolean }
+    options?: { rollbackOnSessionFailure?: boolean },
   ): Promise<RegistrationResult> {
     try {
       // Validate name format and length
@@ -78,7 +78,7 @@ export class RegistrationService {
       if (!nameValidation.valid) {
         return {
           success: false,
-          error: nameValidation.error
+          error: nameValidation.error,
         };
       }
 
@@ -87,7 +87,7 @@ export class RegistrationService {
       if (!event) {
         return {
           success: false,
-          error: 'Event not found'
+          error: 'Event not found',
         };
       }
 
@@ -95,28 +95,28 @@ export class RegistrationService {
       if (event.state === EventState.INIT) {
         return {
           success: false,
-          error: 'Registration is not open for this event'
+          error: 'Registration is not open for this event',
         };
       }
 
       if (event.state === EventState.DRAW) {
         return {
           success: false,
-          error: 'Registration is closed - draw in progress'
+          error: 'Registration is closed - draw in progress',
         };
       }
 
       if (event.state === EventState.CLOSED || event.closed) {
         return {
           success: false,
-          error: 'Event is closed'
+          error: 'Event is closed',
         };
       }
 
       if (!event.registrationOpen) {
         return {
           success: false,
-          error: 'Registration is not open for this event'
+          error: 'Registration is not open for this event',
         };
       }
 
@@ -125,14 +125,14 @@ export class RegistrationService {
       if (existingParticipant) {
         return {
           success: false,
-          error: 'Name already registered for this event'
+          error: 'Name already registered for this event',
         };
       }
 
       // Create participant
       const participant = await this.participantService.create({
         eventId,
-        name: name.trim()
+        name: name.trim(),
       });
 
       // Create user session
@@ -143,9 +143,9 @@ export class RegistrationService {
           success: true,
           participant: {
             ...participant,
-            sessionId
+            sessionId,
           },
-          sessionId
+          sessionId,
         };
       } catch (sessionError) {
         // Handle session creation failure
@@ -154,21 +154,21 @@ export class RegistrationService {
           await this.participantService.delete(participant.id);
           return {
             success: false,
-            error: 'Registration failed - session could not be created'
+            error: 'Registration failed - session could not be created',
           };
         } else {
           // Return success with warning
           return {
             success: false,
             error: 'Registration successful but session creation failed',
-            participant
+            participant,
           };
         }
       }
     } catch (error) {
       return {
         success: false,
-        error: 'Registration failed due to system error'
+        error: 'Registration failed due to system error',
       };
     }
   }
@@ -183,7 +183,7 @@ export class RegistrationService {
       if (!session) {
         return {
           success: false,
-          error: 'Session expired or invalid'
+          error: 'Session expired or invalid',
         };
       }
 
@@ -192,19 +192,19 @@ export class RegistrationService {
       if (!participant) {
         return {
           success: false,
-          error: 'Participant not found'
+          error: 'Participant not found',
         };
       }
 
       return {
         success: true,
         participant,
-        session
+        session,
       };
     } catch (error) {
       return {
         success: false,
-        error: 'Failed to recover session'
+        error: 'Failed to recover session',
       };
     }
   }
@@ -218,12 +218,12 @@ export class RegistrationService {
 
       return {
         success: true,
-        session
+        session,
       };
     } catch (error) {
       return {
         success: false,
-        error: 'Failed to extend session'
+        error: 'Failed to extend session',
       };
     }
   }
@@ -248,7 +248,7 @@ export class RegistrationService {
       if (!this.qrCodeService) {
         return {
           success: false,
-          error: 'QR code service not available'
+          error: 'QR code service not available',
         };
       }
 
@@ -258,12 +258,12 @@ export class RegistrationService {
       return {
         success: true,
         qrCodeData,
-        registrationUrl
+        registrationUrl,
       };
     } catch (error) {
       return {
         success: false,
-        error: 'Failed to generate QR code'
+        error: 'Failed to generate QR code',
       };
     }
   }

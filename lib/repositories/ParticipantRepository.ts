@@ -7,7 +7,7 @@ export class ParticipantRepository {
   async findById(id: string): Promise<Participant | null> {
     try {
       const participant = await prisma.participant.findUnique({
-        where: { id }
+        where: { id },
       });
       return participant;
     } catch (error) {
@@ -19,7 +19,7 @@ export class ParticipantRepository {
     try {
       const participants = await prisma.participant.findMany({
         where: { eventId },
-        orderBy: { registeredAt: 'asc' }
+        orderBy: { registeredAt: 'asc' },
       });
       return participants;
     } catch (error) {
@@ -33,9 +33,9 @@ export class ParticipantRepository {
         where: {
           eventId_name: {
             eventId,
-            name
-          }
-        }
+            name,
+          },
+        },
       });
       return participant;
     } catch (error) {
@@ -43,16 +43,13 @@ export class ParticipantRepository {
     }
   }
 
-  async create(participantData: {
-    eventId: string;
-    name: string;
-  }): Promise<Participant> {
+  async create(participantData: { eventId: string; name: string }): Promise<Participant> {
     try {
       const participant = await prisma.participant.create({
         data: {
           eventId: participantData.eventId,
-          name: participantData.name
-        }
+          name: participantData.name,
+        },
       });
       return participant;
     } catch (error) {
@@ -60,13 +57,16 @@ export class ParticipantRepository {
     }
   }
 
-  async update(id: string, updateData: {
-    name?: string;
-  }): Promise<Participant> {
+  async update(
+    id: string,
+    updateData: {
+      name?: string;
+    },
+  ): Promise<Participant> {
     try {
       const participant = await prisma.participant.update({
         where: { id },
-        data: updateData
+        data: updateData,
       });
       return participant;
     } catch (error) {
@@ -77,7 +77,7 @@ export class ParticipantRepository {
   async delete(id: string): Promise<boolean> {
     try {
       await prisma.participant.delete({
-        where: { id }
+        where: { id },
       });
       return true;
     } catch (error) {
@@ -88,7 +88,7 @@ export class ParticipantRepository {
   async getCount(eventId: string): Promise<number> {
     try {
       const count = await prisma.participant.count({
-        where: { eventId }
+        where: { eventId },
       });
       return count;
     } catch (error) {
@@ -102,10 +102,10 @@ export class ParticipantRepository {
         where: {
           eventId,
           Winner: {
-            none: {}
-          }
+            none: {},
+          },
         },
-        orderBy: { registeredAt: 'asc' }
+        orderBy: { registeredAt: 'asc' },
       });
       return participants;
     } catch (error) {
@@ -119,9 +119,9 @@ export class ParticipantRepository {
         where: {
           eventId,
           Winner: {
-            none: {}
-          }
-        }
+            none: {},
+          },
+        },
       });
       return count;
     } catch (error) {
@@ -132,7 +132,7 @@ export class ParticipantRepository {
   async deleteAllByEventId(eventId: string): Promise<boolean> {
     try {
       await prisma.participant.deleteMany({
-        where: { eventId }
+        where: { eventId },
       });
       return true;
     } catch (error) {

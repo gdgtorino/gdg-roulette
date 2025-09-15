@@ -42,9 +42,7 @@ export function WinnersList({ winners }: WinnersListProps) {
               </div>
             </div>
           </div>
-          <div className="text-yellow-600 dark:text-yellow-400 text-sm font-medium">
-            Winner
-          </div>
+          <div className="text-yellow-600 dark:text-yellow-400 text-sm font-medium">Winner</div>
         </div>
       ))}
     </div>

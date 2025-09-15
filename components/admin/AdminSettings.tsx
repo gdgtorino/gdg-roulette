@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Settings, User, Lock, Globe } from 'lucide-react';
 
 export function AdminSettings() {
-
   return (
     <div className="space-y-6">
       <div>
@@ -24,37 +23,22 @@ export function AdminSettings() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Admin Username
-            </label>
-            <Input
-              type="text"
-              defaultValue="admin"
-              className="max-w-md"
-              disabled
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-2">Admin Username</label>
+            <Input type="text" defaultValue="admin" className="max-w-md" disabled />
             <p className="text-xs text-gray-500 mt-1">
               Username changes are not currently supported
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email (Optional)
-            </label>
-            <Input
-              type="email"
-              placeholder="admin@example.com"
-              className="max-w-md"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email (Optional)</label>
+            <Input type="email" placeholder="admin@example.com" className="max-w-md" />
             <p className="text-xs text-gray-500 mt-1">
               Used for notifications and account recovery
             </p>
           </div>
 
-          <Button className="mt-4">
-            Update Account
-          </Button>
+          <Button className="mt-4">Update Account</Button>
         </CardContent>
       </Card>
 
@@ -68,41 +52,23 @@ export function AdminSettings() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Current Password
-            </label>
-            <Input
-              type="password"
-              placeholder="Enter current password"
-              className="max-w-md"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+            <Input type="password" placeholder="Enter current password" className="max-w-md" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              New Password
-            </label>
-            <Input
-              type="password"
-              placeholder="Enter new password"
-              className="max-w-md"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+            <Input type="password" placeholder="Enter new password" className="max-w-md" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Confirm New Password
             </label>
-            <Input
-              type="password"
-              placeholder="Confirm new password"
-              className="max-w-md"
-            />
+            <Input type="password" placeholder="Confirm new password" className="max-w-md" />
           </div>
 
-          <Button className="mt-4">
-            Change Password
-          </Button>
+          <Button className="mt-4">Change Password</Button>
         </CardContent>
       </Card>
 
@@ -117,9 +83,7 @@ export function AdminSettings() {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email Notifications
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Email Notifications</label>
               <p className="text-xs text-gray-500">
                 Receive email alerts for new registrations and winners
               </p>
@@ -148,12 +112,8 @@ export function AdminSettings() {
 
           <div className="flex items-center justify-between">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Default Language
-              </label>
-              <p className="text-xs text-gray-500">
-                Default language for new events
-              </p>
+              <label className="block text-sm font-medium text-gray-700">Default Language</label>
+              <p className="text-xs text-gray-500">Default language for new events</p>
             </div>
             <select className="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
               <option value="en">English</option>
@@ -161,9 +121,7 @@ export function AdminSettings() {
             </select>
           </div>
 
-          <Button className="mt-4">
-            Save Settings
-          </Button>
+          <Button className="mt-4">Save Settings</Button>
         </CardContent>
       </Card>
 

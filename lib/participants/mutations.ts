@@ -9,7 +9,7 @@ export async function registerParticipant(eventId: string, name?: string) {
     const caller = appRouter.createCaller({} as Context);
     const participant = await caller.events.registerParticipant({
       eventId,
-      name
+      name,
     });
 
     return participant;
@@ -53,7 +53,7 @@ export async function getParticipantStatus(eventId: string, participantId: strin
     return {
       participant,
       isWinner: 'isWinner' in winnerResult ? winnerResult.isWinner !== false : true,
-      winnerDetails: 'isWinner' in winnerResult ? null : winnerResult
+      winnerDetails: 'isWinner' in winnerResult ? null : winnerResult,
     };
   } catch (error) {
     throw error;

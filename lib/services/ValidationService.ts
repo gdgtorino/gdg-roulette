@@ -44,7 +44,7 @@ export class ValidationService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -72,7 +72,9 @@ export class ValidationService {
 
     // Character validation
     if (!/^[\p{L}\p{N}\s\-'.,()]+$/u.test(trimmedName)) {
-      errors.push('Name contains invalid characters. Only letters, numbers, spaces, and common punctuation are allowed');
+      errors.push(
+        'Name contains invalid characters. Only letters, numbers, spaces, and common punctuation are allowed',
+      );
     }
 
     // Check for excessive whitespace
@@ -92,7 +94,7 @@ export class ValidationService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -138,7 +140,7 @@ export class ValidationService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -179,7 +181,7 @@ export class ValidationService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -222,8 +224,21 @@ export class ValidationService {
 
     // Check for reserved usernames
     const reservedUsernames = [
-      'admin', 'administrator', 'root', 'system', 'api', 'test', 'demo', 'guest',
-      'user', 'null', 'undefined', 'login', 'logout', 'register', 'signup'
+      'admin',
+      'administrator',
+      'root',
+      'system',
+      'api',
+      'test',
+      'demo',
+      'guest',
+      'user',
+      'null',
+      'undefined',
+      'login',
+      'logout',
+      'register',
+      'signup',
     ];
 
     if (reservedUsernames.includes(trimmedUsername.toLowerCase())) {
@@ -232,7 +247,7 @@ export class ValidationService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -255,7 +270,8 @@ export class ValidationService {
     }
 
     // Basic email format validation
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    const emailRegex =
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
     if (!emailRegex.test(trimmedEmail)) {
       errors.push('Invalid email address format');
@@ -281,7 +297,7 @@ export class ValidationService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -339,7 +355,7 @@ export class ValidationService {
     return {
       valid: validation.valid,
       sanitizedName,
-      errors: validation.errors
+      errors: validation.errors,
     };
   }
 
@@ -348,12 +364,10 @@ export class ValidationService {
    */
   private containsProfanity(text: string): boolean {
     // Basic profanity word list - in production, use a more comprehensive service
-    const profanityWords = [
-      'spam', 'test123', 'admin123', 'dummy', 'fake'
-    ];
+    const profanityWords = ['spam', 'test123', 'admin123', 'dummy', 'fake'];
 
     const lowerText = text.toLowerCase();
-    return profanityWords.some(word => lowerText.includes(word));
+    return profanityWords.some((word) => lowerText.includes(word));
   }
 
   /**
@@ -379,14 +393,13 @@ export class ValidationService {
       if (process.env.NODE_ENV === 'production' && urlObject.hostname === 'localhost') {
         errors.push('Localhost URLs are not allowed in production');
       }
-
     } catch (error) {
       errors.push('Invalid URL format');
     }
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -414,18 +427,21 @@ export class ValidationService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
   /**
    * Validate file upload
    */
-  validateFileUpload(file: File | null, options: {
-    maxSize?: number;
-    allowedTypes?: string[];
-    required?: boolean;
-  } = {}): ValidationResult {
+  validateFileUpload(
+    file: File | null,
+    options: {
+      maxSize?: number;
+      allowedTypes?: string[];
+      required?: boolean;
+    } = {},
+  ): ValidationResult {
     const errors: string[] = [];
     const { maxSize = 5 * 1024 * 1024, allowedTypes = [], required = false } = options;
 
@@ -453,7 +469,7 @@ export class ValidationService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -463,7 +479,7 @@ export class ValidationService {
   validateBulkData<T>(
     items: T[],
     validator: (item: T) => ValidationResult,
-    maxItems: number = 1000
+    maxItems: number = 1000,
   ): {
     valid: boolean;
     validItems: T[];
@@ -485,12 +501,12 @@ export class ValidationService {
         summary: {
           total: items.length,
           valid: 0,
-          invalid: items.length
-        }
+          invalid: items.length,
+        },
       };
     }
 
-    items.forEach(item => {
+    items.forEach((item) => {
       const validation = validator(item);
       if (validation.valid) {
         validItems.push(item);
@@ -506,8 +522,8 @@ export class ValidationService {
       summary: {
         total: items.length,
         valid: validItems.length,
-        invalid: invalidItems.length
-      }
+        invalid: invalidItems.length,
+      },
     };
   }
 }

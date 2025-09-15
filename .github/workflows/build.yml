@@ -50,7 +50,9 @@ jobs:
             .next
             dist
             node_modules/.prisma
-          key: ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock', '**/schema.prisma') }}-${{ github.sha }}
+          key:
+            ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock', '**/schema.prisma') }}-${{
+            github.sha }}
           restore-keys: |
             ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock', '**/schema.prisma') }}-
             ${{ runner.os }}-build-

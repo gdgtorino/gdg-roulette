@@ -36,24 +36,15 @@ export async function POST(request: NextRequest) {
     const body = await validateRequest(request, loginSchema);
 
     if (!body.success) {
-      return NextResponse.json(
-        { error: body.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: body.error }, { status: 400 });
     }
 
     // TODO: Implement actual authentication logic
     // For now, return a placeholder response
-    return NextResponse.json(
-      { error: 'Authentication not implemented' },
-      { status: 501 }
-    );
+    return NextResponse.json({ error: 'Authentication not implemented' }, { status: 501 });
   } catch (error) {
     console.error('Login error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -67,7 +58,8 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
 
     // Skip rate limiting in Jest tests UNLESS X-Forwarded-For header is provided (for rate limiting tests)
     const hasForwardedFor = request && request.headers.get('X-Forwarded-For');
-    const skipRateLimit = process.env.NODE_ENV === 'test' && !process.env.INTEGRATION_TEST && !hasForwardedFor;
+    const skipRateLimit =
+      process.env.NODE_ENV === 'test' && !process.env.INTEGRATION_TEST && !hasForwardedFor;
 
     // Check rate limiting (5 requests per minute per IP) - skip for unit tests unless testing rate limiting
     if (request && !skipRateLimit) {
@@ -89,9 +81,9 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
             return NextResponse.json(
               {
                 success: false,
-                error: 'Too many login attempts. Please try again later.'
+                error: 'Too many login attempts. Please try again later.',
               },
-              { status: 429 }
+              { status: 429 },
             );
           }
         }
@@ -102,7 +94,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
     if (!username || !password) {
       const response = NextResponse.json(
         { success: false, error: 'Username and password are required' },
-        { status: 400 }
+        { status: 400 },
       );
       addSecurityHeaders(response);
       return response;
@@ -112,7 +104,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
     if (typeof body === 'string') {
       const response = NextResponse.json(
         { success: false, error: 'Invalid JSON format' },
-        { status: 400 }
+        { status: 400 },
       );
       addSecurityHeaders(response);
       return response;
@@ -122,7 +114,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
     if (username === 'rate-limited') {
       const response = NextResponse.json(
         { success: false, error: 'Too many login attempts. Please try again later.' },
-        { status: 429 }
+        { status: 429 },
       );
       addSecurityHeaders(response);
       return response;
@@ -132,18 +124,23 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
     if (request.headers.get('Origin') === 'http://malicious-site.com') {
       const response = NextResponse.json(
         { success: false, error: 'Invalid origin' },
-        { status: 403 }
+        { status: 403 },
       );
       addSecurityHeaders(response);
       return response;
     }
 
     // Handle input sanitization test cases - check for injection attempts
-    if (username && (username.includes('<script>') || username.includes("'DROP") ||
-        username.includes('DROP TABLE') || password.includes('<script>'))) {
+    if (
+      username &&
+      (username.includes('<script>') ||
+        username.includes("'DROP") ||
+        username.includes('DROP TABLE') ||
+        password.includes('<script>'))
+    ) {
       const response = NextResponse.json(
         { success: false, error: 'Invalid characters detected for security reasons' },
-        { status: 400 }
+        { status: 400 },
       );
       addSecurityHeaders(response);
       return response;
@@ -159,15 +156,18 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
           username: username,
           ip: request.headers.get('X-Forwarded-For') || 'unknown',
           userAgent: request.headers.get('User-Agent') || 'unknown',
-          timestamp: new Date()
+          timestamp: new Date(),
         });
 
-        const response = NextResponse.json({
-          success: false,
-          error: loginResult.error || 'Invalid credentials',
-          errorCode: 'AUTH_FAILED',
-          timestamp: new Date().toISOString()
-        }, { status: 401 });
+        const response = NextResponse.json(
+          {
+            success: false,
+            error: loginResult.error || 'Invalid credentials',
+            errorCode: 'AUTH_FAILED',
+            timestamp: new Date().toISOString(),
+          },
+          { status: 401 },
+        );
 
         addSecurityHeaders(response);
         return response;
@@ -176,22 +176,26 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       // Create session
       const session = await sessionManager.createAdminSession(loginResult.admin?.id || 'admin-123');
 
-      const response = NextResponse.json({
-        success: true,
-        sessionToken: session?.id || 'session-token-123',
-        admin: loginResult.admin || {
-          id: 'admin-123',
-          username: username,
-          role: 'ADMIN',
-          permissions: ['CREATE_EVENT', 'MANAGE_USERS']
+      const response = NextResponse.json(
+        {
+          success: true,
+          sessionToken: session?.id || 'session-token-123',
+          admin: loginResult.admin || {
+            id: 'admin-123',
+            username: username,
+            role: 'ADMIN',
+            permissions: ['CREATE_EVENT', 'MANAGE_USERS'],
+          },
+          timestamp: new Date().toISOString(),
         },
-        timestamp: new Date().toISOString()
-      }, { status: 200 });
+        { status: 200 },
+      );
 
       // Set session cookie
       const sessionToken = session?.id || 'session-token-123';
-      response.headers.set('Set-Cookie',
-        `sessionToken=${sessionToken}; HttpOnly; Secure; Path=/; SameSite=Strict`
+      response.headers.set(
+        'Set-Cookie',
+        `sessionToken=${sessionToken}; HttpOnly; Secure; Path=/; SameSite=Strict`,
       );
 
       addSecurityHeaders(response);
@@ -199,32 +203,46 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       return response;
     } catch (authError: any) {
       // Handle service failures
-      if (authError.message?.includes('service error') || authError.message?.includes('Database connection')) {
-        const response = NextResponse.json({
-          success: false,
-          error: 'Internal server error',
-          errorCode: 'SERVICE_ERROR',
-          timestamp: new Date().toISOString()
-        }, { status: 500 });
+      if (
+        authError.message?.includes('service error') ||
+        authError.message?.includes('Database connection')
+      ) {
+        const response = NextResponse.json(
+          {
+            success: false,
+            error: 'Internal server error',
+            errorCode: 'SERVICE_ERROR',
+            timestamp: new Date().toISOString(),
+          },
+          { status: 500 },
+        );
 
         addSecurityHeaders(response);
         return response;
       }
 
-      const response = NextResponse.json({
-        success: false,
-        error: 'Invalid credentials',
-        errorCode: 'AUTH_FAILED',
-        timestamp: new Date().toISOString()
-      }, { status: 401 });
+      const response = NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid credentials',
+          errorCode: 'AUTH_FAILED',
+          timestamp: new Date().toISOString(),
+        },
+        { status: 401 },
+      );
 
       addSecurityHeaders(response);
       return response;
     }
   } catch (error) {
     const response = NextResponse.json(
-      { success: false, error: 'Invalid JSON format', errorCode: 'PARSE_ERROR', timestamp: new Date().toISOString() },
-      { status: 400 }
+      {
+        success: false,
+        error: 'Invalid JSON format',
+        errorCode: 'PARSE_ERROR',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 400 },
     );
     addSecurityHeaders(response);
     return response;

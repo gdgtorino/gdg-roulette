@@ -1,22 +1,34 @@
 # The Draw
 
-A modern, full-stack lottery and raffle management system designed for events, organizations, and communities. The Draw provides an intuitive interface for administrators to create events, manage participants, and conduct fair, transparent drawings with visual effects.
+A modern, full-stack lottery and raffle management system designed for events,
+organizations, and communities. The Draw provides an intuitive interface for
+administrators to create events, manage participants, and conduct fair,
+transparent drawings with visual effects.
 
 ## 🎯 Features
 
 ### Admin Features
-- **Event Management**: Create, delete, and view historical events with participant lists and winner records
-- **QR Code Generation**: Automatic QR code generation for easy participant registration
-- **Registration Control**: Real-time registration blocking and participant management
-- **Multiple Drawings**: Conduct multiple sequential draws with automatic participant removal
-- **Visual Effects**: Confetti animations and roulette-style randomizer for engaging draw experience
+
+- **Event Management**: Create, delete, and view historical events with
+  participant lists and winner records
+- **QR Code Generation**: Automatic QR code generation for easy participant
+  registration
+- **Registration Control**: Real-time registration blocking and participant
+  management
+- **Multiple Drawings**: Conduct multiple sequential draws with automatic
+  participant removal
+- **Visual Effects**: Confetti animations and roulette-style randomizer for
+  engaging draw experience
 - **Comprehensive Dashboard**: Full event history and winner tracking
 - **Multi-language Support**: Available in English and Italian
 - **Dark/Light Mode**: Theme switching for better user experience
 
 ### User Features
-- **QR Code Registration**: Quick and easy event registration via QR code scanning
-- **Auto-generated Names**: Passphrase-style default names with customization options
+
+- **QR Code Registration**: Quick and easy event registration via QR code
+  scanning
+- **Auto-generated Names**: Passphrase-style default names with customization
+  options
 - **Multi-event Participation**: Same user can participate in different events
 - **Real-time Updates**: Live registration status and draw results
 
@@ -42,48 +54,56 @@ The Draw is built as a modern monorepo with the following components:
 ### Development Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd the-draw
    ```
 
 2. **Install dependencies**
+
    ```bash
    yarn install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
 4. **Start Redis (if not using Docker)**
+
    ```bash
    # macOS with Homebrew
    brew services start redis
-   
+
    # Ubuntu/Debian
    sudo systemctl start redis
    ```
 
 5. **Start development servers**
+
    ```bash
    yarn dev
    ```
 
    This starts:
+
    - Backend API on http://localhost:3001
    - Frontend on http://localhost:3000
 
 ### Docker Deployment
 
 1. **Build and start services**
+
    ```bash
    yarn docker:up
    ```
 
    This starts:
+
    - Frontend: http://localhost:8090
    - Backend API: http://localhost:8090/api
    - Traefik Dashboard: http://localhost:8091
@@ -128,11 +148,13 @@ NODE_ENV=production
 ## 📚 API Documentation
 
 ### Authentication
+
 - `POST /api/auth/login` - Admin login
 - `POST /api/auth/logout` - Admin logout
 - `GET /api/auth/me` - Get current user info
 
 ### Events
+
 - `GET /api/events` - List all events
 - `POST /api/events` - Create new event
 - `GET /api/events/:id` - Get event details
@@ -141,16 +163,19 @@ NODE_ENV=production
 - `POST /api/events/:id/draw` - Perform drawing
 
 ### Participants
+
 - `GET /api/events/:id/participants` - Get event participants
 - `POST /api/events/:id/participants` - Register participant
 - `DELETE /api/events/:id/participants/:participantId` - Remove participant
 
 ### QR Codes
+
 - `GET /api/events/:id/qr` - Get event QR code
 
 ## 🛠️ Development Commands
 
 ### Monorepo Commands
+
 ```bash
 # Start all services in development
 yarn dev
@@ -171,6 +196,7 @@ yarn docker:down     # Stop Docker services
 ```
 
 ### Backend Commands
+
 ```bash
 # Development server with hot reload
 yarn workspace @the-draw/backend dev
@@ -187,6 +213,7 @@ yarn workspace @the-draw/backend lint:fix
 ```
 
 ### Frontend Commands
+
 ```bash
 # Development server
 yarn workspace @the-draw/frontend dev
@@ -239,16 +266,18 @@ the-draw/
 ### Docker Production Setup
 
 1. **Update environment variables**
+
    ```bash
    # Set strong passwords and secrets
    JWT_SECRET=$(openssl rand -hex 32)
    ADMIN_DEFAULT_PASSWORD=$(openssl rand -base64 32)
    ```
 
-2. **Configure domain and SSL**
-   Update `docker-compose.yml` Traefik labels for your domain:
+2. **Configure domain and SSL** Update `docker-compose.yml` Traefik labels for
+   your domain:
+
    ```yaml
-   - "traefik.http.routers.frontend.rule=Host(`yourdomain.com`)"
+   - 'traefik.http.routers.frontend.rule=Host(`yourdomain.com`)'
    ```
 
 3. **Start production services**
@@ -259,21 +288,22 @@ the-draw/
 ### Manual Deployment
 
 1. **Build applications**
+
    ```bash
    yarn build
    ```
 
 2. **Set up Redis**
+
    ```bash
    # Install and configure Redis
    sudo apt install redis-server
    ```
 
-3. **Configure reverse proxy**
-   Set up Nginx or Apache to proxy requests to the backend and serve the frontend.
+3. **Configure reverse proxy** Set up Nginx or Apache to proxy requests to the
+   backend and serve the frontend.
 
-4. **Set up process management**
-   Use PM2 or systemd to manage Node.js processes:
+4. **Set up process management** Use PM2 or systemd to manage Node.js processes:
    ```bash
    pm2 start dist/index.js --name the-draw-app
    ```
@@ -286,7 +316,7 @@ The project includes ESLint configuration for code quality:
 # Run backend linting
 yarn workspace @the-draw/backend lint
 
-# Run frontend linting  
+# Run frontend linting
 yarn workspace @the-draw/frontend lint
 
 # Auto-fix issues
@@ -303,13 +333,15 @@ yarn workspace @the-draw/backend lint:fix
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for
+details.
 
 ## 🆘 Troubleshooting
 
 ### Common Issues
 
 **Redis Connection Failed**
+
 ```bash
 # Check Redis status
 redis-cli ping
@@ -320,6 +352,7 @@ docker logs the-draw-redis
 ```
 
 **Port Already in Use**
+
 ```bash
 # Find process using port
 lsof -i :3000
@@ -328,6 +361,7 @@ kill -9 <PID>
 ```
 
 **Docker Build Issues**
+
 ```bash
 # Clean Docker cache
 docker system prune -a
@@ -336,6 +370,7 @@ docker-compose build --no-cache
 ```
 
 **Frontend Build Failures**
+
 ```bash
 # Clear Next.js cache
 rm -rf .next
@@ -353,4 +388,5 @@ yarn install --force
 
 ## 📞 Support
 
-For issues, questions, or contributions, please open an issue in the GitHub repository.
+For issues, questions, or contributions, please open an issue in the GitHub
+repository.

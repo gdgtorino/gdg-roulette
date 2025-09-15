@@ -36,25 +36,22 @@ export function ParticipantList({
   eventId,
   showSearch = true,
   showExport = true,
-  className
+  className,
 }: ParticipantListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'winners' | 'remaining'>('all');
 
-  const winnerIds = useMemo(() =>
-    new Set(winners.map(w => w.participantId)),
-    [winners]
-  );
+  const winnerIds = useMemo(() => new Set(winners.map((w) => w.participantId)), [winners]);
 
   const filteredParticipants = useMemo(() => {
-    let filtered = participants.filter(participant =>
-      participant.name.toLowerCase().includes(searchTerm.toLowerCase())
+    let filtered = participants.filter((participant) =>
+      participant.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     if (filterStatus === 'winners') {
-      filtered = filtered.filter(p => winnerIds.has(p.id));
+      filtered = filtered.filter((p) => winnerIds.has(p.id));
     } else if (filterStatus === 'remaining') {
-      filtered = filtered.filter(p => !winnerIds.has(p.id));
+      filtered = filtered.filter((p) => !winnerIds.has(p.id));
     }
 
     return filtered;
@@ -66,24 +63,24 @@ export function ParticipantList({
   };
 
   const getWinnerInfo = (participantId: string) => {
-    return winners.find(w => w.participantId === participantId);
+    return winners.find((w) => w.participantId === participantId);
   };
 
   const exportParticipants = () => {
     const csvContent = [
       ['Name', 'Registered At', 'Status', 'Winner Order', 'Won At'],
-      ...filteredParticipants.map(participant => {
+      ...filteredParticipants.map((participant) => {
         const winner = getWinnerInfo(participant.id);
         return [
           participant.name,
           formatDate(participant.registeredAt),
           winner ? 'Winner' : 'Participant',
           winner ? winner.drawOrder.toString() : '',
-          winner ? formatDate(winner.drawnAt) : ''
+          winner ? formatDate(winner.drawnAt) : '',
         ];
-      })
+      }),
     ]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .map((row) => row.map((cell) => `"${cell}"`).join(','))
       .join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -109,12 +106,7 @@ export function ParticipantList({
           </div>
           <div className="flex items-center gap-2">
             {showExport && participants.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={exportParticipants}
-                className="gap-2"
-              >
+              <Button variant="outline" size="sm" onClick={exportParticipants} className="gap-2">
                 <Download className="h-4 w-4" />
                 Export CSV
               </Button>
@@ -189,16 +181,12 @@ export function ParticipantList({
                 <div
                   key={participant.id}
                   className={`flex items-center justify-between p-3 rounded-lg border ${
-                    winner
-                      ? 'bg-yellow-50 border-yellow-200'
-                      : 'bg-gray-50 border-gray-200'
+                    winner ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-200'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white border">
-                      <span className="text-sm font-medium text-gray-600">
-                        {index + 1}
-                      </span>
+                      <span className="text-sm font-medium text-gray-600">{index + 1}</span>
                     </div>
                     <div>
                       <div className="flex items-center gap-2">

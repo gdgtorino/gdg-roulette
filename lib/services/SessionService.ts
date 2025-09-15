@@ -28,7 +28,8 @@ export class SessionService {
    */
   async createSession(sessionData: SessionData): Promise<Session> {
     try {
-      const expiresAt = sessionData.expiresAt || new Date(Date.now() + SessionService.DEFAULT_SESSION_DURATION);
+      const expiresAt =
+        sessionData.expiresAt || new Date(Date.now() + SessionService.DEFAULT_SESSION_DURATION);
 
       const session: Session = {
         id: this.generateSessionId(),
@@ -38,14 +39,16 @@ export class SessionService {
         createdAt: new Date(),
         updatedAt: new Date(),
         expiresAt,
-        isActive: true
+        isActive: true,
       };
 
       // In a real implementation, this would save to database
       // For now, return the session object
       return session;
     } catch (error) {
-      throw new Error(`Failed to create session: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to create session: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -58,7 +61,9 @@ export class SessionService {
       // For now, return null
       return null;
     } catch (error) {
-      throw new Error(`Failed to get session: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to get session: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -72,14 +77,14 @@ export class SessionService {
       if (!session) {
         return {
           isValid: false,
-          error: 'Session not found'
+          error: 'Session not found',
         };
       }
 
       if (!session.isActive) {
         return {
           isValid: false,
-          error: 'Session is inactive'
+          error: 'Session is inactive',
         };
       }
 
@@ -88,7 +93,7 @@ export class SessionService {
         await this.invalidateSession(sessionId);
         return {
           isValid: false,
-          error: 'Session expired'
+          error: 'Session expired',
         };
       }
 
@@ -99,12 +104,12 @@ export class SessionService {
       return {
         isValid: true,
         session,
-        user: undefined // Would be populated with actual user data
+        user: undefined, // Would be populated with actual user data
       };
     } catch (error) {
       return {
         isValid: false,
-        error: `Session validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        error: `Session validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -128,14 +133,19 @@ export class SessionService {
 
       return session;
     } catch (error) {
-      throw new Error(`Failed to refresh session: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to refresh session: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
   /**
    * Update session metadata
    */
-  async updateSessionMetadata(sessionId: string, metadata: Record<string, any>): Promise<Session | null> {
+  async updateSessionMetadata(
+    sessionId: string,
+    metadata: Record<string, any>,
+  ): Promise<Session | null> {
     try {
       const session = await this.getSession(sessionId);
       if (!session) {
@@ -148,7 +158,9 @@ export class SessionService {
 
       return session;
     } catch (error) {
-      throw new Error(`Failed to update session metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to update session metadata: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -161,7 +173,9 @@ export class SessionService {
       // For now, return true
       return true;
     } catch (error) {
-      throw new Error(`Failed to invalidate session: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to invalidate session: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -174,7 +188,9 @@ export class SessionService {
       // For now, return true
       return true;
     } catch (error) {
-      throw new Error(`Failed to invalidate user sessions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to invalidate user sessions: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -187,7 +203,9 @@ export class SessionService {
       // For now, return empty array
       return [];
     } catch (error) {
-      throw new Error(`Failed to get user sessions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to get user sessions: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -199,7 +217,9 @@ export class SessionService {
       const sessions = await this.getUserSessions(userId);
       return sessions.length;
     } catch (error) {
-      throw new Error(`Failed to get session count: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to get session count: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -212,7 +232,9 @@ export class SessionService {
       // For now, return 0
       return 0;
     } catch (error) {
-      throw new Error(`Failed to cleanup expired sessions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to cleanup expired sessions: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -233,10 +255,12 @@ export class SessionService {
         activeSessions: 0,
         expiredSessions: 0,
         adminSessions: 0,
-        participantSessions: 0
+        participantSessions: 0,
       };
     } catch (error) {
-      throw new Error(`Failed to get session stats: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to get session stats: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -289,18 +313,21 @@ export class SessionService {
     return this.createSession({
       userId: adminId,
       userType: 'admin',
-      metadata
+      metadata,
     });
   }
 
   /**
    * Create participant session
    */
-  async createParticipantSession(participantId: string, metadata?: Record<string, any>): Promise<Session> {
+  async createParticipantSession(
+    participantId: string,
+    metadata?: Record<string, any>,
+  ): Promise<Session> {
     return this.createSession({
       userId: participantId,
       userType: 'participant',
-      metadata
+      metadata,
     });
   }
 

@@ -9,13 +9,13 @@ services:
       - NODE_ENV=staging
       - NEXT_PUBLIC_API_URL=https://staging.thedraw.app/api
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend-staging.rule=Host(`staging.thedraw.app`)"
-      - "traefik.http.routers.frontend-staging.entrypoints=websecure"
-      - "traefik.http.routers.frontend-staging.tls=true"
-      - "traefik.http.routers.frontend-staging.tls.certresolver=letsencrypt"
-      - "traefik.http.services.frontend-staging.loadbalancer.server.port=3000"
-      - "traefik.http.routers.frontend-staging.priority=10"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.frontend-staging.rule=Host(`staging.thedraw.app`)'
+      - 'traefik.http.routers.frontend-staging.entrypoints=websecure'
+      - 'traefik.http.routers.frontend-staging.tls=true'
+      - 'traefik.http.routers.frontend-staging.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.frontend-staging.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.frontend-staging.priority=10'
     deploy:
       replicas: 2
       resources:
@@ -32,13 +32,13 @@ services:
       - CORS_ORIGIN=https://staging.thedraw.app
       - LOG_LEVEL=debug
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend-staging.rule=Host(`staging.thedraw.app`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.backend-staging.entrypoints=websecure"
-      - "traefik.http.routers.backend-staging.tls=true"
-      - "traefik.http.routers.backend-staging.tls.certresolver=letsencrypt"
-      - "traefik.http.services.backend-staging.loadbalancer.server.port=3001"
-      - "traefik.http.routers.backend-staging.priority=100"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.backend-staging.rule=Host(`staging.thedraw.app`) && PathPrefix(`/api`)'
+      - 'traefik.http.routers.backend-staging.entrypoints=websecure'
+      - 'traefik.http.routers.backend-staging.tls=true'
+      - 'traefik.http.routers.backend-staging.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.backend-staging.loadbalancer.server.port=3001'
+      - 'traefik.http.routers.backend-staging.priority=100'
     deploy:
       replicas: 2
       resources:
@@ -51,21 +51,21 @@ services:
 
   traefik:
     command:
-      - "--api.dashboard=true"
-      - "--api.insecure=false"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@thedraw.app}"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-      - "--log.level=INFO"
-      - "--accesslog=true"
-      - "--metrics.prometheus=true"
+      - '--api.dashboard=true'
+      - '--api.insecure=false'
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--entrypoints.web.address=:80'
+      - '--entrypoints.websecure.address=:443'
+      - '--certificatesresolvers.letsencrypt.acme.tlschallenge=true'
+      - '--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@thedraw.app}'
+      - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json'
+      - '--log.level=INFO'
+      - '--accesslog=true'
+      - '--metrics.prometheus=true'
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-ssl:/letsencrypt
@@ -76,15 +76,9 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-staging_secure_password}
     command: >
-      postgres
-      -c shared_preload_libraries=pg_stat_statements
-      -c pg_stat_statements.max=10000
-      -c pg_stat_statements.track=all
-      -c max_connections=200
-      -c shared_buffers=256MB
-      -c effective_cache_size=1GB
-      -c work_mem=4MB
-      -c maintenance_work_mem=64MB
+      postgres -c shared_preload_libraries=pg_stat_statements -c pg_stat_statements.max=10000 -c
+      pg_stat_statements.track=all -c max_connections=200 -c shared_buffers=256MB -c
+      effective_cache_size=1GB -c work_mem=4MB -c maintenance_work_mem=64MB
     deploy:
       resources:
         limits:
@@ -96,11 +90,7 @@ services:
 
   redis:
     command: >
-      redis-server
-      --appendonly yes
-      --maxmemory 512mb
-      --maxmemory-policy allkeys-lru
-      --save 60 1
+      redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru --save 60 1
     deploy:
       resources:
         limits:
@@ -128,11 +118,12 @@ services:
     networks:
       - the-draw-network
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.prometheus-staging.rule=Host(`staging.thedraw.app`) && PathPrefix(`/prometheus`)"
-      - "traefik.http.routers.prometheus-staging.entrypoints=websecure"
-      - "traefik.http.routers.prometheus-staging.tls=true"
-      - "traefik.http.services.prometheus-staging.loadbalancer.server.port=9090"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.prometheus-staging.rule=Host(`staging.thedraw.app`) &&
+        PathPrefix(`/prometheus`)'
+      - 'traefik.http.routers.prometheus-staging.entrypoints=websecure'
+      - 'traefik.http.routers.prometheus-staging.tls=true'
+      - 'traefik.http.services.prometheus-staging.loadbalancer.server.port=9090'
 
 volumes:
   traefik-ssl:

@@ -25,12 +25,9 @@ export class PermissionService {
       'DELETE_EVENT',
       'VIEW_EVENTS',
       'MANAGE_USERS',
-      'VIEW_ANALYTICS'
+      'VIEW_ANALYTICS',
     ],
-    MODERATOR: [
-      'VIEW_EVENTS',
-      'VIEW_ANALYTICS'
-    ]
+    MODERATOR: ['VIEW_EVENTS', 'VIEW_ANALYTICS'],
   };
 
   private readonly permissionHierarchy: Record<Permission, Permission[]> = {
@@ -42,21 +39,27 @@ export class PermissionService {
       'MANAGE_USERS',
       'VIEW_ANALYTICS',
       'DELETE_ALL_EVENTS',
-      'READ_ONLY_MODE'
+      'READ_ONLY_MODE',
     ],
-    'MANAGE_USERS': ['VIEW_EVENTS', 'VIEW_ANALYTICS'],
-    'DELETE_EVENT': ['MODIFY_EVENT', 'VIEW_EVENTS'],
-    'MODIFY_EVENT': ['VIEW_EVENTS'],
-    'CREATE_EVENT': ['VIEW_EVENTS'],
-    'DELETE_ALL_EVENTS': ['DELETE_EVENT', 'MODIFY_EVENT', 'VIEW_EVENTS'],
-    'VIEW_ANALYTICS': [],
-    'VIEW_EVENTS': [],
-    'READ_ONLY_MODE': []
+    MANAGE_USERS: ['VIEW_EVENTS', 'VIEW_ANALYTICS'],
+    DELETE_EVENT: ['MODIFY_EVENT', 'VIEW_EVENTS'],
+    MODIFY_EVENT: ['VIEW_EVENTS'],
+    CREATE_EVENT: ['VIEW_EVENTS'],
+    DELETE_ALL_EVENTS: ['DELETE_EVENT', 'MODIFY_EVENT', 'VIEW_EVENTS'],
+    VIEW_ANALYTICS: [],
+    VIEW_EVENTS: [],
+    READ_ONLY_MODE: [],
   };
 
   private readonly conflictingPermissions: Record<Permission, Permission[]> = {
-    'DELETE_ALL_EVENTS': ['READ_ONLY_MODE'],
-    'READ_ONLY_MODE': ['CREATE_EVENT', 'MODIFY_EVENT', 'DELETE_EVENT', 'DELETE_ALL_EVENTS', 'MANAGE_USERS']
+    DELETE_ALL_EVENTS: ['READ_ONLY_MODE'],
+    READ_ONLY_MODE: [
+      'CREATE_EVENT',
+      'MODIFY_EVENT',
+      'DELETE_EVENT',
+      'DELETE_ALL_EVENTS',
+      'MANAGE_USERS',
+    ],
   };
 
   /**
@@ -142,7 +145,7 @@ export class PermissionService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -194,7 +197,7 @@ export class PermissionService {
    */
   getPermissionDifference(
     currentPermissions: Permission[],
-    newPermissions: Permission[]
+    newPermissions: Permission[],
   ): {
     added: Permission[];
     removed: Permission[];
@@ -203,9 +206,9 @@ export class PermissionService {
     const current = new Set(currentPermissions);
     const newPerms = new Set(newPermissions);
 
-    const added = newPermissions.filter(p => !current.has(p));
-    const removed = currentPermissions.filter(p => !newPerms.has(p));
-    const unchanged = currentPermissions.filter(p => newPerms.has(p));
+    const added = newPermissions.filter((p) => !current.has(p));
+    const removed = currentPermissions.filter((p) => !newPerms.has(p));
+    const unchanged = currentPermissions.filter((p) => newPerms.has(p));
 
     return { added, removed, unchanged };
   }
@@ -230,14 +233,14 @@ export class PermissionService {
   getPermissionDescription(permission: Permission): string {
     const descriptions: Record<Permission, string> = {
       '*': 'All permissions (Super Admin)',
-      'CREATE_EVENT': 'Create new events',
-      'MODIFY_EVENT': 'Modify existing events',
-      'DELETE_EVENT': 'Delete specific events',
-      'VIEW_EVENTS': 'View events and participants',
-      'MANAGE_USERS': 'Create and manage admin users',
-      'VIEW_ANALYTICS': 'View system analytics and reports',
-      'DELETE_ALL_EVENTS': 'Delete all events (dangerous)',
-      'READ_ONLY_MODE': 'Read-only access (no modifications)'
+      CREATE_EVENT: 'Create new events',
+      MODIFY_EVENT: 'Modify existing events',
+      DELETE_EVENT: 'Delete specific events',
+      VIEW_EVENTS: 'View events and participants',
+      MANAGE_USERS: 'Create and manage admin users',
+      VIEW_ANALYTICS: 'View system analytics and reports',
+      DELETE_ALL_EVENTS: 'Delete all events (dangerous)',
+      READ_ONLY_MODE: 'Read-only access (no modifications)',
     };
 
     return descriptions[permission] || 'Unknown permission';
@@ -248,9 +251,9 @@ export class PermissionService {
    */
   getRoleDescription(role: Role): string {
     const descriptions: Record<Role, string> = {
-      'SUPER_ADMIN': 'Full system access with all permissions',
-      'ADMIN': 'Standard admin with event and user management',
-      'MODERATOR': 'View-only access to events and analytics'
+      SUPER_ADMIN: 'Full system access with all permissions',
+      ADMIN: 'Standard admin with event and user management',
+      MODERATOR: 'View-only access to events and analytics',
     };
 
     return descriptions[role];
@@ -261,7 +264,7 @@ export class PermissionService {
    */
   checkSecurityViolations(
     granterPermissions: Permission[],
-    targetPermissions: Permission[]
+    targetPermissions: Permission[],
   ): string[] {
     const violations: string[] = [];
 
@@ -298,14 +301,17 @@ export class PermissionService {
       'MANAGE_USERS',
       'VIEW_ANALYTICS',
       'DELETE_ALL_EVENTS',
-      'READ_ONLY_MODE'
+      'READ_ONLY_MODE',
     ];
   }
 
   /**
    * Check if user has inherited permission through hierarchy
    */
-  private hasInheritedPermission(userPermissions: Permission[], requiredPermission: Permission): boolean {
+  private hasInheritedPermission(
+    userPermissions: Permission[],
+    requiredPermission: Permission,
+  ): boolean {
     // Check if any of the user's permissions include the required permission in their hierarchy
     for (const userPermission of userPermissions) {
       const inherited = this.permissionHierarchy[userPermission] || [];
@@ -347,7 +353,7 @@ export class PermissionService {
     targetAdminId: string,
     oldPermissions: Permission[],
     newPermissions: Permission[],
-    reason?: string
+    reason?: string,
   ): {
     timestamp: Date;
     adminId: string;
@@ -366,8 +372,12 @@ export class PermissionService {
 
     if (added.includes('*') || removed.includes('*')) {
       riskLevel = 'HIGH';
-    } else if (added.includes('MANAGE_USERS') || added.includes('DELETE_ALL_EVENTS') ||
-               removed.includes('MANAGE_USERS') || removed.includes('DELETE_ALL_EVENTS')) {
+    } else if (
+      added.includes('MANAGE_USERS') ||
+      added.includes('DELETE_ALL_EVENTS') ||
+      removed.includes('MANAGE_USERS') ||
+      removed.includes('DELETE_ALL_EVENTS')
+    ) {
       riskLevel = 'HIGH';
     } else if (added.includes('DELETE_EVENT') || removed.includes('DELETE_EVENT')) {
       riskLevel = 'MEDIUM';
@@ -379,7 +389,7 @@ export class PermissionService {
       targetAdminId,
       changes: { added, removed },
       reason,
-      riskLevel
+      riskLevel,
     };
   }
 }

@@ -1,22 +1,22 @@
-import {NextIntlClientProvider} from 'next-intl';
-import {getMessages} from 'next-intl/server';
-import {notFound} from 'next/navigation';
-import {cookies} from 'next/headers';
-import "../globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
+import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
+import '../globals.css';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 const locales = ['en', 'it'];
 
 export function generateStaticParams() {
-  return locales.map((locale) => ({locale}));
+  return locales.map((locale) => ({ locale }));
 }
 
 export default async function LocaleLayout({
   children,
-  params: {locale}
+  params: { locale },
 }: {
   children: React.ReactNode;
-  params: {locale: string};
+  params: { locale: string };
 }) {
   // Validate that the incoming `locale` parameter is valid
   if (!locales.includes(locale)) notFound();
@@ -34,9 +34,7 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning className={theme}>
       <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider initialTheme={theme}>
-            {children}
-          </ThemeProvider>
+          <ThemeProvider initialTheme={theme}>{children}</ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>
