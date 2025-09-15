@@ -40,6 +40,9 @@ describe('Admin Management System', () => {
     permissionService = new PermissionService() as jest.Mocked<PermissionService>;
     eventService = new EventService() as jest.Mocked<EventService>;
 
+    // Common mock setups that most tests need
+    setupCommonMocks();
+
     // Initialize admin service
     adminService = new AdminService(
       adminRepository,
@@ -48,6 +51,26 @@ describe('Admin Management System', () => {
       eventService
     );
   });
+
+  function setupCommonMocks() {
+    // Mock creator admin exists (most tests use this)
+    const defaultCreatorAdmin = {
+      id: 'creator-123',
+      username: 'creator',
+      role: 'SUPER_ADMIN',
+      permissions: ['MANAGE_USERS']
+    };
+    adminRepository.findById.mockResolvedValue(defaultCreatorAdmin);
+
+    // Common repository mocks - only set defaults that most tests need
+    adminRepository.findByUsername.mockResolvedValue(null);
+    adminRepository.findByEmail.mockResolvedValue(null);
+
+    // Common service mocks - set basic defaults, let individual tests override
+    passwordService.hash.mockResolvedValue('hashed-password');
+    permissionService.hasPermission.mockReturnValue(true);
+    // Don't set a default for getDefaultPermissions - let each test set its own
+  }
 
   afterEach(() => {
     jest.restoreAllMocks();
@@ -75,8 +98,7 @@ describe('Admin Management System', () => {
         permissions: ['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS']
       };
 
-      adminRepository.findByUsername.mockResolvedValue(null);
-      adminRepository.findByEmail.mockResolvedValue(null);
+      // Override specific mocks for this test
       passwordService.hash.mockResolvedValue(hashedPassword);
       permissionService.getDefaultPermissions.mockReturnValue(['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS']);
       adminRepository.create.mockResolvedValue(createdAdmin);
@@ -151,10 +173,6 @@ describe('Admin Management System', () => {
         role: 'MODERATOR'
       };
 
-      adminRepository.findByUsername.mockResolvedValue(null);
-      adminRepository.findByEmail.mockResolvedValue(null);
-      passwordService.hash.mockResolvedValue('hashed-password');
-
       permissionService.getDefaultPermissions
         .mockReturnValueOnce(['*']) // Super admin gets all permissions
         .mockReturnValueOnce(['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS']) // Regular admin
@@ -162,28 +180,29 @@ describe('Admin Management System', () => {
 
       permissionService.hasPermission.mockReturnValue(true);
 
+      // Mock adminRepository.create to return admin with permissions that match getDefaultPermissions calls
       adminRepository.create
-        .mockResolvedValueOnce({
+        .mockImplementationOnce(async (data) => ({
           id: 'super-admin-123',
-          username: 'superadmin',
-          role: 'SUPER_ADMIN',
-          permissions: ['*'],
+          username: data.username,
+          role: data.role,
+          permissions: data.permissions, // Use the permissions passed from the service
           createdAt: new Date()
-        })
-        .mockResolvedValueOnce({
+        }))
+        .mockImplementationOnce(async (data) => ({
           id: 'admin-123',
-          username: 'regularadmin',
-          role: 'ADMIN',
-          permissions: ['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS'],
+          username: data.username,
+          role: data.role,
+          permissions: data.permissions,
           createdAt: new Date()
-        })
-        .mockResolvedValueOnce({
+        }))
+        .mockImplementationOnce(async (data) => ({
           id: 'mod-123',
-          username: 'moderator',
-          role: 'MODERATOR',
-          permissions: ['VIEW_EVENTS', 'VIEW_ANALYTICS'],
+          username: data.username,
+          role: data.role,
+          permissions: data.permissions,
           createdAt: new Date()
-        });
+        }));
 
       // Act
       const superResult = await adminService.createAdmin(superAdminData, 'creator-123');
