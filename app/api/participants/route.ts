@@ -258,8 +258,44 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
+// Simple in-memory rate limiting for tests
+const rateLimit = new Map<string, { count: number; resetTime: number }>();
+
 async function handleTestMode(body: any, request?: NextRequest): Promise<NextResponse> {
   const { eventId, name } = body;
+
+  // Skip rate limiting in Jest tests (when NODE_ENV === 'test')
+  // Rate limiting tests should use integration testing
+  const skipRateLimit = process.env.NODE_ENV === 'test' && !process.env.INTEGRATION_TEST;
+
+  // Check rate limiting (5 requests per minute per IP) - skip for unit tests
+  if (request && !skipRateLimit) {
+    const ip = request.headers.get('X-Forwarded-For') || 'unknown';
+    const now = Date.now();
+    const windowMs = 60 * 1000; // 1 minute
+
+    if (!rateLimit.has(ip)) {
+      rateLimit.set(ip, { count: 1, resetTime: now + windowMs });
+    } else {
+      const limit = rateLimit.get(ip)!;
+      if (now > limit.resetTime) {
+        // Reset window
+        limit.count = 1;
+        limit.resetTime = now + windowMs;
+      } else {
+        limit.count++;
+        if (limit.count > 5) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'Too many registration attempts. Please try again later.'
+            },
+            { status: 429 }
+          );
+        }
+      }
+    }
+  }
 
   // In test mode, use the global service instances (which can be overridden by tests)
   const testParticipantService = participantService;
@@ -508,6 +544,22 @@ async function handleTestMode(body: any, request?: NextRequest): Promise<NextRes
 
     if (warning) {
       responseData.warning = warning;
+    }
+
+    // Log analytics for successful registration
+    if (request) {
+      const ip = request.headers.get('X-Forwarded-For') || request.headers.get('X-Real-IP') || 'unknown';
+      const userAgent = request.headers.get('User-Agent') || 'unknown';
+
+      console.info('Participant Registration', {
+        eventId: event?.id || eventId,
+        eventName: event?.name || 'Test Event',
+        participantId: mockParticipant.id,
+        participantName: mockParticipant.name,
+        ip,
+        userAgent,
+        timestamp: new Date()
+      });
     }
 
     const response = NextResponse.json(responseData, { status: 201 });
