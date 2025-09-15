@@ -240,7 +240,12 @@ export class EventStateMachine {
    * Get current state of an event
    */
   private getEventState(event: Event): EventState {
-    // Determine state based on event properties if state field is not available
+    // If state field is explicitly set, use it directly
+    if (event.state && Object.values(EventState).includes(event.state as EventState)) {
+      return event.state as EventState;
+    }
+
+    // Otherwise, determine state based on event properties
     if (event.closed) {
       return EventState.CLOSED;
     }
