@@ -78,8 +78,13 @@ async function handleLogoutTestMode(request: NextRequest): Promise<NextResponse>
         message: 'Logged out successfully'
       }, { status: 200 });
 
-      // Clear session cookies - format expected by tests
-      response.headers.set('Set-Cookie', 'sessionToken=; HttpOnly; Secure; Path=/; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT');
+      // Clear multiple session cookies - format expected by tests
+      const cookiesToClear = [
+        'sessionToken=; HttpOnly; Secure; Path=/; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'adminPrefs=; HttpOnly; Secure; Path=/; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'csrfToken=; HttpOnly; Secure; Path=/; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+      ];
+      response.headers.set('Set-Cookie', cookiesToClear.join(', '));
 
       addSecurityHeaders(response);
       return response;
