@@ -305,7 +305,7 @@ export function CreateAdminForm({
         {/* Password Field */}
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-            Password
+            Password *
           </label>
           <Input
             id="password"
@@ -315,7 +315,6 @@ export function CreateAdminForm({
             placeholder="Enter secure password"
             disabled={isSubmitting || isFormDisabled}
             aria-invalid={errors.password ? 'true' : 'false'}
-            aria-label="Password (main)"
             className={errors.password ? 'border-red-300' : ''}
           />
           {errors.password && (
@@ -422,7 +421,7 @@ export function CreateAdminForm({
                 Creating Account...
               </>
             ) : (
-              'Create Admin Account'
+              'Create Admin'
             )}
           </Button>
 
