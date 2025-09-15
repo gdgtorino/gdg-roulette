@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom'
+require('@testing-library/jest-dom')
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -50,11 +50,12 @@ jest.mock('next/navigation', () => ({
 }))
 
 // Mock Next.js Image component
+const React = require('react');
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props) => {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} />
+    return React.createElement('img', props)
   },
 }))
 
@@ -98,7 +99,7 @@ global.IntersectionObserver = jest.fn().mockImplementation(() => ({
 }))
 
 // Mock fetch API for tests
-import { TextEncoder, TextDecoder } from 'util'
+const { TextEncoder, TextDecoder } = require('util')
 global.TextEncoder = TextEncoder
 global.TextDecoder = TextDecoder
 
