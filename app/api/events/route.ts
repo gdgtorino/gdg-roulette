@@ -103,7 +103,10 @@ function handleGetEventsTestMode(): NextResponse {
     }
   ];
 
-  return NextResponse.json({ events: mockEvents });
+  return NextResponse.json({
+    success: true,
+    events: mockEvents
+  });
 }
 
 async function handleCreateEventTestMode(request: NextRequest): Promise<NextResponse> {
