@@ -65,6 +65,14 @@ async function handleLogoutTestMode(request: NextRequest): Promise<NextResponse>
     try {
       await authService.logout(sessionToken);
 
+      // Log successful logout for audit trail
+      console.info('Admin logout', {
+        adminId: 'admin-123',
+        username: 'admin1', // In real implementation, this would come from session
+        ip: request.headers.get('X-Forwarded-For') || 'unknown',
+        timestamp: new Date()
+      });
+
       const response = NextResponse.json({
         success: true,
         message: 'Logged out successfully'
