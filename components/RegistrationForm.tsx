@@ -32,7 +32,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ event, onSub
     }
 
     setIsLoading(true);
-    setMessage('Registering...');
+    setMessage('');
     setIsError(false);
 
     try {
@@ -43,7 +43,8 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({ event, onSub
           setMessage(result.error || 'Registration failed');
           setIsError(true);
         } else if (result && result.success) {
-          setMessage('Successfully registered!');
+          const participantName = result.participant?.name || name.trim();
+          setMessage(`Successfully registered! Welcome, ${participantName}!`);
           setIsError(false);
         }
       }
