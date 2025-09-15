@@ -10,8 +10,10 @@ import { Admin } from '@/lib/types';
 
 interface CreateAdminFormProps {
   onAdminCreated?: (admin: Admin) => void;
+  onSubmit?: (data: FormData) => Promise<void>;
   onCancel?: () => void;
   creatorAdmin?: Admin;
+  currentAdmin?: Admin;
   className?: string;
 }
 
@@ -57,8 +59,10 @@ const ROLE_OPTIONS = [
 
 export function CreateAdminForm({
   onAdminCreated,
+  onSubmit,
   onCancel,
   creatorAdmin,
+  currentAdmin,
   className = '',
 }: CreateAdminFormProps) {
   const [formData, setFormData] = useState<FormData>({
@@ -72,6 +76,11 @@ export function CreateAdminForm({
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
+  // Check if current user has permissions to create admins
+  const adminToCheck = currentAdmin || creatorAdmin;
+  const hasManageUsersPermission = adminToCheck?.permissions?.includes('MANAGE_USERS') ?? false;
+  const isFormDisabled = !hasManageUsersPermission;
 
   const validateUsername = (username: string): string | undefined => {
     const trimmed = username.trim();
@@ -154,23 +163,33 @@ export function CreateAdminForm({
     setErrors({});
 
     try {
-      const response = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username.trim(),
-          password: formData.password,
-          email: formData.email.trim(),
-          role: formData.role,
-        }),
-      });
+      // Use custom onSubmit if provided (for testing)
+      if (onSubmit) {
+        await onSubmit(formData);
+      } else {
+        // Default API submission
+        const response = await fetch('/api/admin/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: formData.username.trim(),
+            password: formData.password,
+            email: formData.email.trim(),
+            role: formData.role,
+          }),
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to create admin account');
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to create admin account');
+        }
+
+        if (onAdminCreated) {
+          onAdminCreated(result.admin);
+        }
       }
 
       // Success - reset form
@@ -181,10 +200,6 @@ export function CreateAdminForm({
         email: '',
         role: 'ADMIN',
       });
-
-      if (onAdminCreated) {
-        onAdminCreated(result.admin);
-      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to create admin account';
@@ -206,6 +221,11 @@ export function CreateAdminForm({
         {creatorAdmin && (
           <p className="text-sm text-gray-500 mt-2">Creating as: {creatorAdmin.username}</p>
         )}
+        {isFormDisabled && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md" role="alert">
+            <p className="text-red-800 text-sm">Insufficient permissions to create admin accounts</p>
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -220,7 +240,7 @@ export function CreateAdminForm({
             value={formData.username}
             onChange={(e) => handleInputChange('username', e.target.value)}
             placeholder="Enter username"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isFormDisabled}
             aria-invalid={errors.username ? 'true' : 'false'}
             className={errors.username ? 'border-red-300' : ''}
           />
@@ -242,7 +262,7 @@ export function CreateAdminForm({
             value={formData.email}
             onChange={(e) => handleInputChange('email', e.target.value)}
             placeholder="Enter email address"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isFormDisabled}
             aria-invalid={errors.email ? 'true' : 'false'}
             className={errors.email ? 'border-red-300' : ''}
           />
@@ -264,7 +284,7 @@ export function CreateAdminForm({
             value={formData.password}
             onChange={(e) => handleInputChange('password', e.target.value)}
             placeholder="Enter secure password"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isFormDisabled}
             aria-invalid={errors.password ? 'true' : 'false'}
             className={errors.password ? 'border-red-300' : ''}
           />
@@ -289,7 +309,7 @@ export function CreateAdminForm({
             value={formData.confirmPassword}
             onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
             placeholder="Re-enter password"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isFormDisabled}
             aria-invalid={errors.confirmPassword ? 'true' : 'false'}
             className={errors.confirmPassword ? 'border-red-300' : ''}
           />
@@ -302,37 +322,29 @@ export function CreateAdminForm({
 
         {/* Role Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">Admin Role *</label>
-          <div className="space-y-3">
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+            Admin Role *
+          </label>
+          <select
+            id="role"
+            name="role"
+            value={formData.role}
+            onChange={(e) => handleInputChange('role', e.target.value)}
+            disabled={isSubmitting || isFormDisabled}
+            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.role ? 'border-red-300' : ''}`}
+            aria-invalid={errors.role ? 'true' : 'false'}
+          >
             {ROLE_OPTIONS.map((role) => (
-              <div key={role.value} className="flex items-start">
-                <input
-                  id={role.value}
-                  type="radio"
-                  name="role"
-                  value={role.value}
-                  checked={formData.role === role.value}
-                  onChange={(e) => handleInputChange('role', e.target.value)}
-                  disabled={isSubmitting}
-                  className="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                />
-                <label htmlFor={role.value} className="ml-3 flex-1">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span className="font-medium text-gray-900">{role.label}</span>
-                    <Badge variant={role.badge as 'primary' | 'secondary' | 'danger'} className="text-xs">
-                      {role.value.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-gray-600">{role.description}</p>
-                  <div className="mt-1">
-                    <p className="text-xs text-gray-500">
-                      Permissions: {role.permissions.join(', ')}
-                    </p>
-                  </div>
-                </label>
-              </div>
+              <option key={role.value} value={role.value}>
+                {role.label} - {role.description}
+              </option>
             ))}
-          </div>
+          </select>
+          {errors.role && (
+            <p className="mt-1 text-sm text-red-600" role="alert">
+              {errors.role}
+            </p>
+          )}
         </div>
 
         {/* Submit Error */}
@@ -344,7 +356,7 @@ export function CreateAdminForm({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+          <Button type="submit" disabled={isSubmitting || isFormDisabled} className="w-full sm:w-auto">
             {isSubmitting ? (
               <>
                 <LoadingSpinner className="mr-2 h-4 w-4" />
@@ -360,7 +372,7 @@ export function CreateAdminForm({
               type="button"
               variant="outline"
               onClick={onCancel}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isFormDisabled}
               className="w-full sm:w-auto"
             >
               Cancel

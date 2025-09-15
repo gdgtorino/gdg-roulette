@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface Event {
   id: string;
@@ -28,6 +28,8 @@ export const LotteryComponent: React.FC<LotteryComponentProps> = ({
   onDrawWinner,
   onDrawAll,
 }) => {
+  const [latestWinner, setLatestWinner] = useState<Winner | null>(null);
+
   const canDraw = event.participantCount > event.winnerCount;
 
   const handleDrawWinner = async () => {
@@ -35,6 +37,8 @@ export const LotteryComponent: React.FC<LotteryComponentProps> = ({
       const result = await onDrawWinner(event.id);
 
       if (result?.success && result?.winner) {
+        setLatestWinner(result.winner);
+
         // Trigger confetti if available
         if (typeof (globalThis as { confetti?: () => void }).confetti === 'function') {
           (globalThis as { confetti: () => void }).confetti();
@@ -65,7 +69,12 @@ export const LotteryComponent: React.FC<LotteryComponentProps> = ({
           <button onClick={handleDrawAll}>Draw All</button>
         </div>
       ) : (
-        <p>All participants have been drawn</p>
+        <div>
+          <button disabled>Draw Winner</button>
+
+          <button disabled>Draw All</button>
+          <p>All participants have been drawn</p>
+        </div>
       )}
 
       {winners.length > 0 && (
@@ -84,7 +93,13 @@ export const LotteryComponent: React.FC<LotteryComponentProps> = ({
       )}
 
       {/* Show latest winner if available */}
-      {winners.length > 0 && (
+      {latestWinner && (
+        <div>
+          <p>Winner: {latestWinner.participantName}</p>
+          <p>Position: {latestWinner.drawOrder}</p>
+        </div>
+      )}
+      {!latestWinner && winners.length > 0 && (
         <div>
           <p>Winner: {winners[winners.length - 1]?.participantName}</p>
           <p>Position: {winners[winners.length - 1]?.drawOrder}</p>

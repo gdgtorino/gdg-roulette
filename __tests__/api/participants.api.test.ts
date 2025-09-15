@@ -611,7 +611,10 @@ describe('/api/participants API Routes', () => {
     });
 
     it('should implement rate limiting for registration attempts', async () => {
-      // Arrange
+      // Arrange - Enable rate limiting for this test
+      const originalIntegrationTest = process.env.INTEGRATION_TEST;
+      process.env.INTEGRATION_TEST = 'true';
+
       const registrationData = {
         eventId: 'event-123',
         name: 'Rate Limited User',
@@ -648,6 +651,13 @@ describe('/api/participants API Routes', () => {
       expect(lastResponseData.error).toBe(
         'Too many registration attempts. Please try again later.',
       );
+
+      // Cleanup - Restore original environment variable
+      if (originalIntegrationTest !== undefined) {
+        process.env.INTEGRATION_TEST = originalIntegrationTest;
+      } else {
+        delete process.env.INTEGRATION_TEST;
+      }
     });
 
     it('should log registration activities for analytics', async () => {

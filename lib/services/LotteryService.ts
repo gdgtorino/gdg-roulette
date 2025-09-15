@@ -112,7 +112,12 @@ export class LotteryService {
       let warning: string | undefined;
       try {
         await this.notificationService.notifyWinner(winner);
-        await this.notificationService.broadcastDrawUpdate(eventId, winner);
+        await this.notificationService.broadcastDrawUpdate(eventId, {
+          type: 'WINNER_DRAWN',
+          winner,
+          drawOrder: winner.drawOrder,
+          timestamp: new Date(),
+        });
       } catch (notificationError) {
         // Log error but don't fail the draw
         console.error('Notification failed:', notificationError);
@@ -124,7 +129,7 @@ export class LotteryService {
         winner,
         warning,
       };
-    } catch {
+    } catch (error) {
       // Handle specific error types
       if (error instanceof Error) {
         if (error.message.includes('Database') || error.message.includes('database')) {
@@ -211,10 +216,10 @@ export class LotteryService {
         success: true,
         winner,
       };
-    } catch {
+    } catch (error) {
       return {
         success: false,
-        error: `Draw failed: `,
+        error: `Draw failed: ${error instanceof Error ? error.message : error}`,
       };
     }
   }
@@ -242,11 +247,11 @@ export class LotteryService {
         winners,
         error: errors.length > 0 ? errors.join('; ') : undefined,
       };
-    } catch {
+    } catch (error) {
       return {
         success: false,
         winners: [],
-        error: `Batch draw failed: `,
+        error: `Batch draw failed: ${error instanceof Error ? error.message : error}`,
       };
     }
   }
@@ -337,8 +342,8 @@ export class LotteryService {
         try {
           await this.eventService.autoCloseEvent(eventId);
           eventClosed = true;
-        } catch {
-          console.warn('Failed to auto-close event:', error);
+        } catch (closeError) {
+          console.warn('Failed to auto-close event:', closeError);
         }
       }
 
@@ -347,7 +352,7 @@ export class LotteryService {
         winners,
         eventClosed,
       };
-    } catch {
+    } catch (error) {
       return {
         success: false,
         winners: [],
@@ -385,7 +390,7 @@ export class LotteryService {
         winners,
         error: errors.length > 0 ? errors.join('; ') : undefined,
       };
-    } catch {
+    } catch (error) {
       return {
         success: false,
         winners: [],

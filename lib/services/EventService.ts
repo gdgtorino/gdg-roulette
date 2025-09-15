@@ -369,4 +369,31 @@ export class EventService {
       throw new Error(`Failed to get event summary: `);
     }
   }
+
+  /**
+   * Auto-close event when all participants have been drawn
+   */
+  async autoCloseEvent(eventId: string): Promise<Event> {
+    try {
+      const event = await this.findById(eventId);
+      if (!event) {
+        throw new Error('Event not found');
+      }
+
+      if (event.closed) {
+        return event; // Already closed
+      }
+
+      // Update the event to closed state
+      const updatedEvent = await this.updateEvent(eventId, {
+        closed: true,
+        state: 'CLOSED',
+        registrationOpen: false,
+      });
+
+      return updatedEvent;
+    } catch (error) {
+      throw new Error(`Failed to auto-close event: ${error instanceof Error ? error.message : error}`);
+    }
+  }
 }

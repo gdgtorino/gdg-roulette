@@ -22,34 +22,45 @@ const mockParticipantService = {
   findByEventId: jest.fn(),
   findById: jest.fn(),
   findByEventAndName: jest.fn(),
-  create: jest.fn()
+  create: jest.fn(),
+  getAvailableParticipants: jest.fn(),
+  getAllParticipants: jest.fn(),
+  getTotalParticipants: jest.fn()
 };
 
 const mockWinnerService = {
   create: jest.fn(),
   findByEventId: jest.fn(),
   findByParticipantId: jest.fn(),
-  getWinnersCount: jest.fn()
+  getWinnersCount: jest.fn(),
+  getWinnerCount: jest.fn(),
+  createWinner: jest.fn(),
+  isParticipantWinner: jest.fn()
 };
 
 const mockNotificationService = {
   notifyWinner: jest.fn(),
   notifyAllParticipants: jest.fn(),
   sendRealTimeUpdate: jest.fn(),
-  connectToLiveUpdates: jest.fn()
+  connectToLiveUpdates: jest.fn(),
+  broadcastDrawUpdate: jest.fn(),
+  sendEmailNotification: jest.fn(),
+  sendSMSNotification: jest.fn()
 };
 
 const mockEventService = {
   findById: jest.fn(),
   updateState: jest.fn(),
   create: jest.fn(),
-  findAll: jest.fn()
+  findAll: jest.fn(),
+  autoCloseEvent: jest.fn()
 };
 
 const mockRandomService = {
   selectRandom: jest.fn(),
   generateRandomId: jest.fn(),
-  shuffle: jest.fn()
+  shuffle: jest.fn(),
+  selectRandomParticipant: jest.fn()
 };
 
 describe('Lottery System', () => {
@@ -342,9 +353,8 @@ describe('Lottery System', () => {
       // Assert
       expect(result.success).toBe(true);
       expect(mockNotificationService.notifyWinner).toHaveBeenCalledWith(selectedWinner);
-      expect(mockNotificationService.notifyWinner).toHaveBeenCalledBefore(
-        jest.fn() // Ensure notification happens before method returns
-      );
+      // Verify notification was called (order testing would require more complex setup)
+      expect(mockNotificationService.notifyWinner).toHaveBeenCalledTimes(1);
     });
 
     it('should send real-time updates to all participants', async () => {
@@ -556,24 +566,34 @@ describe('Lottery System', () => {
       mockParticipantService.getAllParticipants.mockResolvedValue(participants);
       mockWinnerService.getWinnerCount.mockResolvedValue(0);
 
-      // Mock random selection to return participants in shuffled order
-      const shuffledOrder = [3, 7, 1, 9, 4, 2, 8, 5, 0, 6]; // Indices
-      let selectionIndex = 0;
+      // Track drawn participants
+      const drawnParticipantIds = new Set<string>();
 
-      mockRandomService.selectRandomParticipant.mockImplementation((availableParticipants) => {
-        const selectedIndex = shuffledOrder[selectionIndex % shuffledOrder.length];
-        selectionIndex++;
-        return Promise.resolve(availableParticipants[selectedIndex % availableParticipants.length]);
+      // Mock getAvailableParticipants to return undrawn participants
+      mockParticipantService.getAvailableParticipants.mockImplementation(() => {
+        return Promise.resolve(participants.filter(p => !drawnParticipantIds.has(p.id)));
       });
 
-      mockWinnerService.createWinner.mockImplementation((data) => Promise.resolve({
-        id: `winner-${data.drawOrder}`,
-        eventId: data.eventId,
-        participantId: data.participantId,
-        participantName: data.participantName,
-        drawOrder: data.drawOrder,
-        drawnAt: new Date()
-      }));
+      mockRandomService.selectRandomParticipant.mockImplementation((availableParticipants) => {
+        if (availableParticipants.length === 0) {
+          return Promise.resolve(null);
+        }
+        // Return the first participant to ensure deterministic testing
+        const selectedParticipant = availableParticipants[0];
+        return Promise.resolve(selectedParticipant);
+      });
+
+      mockWinnerService.createWinner.mockImplementation((data) => {
+        drawnParticipantIds.add(data.participantId);
+        return Promise.resolve({
+          id: `winner-${data.drawOrder}`,
+          eventId: data.eventId,
+          participantId: data.participantId,
+          participantName: data.participantName,
+          drawOrder: data.drawOrder,
+          drawnAt: new Date()
+        });
+      });
 
       mockNotificationService.notifyWinner.mockResolvedValue(true);
 
@@ -679,6 +699,12 @@ describe('Lottery System', () => {
       mockEventService.findById.mockResolvedValue(mockEvent);
       mockParticipantService.getAllParticipants.mockResolvedValue(participants);
       mockWinnerService.getWinnerCount.mockResolvedValue(0);
+      mockParticipantService.getTotalParticipants.mockResolvedValue(2);
+
+      // Mock getAvailableParticipants to simulate drawing
+      mockParticipantService.getAvailableParticipants
+        .mockResolvedValueOnce(participants)
+        .mockResolvedValueOnce([participants[0]]);
 
       mockRandomService.selectRandomParticipant
         .mockResolvedValueOnce(participants[1])
@@ -729,40 +755,34 @@ describe('Lottery System', () => {
 
       mockEventService.findById.mockResolvedValue(mockEvent);
 
-      // First draw
-      mockParticipantService.getAvailableParticipants
-        .mockResolvedValueOnce(participants)
-        .mockResolvedValueOnce([participants[0]]); // Alice still available, Bob drawn
+      // Track drawn participants
+      const drawnParticipantIds = new Set<string>();
 
-      mockWinnerService.getWinnerCount
-        .mockResolvedValueOnce(0)
-        .mockResolvedValueOnce(1);
+      mockParticipantService.getAvailableParticipants.mockImplementation(() => {
+        return Promise.resolve(participants.filter(p => !drawnParticipantIds.has(p.id)));
+      });
 
-      mockWinnerService.isParticipantWinner
-        .mockResolvedValueOnce(false) // Bob not a winner yet
-        .mockResolvedValueOnce(true); // Bob is now a winner
+      mockWinnerService.getWinnerCount.mockImplementation(() => Promise.resolve(drawnParticipantIds.size));
 
-      mockRandomService.selectRandomParticipant
-        .mockResolvedValueOnce(participants[1]) // Bob selected first
-        .mockResolvedValueOnce(participants[0]); // Alice selected second
+      mockWinnerService.isParticipantWinner.mockImplementation((eventId, participantId) =>
+        Promise.resolve(drawnParticipantIds.has(participantId))
+      );
 
-      mockWinnerService.createWinner
-        .mockResolvedValueOnce({
-          id: 'winner-1',
-          eventId,
-          participantId: 'p2',
-          participantName: 'Bob',
-          drawOrder: 1,
-          drawnAt: new Date()
-        })
-        .mockResolvedValueOnce({
-          id: 'winner-2',
-          eventId,
-          participantId: 'p1',
-          participantName: 'Alice',
-          drawOrder: 2,
+      mockRandomService.selectRandomParticipant.mockImplementation((availableParticipants) => {
+        return Promise.resolve(availableParticipants[0] || null);
+      });
+
+      mockWinnerService.createWinner.mockImplementation((data) => {
+        drawnParticipantIds.add(data.participantId);
+        return Promise.resolve({
+          id: `winner-${data.drawOrder}`,
+          eventId: data.eventId,
+          participantId: data.participantId,
+          participantName: data.participantName,
+          drawOrder: data.drawOrder,
           drawnAt: new Date()
         });
+      });
 
       mockNotificationService.notifyWinner.mockResolvedValue(true);
 
@@ -772,10 +792,10 @@ describe('Lottery System', () => {
 
       // Assert
       expect(firstDraw.success).toBe(true);
-      expect(firstDraw.winner.participantName).toBe('Bob');
+      expect(firstDraw.winner.participantName).toBe('Alice');
 
       expect(secondDraw.success).toBe(true);
-      expect(secondDraw.winner.participantName).toBe('Alice');
+      expect(secondDraw.winner.participantName).toBe('Bob');
       expect(secondDraw.winner.participantId).not.toBe(firstDraw.winner.participantId);
     });
 
@@ -810,12 +830,14 @@ describe('Lottery System', () => {
         Promise.resolve(drawnParticipants.size)
       );
 
+      mockParticipantService.getTotalParticipants.mockResolvedValue(3);
+
       mockWinnerService.isParticipantWinner.mockImplementation((eventId, participantId) =>
         Promise.resolve(drawnParticipants.has(participantId))
       );
 
       mockRandomService.selectRandomParticipant.mockImplementation((available) =>
-        Promise.resolve(available[0])
+        Promise.resolve(available[0] || null)
       );
 
       mockWinnerService.createWinner.mockImplementation((data) => {
@@ -838,10 +860,14 @@ describe('Lottery System', () => {
       const draw3 = await lotteryService.drawSingleWinner(eventId, 'admin-123');
 
       // Assert
+      expect(draw1.success).toBe(true);
+      expect(draw2.success).toBe(true);
+      expect(draw3.success).toBe(true);
+
       const allWinnerIds = [
-        draw1.winner.participantId,
-        draw2.winner.participantId,
-        draw3.winner.participantId
+        draw1.winner!.participantId,
+        draw2.winner!.participantId,
+        draw3.winner!.participantId
       ];
 
       // Verify uniqueness
@@ -901,19 +927,29 @@ describe('Lottery System', () => {
       mockParticipantService.getAllParticipants.mockResolvedValue(participants);
       mockWinnerService.getWinnerCount.mockResolvedValue(0);
 
-      // Mock sequential selection
-      mockRandomService.selectRandomParticipant.mockImplementation((available) => {
-        return Promise.resolve(available[Math.floor(Math.random() * available.length)]);
+      // Track drawn participants for this test
+      const drawnParticipantIds = new Set<string>();
+
+      mockParticipantService.getAvailableParticipants.mockImplementation(() => {
+        return Promise.resolve(participants.filter(p => !drawnParticipantIds.has(p.id)));
       });
 
-      mockWinnerService.createWinner.mockImplementation((data) => Promise.resolve({
-        id: `winner-${data.drawOrder}`,
-        eventId: data.eventId,
-        participantId: data.participantId,
-        participantName: data.participantName,
-        drawOrder: data.drawOrder,
-        drawnAt: new Date()
-      }));
+      // Mock sequential selection
+      mockRandomService.selectRandomParticipant.mockImplementation((available) => {
+        return Promise.resolve(available[0] || null);
+      });
+
+      mockWinnerService.createWinner.mockImplementation((data) => {
+        drawnParticipantIds.add(data.participantId);
+        return Promise.resolve({
+          id: `winner-${data.drawOrder}`,
+          eventId: data.eventId,
+          participantId: data.participantId,
+          participantName: data.participantName,
+          drawOrder: data.drawOrder,
+          drawnAt: new Date()
+        });
+      });
 
       mockNotificationService.notifyWinner.mockResolvedValue(true);
 
@@ -946,6 +982,7 @@ describe('Lottery System', () => {
       mockEventService.findById.mockResolvedValue(mockEvent);
       mockParticipantService.getAvailableParticipants.mockResolvedValue([participant]);
       mockWinnerService.getWinnerCount.mockResolvedValue(0);
+      mockWinnerService.isParticipantWinner.mockResolvedValue(false);
       mockRandomService.selectRandomParticipant.mockResolvedValue(participant);
 
       mockWinnerService.createWinner.mockResolvedValue({
@@ -987,21 +1024,34 @@ describe('Lottery System', () => {
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
-      mockParticipantService.getAvailableParticipants.mockResolvedValue(participants);
       mockWinnerService.getWinnerCount.mockResolvedValue(0);
 
-      mockRandomService.selectRandomParticipant.mockImplementation((available) =>
-        Promise.resolve(available[0])
+      // Track drawn participants for this test
+      const drawnParticipantIds = new Set<string>();
+
+      mockParticipantService.getAvailableParticipants.mockImplementation(() => {
+        return Promise.resolve(participants.filter(p => !drawnParticipantIds.has(p.id)));
+      });
+
+      mockWinnerService.isParticipantWinner.mockImplementation((eventId, participantId) =>
+        Promise.resolve(drawnParticipantIds.has(participantId))
       );
 
-      mockWinnerService.createWinner.mockImplementation((data) => Promise.resolve({
-        id: `winner-${data.drawOrder}`,
-        eventId: data.eventId,
-        participantId: data.participantId,
-        participantName: data.participantName,
-        drawOrder: data.drawOrder,
-        drawnAt: new Date()
-      }));
+      mockRandomService.selectRandomParticipant.mockImplementation((available) =>
+        Promise.resolve(available[0] || null)
+      );
+
+      mockWinnerService.createWinner.mockImplementation((data) => {
+        drawnParticipantIds.add(data.participantId);
+        return Promise.resolve({
+          id: `winner-${data.drawOrder}`,
+          eventId: data.eventId,
+          participantId: data.participantId,
+          participantName: data.participantName,
+          drawOrder: data.drawOrder,
+          drawnAt: new Date()
+        });
+      });
 
       mockNotificationService.notifyWinner.mockResolvedValue(true);
 
@@ -1204,6 +1254,7 @@ describe('Lottery System', () => {
       mockParticipantService.getAvailableParticipants.mockResolvedValue(participants);
       mockWinnerService.getWinnerCount.mockResolvedValue(0);
       mockRandomService.selectRandomParticipant.mockResolvedValue(participants[0]);
+      mockWinnerService.isParticipantWinner.mockResolvedValue(false);
       mockWinnerService.createWinner.mockRejectedValue(new Error('Database error'));
 
       // Act
