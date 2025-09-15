@@ -66,7 +66,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   loadingMessage = 'Loading...',
   showConfetti = false,
   showTimestamp = false,
-  showPosition = false,
+  showPosition = true,
   showStats = false,
   onShare,
   onNavigateBack,
@@ -119,6 +119,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                   hour: 'numeric',
                   minute: '2-digit',
                   hour12: true,
+                  timeZone: 'UTC',
                 })}
               </p>
             </div>
