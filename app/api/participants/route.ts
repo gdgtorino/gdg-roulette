@@ -26,18 +26,17 @@ sessionService = new SessionService();
 notificationService = new NotificationService();
 
 // Allow tests to override services
-// Note: Commented out for build compatibility - re-enable for testing
-// export function setTestServices(services: {
-//   participantService?: ParticipantService;
-//   eventService?: EventService;
-//   sessionService?: SessionService;
-//   notificationService?: NotificationService;
-// }) {
-//   if (services.participantService) participantService = services.participantService;
-//   if (services.eventService) eventService = services.eventService;
-//   if (services.sessionService) sessionService = services.sessionService;
-//   if (services.notificationService) notificationService = services.notificationService;
-// }
+export function setTestServices(services: {
+  participantService?: ParticipantService;
+  eventService?: EventService;
+  sessionService?: SessionService;
+  notificationService?: NotificationService;
+}) {
+  if (services.participantService) participantService = services.participantService;
+  if (services.eventService) eventService = services.eventService;
+  if (services.sessionService) sessionService = services.sessionService;
+  if (services.notificationService) notificationService = services.notificationService;
+}
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {

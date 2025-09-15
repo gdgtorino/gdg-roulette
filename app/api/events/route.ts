@@ -27,14 +27,13 @@ eventService = new EventService();
 authService = new AuthService();
 
 // Function to set test services
-// Note: Commented out for build compatibility - re-enable for testing
-// export function setTestServices(services: {
-//   eventService?: EventService;
-//   authService?: AuthService;
-// }) {
-//   if (services.eventService) eventService = services.eventService;
-//   if (services.authService) authService = services.authService;
-// }
+export function setEventsTestServices(services: {
+  eventService?: EventService;
+  authService?: AuthService;
+}) {
+  if (services.eventService) eventService = services.eventService;
+  if (services.authService) authService = services.authService;
+}
 
 export async function GET() {
   try {

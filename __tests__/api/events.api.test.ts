@@ -11,7 +11,7 @@ import { NextRequest } from 'next/server';
 import {
   GET as getEventsHandler,
   POST as createEventHandler,
-  setTestServices as setEventsTestServices,
+  setEventsTestServices,
 } from '../../app/api/events/route';
 import {
   GET as getEventHandler,

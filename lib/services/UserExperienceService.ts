@@ -116,7 +116,7 @@ export class UserExperienceService {
               session = null; // Mark session as invalid
             }
           }
-        } catch {
+        } catch (error) {
           console.warn('Failed to recover session:', error);
           // Clear corrupted state
           this.userStateManager.clearUserState(eventId);
@@ -148,9 +148,11 @@ export class UserExperienceService {
         success: true,
         userState,
       };
-    } catch {
-      const isNetworkError = false;
-
+    } catch (error) {
+      const isNetworkError = error instanceof Error &&
+        (error.message.includes('Network') || error.message.includes('network') ||
+         error.message.includes('NETWORK') || error.message.includes('connection') ||
+         error.message.includes('timeout') || error.message.includes('TIMEOUT'));
 
       return {
         success: false,
@@ -173,7 +175,7 @@ export class UserExperienceService {
   async saveUserState(eventId: string, userState: Partial<UserState>): Promise<void> {
     try {
       this.userStateManager.saveUserState(eventId, userState);
-    } catch {
+    } catch (error) {
       console.warn('Failed to save user state:', error);
     }
   }
@@ -283,7 +285,7 @@ export class UserExperienceService {
       } else {
         throw new Error('WebSocket connection failed');
       }
-    } catch {
+    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Connection failed';
 
       // Handle auto-reconnection
@@ -343,7 +345,8 @@ export class UserExperienceService {
       }
 
       return result;
-    } catch {
+    } catch (error) {
+      console.warn('Reconnection attempt failed:', error);
       return await this.attemptReconnection(eventId, participantId, options, attempt + 1);
     }
   }
@@ -390,7 +393,7 @@ export class UserExperienceService {
             }
             break;
         }
-      } catch {
+      } catch (error) {
         console.warn('Failed to parse WebSocket message:', error);
       }
     };
@@ -420,7 +423,8 @@ export class UserExperienceService {
       // This would typically call a WinnerService method
       // For now, return false (no winner found)
       return { isWinner: false };
-    } catch {
+    } catch (error) {
+      console.warn('Failed to check winner status:', error);
       return { isWinner: false };
     }
   }
