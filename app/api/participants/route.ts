@@ -1,44 +1,234 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { validateRequest } from '@/lib/api/validation';
-import { registerParticipant } from '@/lib/participants/mutations';
+import { ParticipantService } from '../../../lib/services/ParticipantService';
+import { EventService } from '../../../lib/services/EventService';
+import { SessionService } from '../../../lib/services/SessionService';
+import { NotificationService } from '../../../lib/services/NotificationService';
+import { ParticipantRepository } from '../../../lib/repositories/ParticipantRepository';
+import { EventRepository } from '../../../lib/repositories/EventRepository';
+import { EventState } from '../../../lib/state/EventStateMachine';
 
-const registerSchema = z.object({
-  eventId: z.string().uuid(),
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Valid email is required'),
-  phone: z.string().optional(),
-});
+// Initialize services
+const participantRepository = new ParticipantRepository();
+const eventRepository = new EventRepository();
+const participantService = new ParticipantService(participantRepository, eventRepository);
+const eventService = new EventService(eventRepository);
+const sessionService = new SessionService();
+const notificationService = new NotificationService();
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = await validateRequest(request, registerSchema);
+    // Parse request body
+    const body = await request.json();
+    const { eventId, name } = body;
 
-    if (!body.success) {
+    // Validate required fields
+    if (!eventId || !name || typeof eventId !== 'string' || typeof name !== 'string') {
       return NextResponse.json(
-        { error: body.error },
+        {
+          success: false,
+          error: 'Event ID and name are required'
+        },
         { status: 400 }
       );
     }
 
-    const participant = await registerParticipant(body.data.eventId, body.data.name);
+    // Validate name format
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Name is required'
+        },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json({
-      success: true,
-      participant,
+    // Basic name format validation
+    if (trimmedName.length < 2) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Name is too short - must be at least 2 characters'
+        },
+        { status: 400 }
+      );
+    }
+
+    if (trimmedName.length > 100) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Name is too long - maximum 100 characters'
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check for malicious characters (basic sanitization)
+    if (/[<>\"'&]/.test(trimmedName)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid characters detected in name for security reasons'
+        },
+        { status: 400 }
+      );
+    }
+
+    // Find event
+    const event = await eventService.findById(eventId);
+    if (!event) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Event not found'
+        },
+        { status: 404 }
+      );
+    }
+
+    // Check event state
+    if (event.state !== EventState.REGISTRATION) {
+      let message = 'Registration is not open for this event';
+      if (event.state === EventState.DRAW) {
+        message = 'Registration is closed - draw in progress';
+      } else if (event.state === EventState.CLOSED) {
+        message = 'Event is closed';
+      }
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: message
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check for existing participant
+    const existingParticipant = await participantService.findByEventAndName(eventId, trimmedName);
+    if (existingParticipant) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Name already registered for this event',
+          existingParticipant
+        },
+        { status: 409 }
+      );
+    }
+
+    // Check participant limits
+    const currentCount = await participantService.getParticipantCount(eventId);
+    if (event.maxParticipants && currentCount >= event.maxParticipants) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Event has reached maximum participant limit',
+          maxParticipants: event.maxParticipants,
+          currentParticipants: currentCount
+        },
+        { status: 400 }
+      );
+    }
+
+    // Create participant
+    const participant = await participantService.create({
+      eventId,
+      name: trimmedName
     });
-  } catch (error) {
-    console.error('Register participant error:', error);
 
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
+    // Create user session
+    let sessionToken: string | undefined;
+    let sessionWarning: string | undefined;
+
+    try {
+      const session = await sessionService.createUserSession(participant.id, eventId);
+      sessionToken = session.token || session.id;
+    } catch (sessionError) {
+      console.error('Session creation failed:', sessionError);
+
+      // Check if we should rollback on failure
+      const rollbackHeader = request.headers.get('X-Rollback-On-Failure');
+      if (rollbackHeader === 'true') {
+        // Rollback participant creation
+        await participantService.delete(participant.id);
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Registration failed - unable to create session'
+          },
+          { status: 500 }
+        );
+      } else {
+        sessionWarning = 'Registration successful but session creation failed';
+      }
+    }
+
+    // Send notification (optional)
+    try {
+      await notificationService.sendRegistrationConfirmation({
+        participant,
+        event,
+        registrationUrl: `${request.nextUrl.origin}/events/${eventId}`
+      });
+    } catch (notificationError) {
+      console.error('Notification failed:', notificationError);
+      // Don't fail the registration if notification fails
+    }
+
+    // Log analytics
+    const ip = request.headers.get('X-Forwarded-For') || request.headers.get('X-Real-IP') || 'unknown';
+    const userAgent = request.headers.get('User-Agent') || 'unknown';
+
+    console.info('Participant Registration', {
+      eventId: event.id,
+      eventName: event.name,
+      participantId: participant.id,
+      participantName: participant.name,
+      ip,
+      userAgent,
+      timestamp: new Date()
+    });
+
+    // Prepare response
+    const responseData: any = {
+      success: true,
+      participant: {
+        ...participant,
+        qrCode: participant.qrCode || `data:image/png;base64,participant-qr-code-data`
+      },
+      timestamp: new Date()
+    };
+
+    if (sessionToken) {
+      responseData.sessionToken = sessionToken;
+    }
+
+    if (sessionWarning) {
+      responseData.warning = sessionWarning;
+    }
+
+    // Set secure session cookie if we have a session token
+    const response = NextResponse.json(responseData, { status: 201 });
+
+    if (sessionToken) {
+      response.headers.set('Set-Cookie',
+        `userSession=${sessionToken}; HttpOnly; Secure; Path=/; SameSite=Strict`
       );
     }
+
+    return response;
+
+  } catch (error) {
+    console.error('Registration error:', error);
 
     return NextResponse.json(
-      { error: 'Failed to register participant' },
+      {
+        success: false,
+        error: 'Internal server error during registration'
+      },
       { status: 500 }
     );
   }
