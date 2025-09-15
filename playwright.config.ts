@@ -69,22 +69,13 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: [
-    {
-      command: 'yarn workspace @the-draw/frontend dev',
-      url: 'http://127.0.0.1:3000',
-      reuseExistingServer: !process.env.CI,
-      stdout: 'ignore',
-      stderr: 'pipe',
-    },
-    {
-      command: 'yarn workspace @the-draw/backend dev',
-      url: 'http://127.0.0.1:3001',
-      reuseExistingServer: !process.env.CI,
-      stdout: 'ignore',
-      stderr: 'pipe',
-    },
-  ],
+  webServer: {
+    command: 'yarn dev',
+    url: 'http://127.0.0.1:3000',
+    reuseExistingServer: !process.env.CI,
+    stdout: 'ignore',
+    stderr: 'pipe',
+  },
 
   /* Global setup and teardown */
   globalSetup: require.resolve('./e2e/global-setup.ts'),
