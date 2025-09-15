@@ -47,6 +47,7 @@ jest.mock('next/navigation', () => ({
   usePathname() {
     return '/'
   },
+  redirect: jest.fn(),
 }))
 
 // Mock Next.js server components (NextResponse)
