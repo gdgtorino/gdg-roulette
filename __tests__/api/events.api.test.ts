@@ -8,8 +8,8 @@
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { NextRequest } from 'next/server';
-import { GET as getEventsHandler, POST as createEventHandler } from '../../app/api/events/route';
-import { GET as getEventHandler, PUT as updateEventHandler, DELETE as deleteEventHandler } from '../../app/api/events/[eventId]/route';
+import { GET as getEventsHandler, POST as createEventHandler, setTestServices as setEventsTestServices } from '../../app/api/events/route';
+import { GET as getEventHandler, PUT as updateEventHandler, DELETE as deleteEventHandler, setTestServices as setEventTestServices } from '../../app/api/events/[eventId]/route';
 import { POST as executeDrawHandler } from '../../app/api/draws/[eventId]/execute/route';
 import { EventService } from '../../lib/services/EventService';
 import { LotteryService } from '../../lib/services/LotteryService';
@@ -17,23 +17,47 @@ import { AuthService } from '../../lib/services/AuthService';
 import { EventState } from '../../lib/state/EventStateMachine';
 
 // Mock services
-jest.mock('../../lib/services/EventService');
-jest.mock('../../lib/services/LotteryService');
-jest.mock('../../lib/services/AuthService');
+const mockEventService = {
+  findById: jest.fn(),
+  create: jest.fn(),
+  updateState: jest.fn(),
+  findAll: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+  getEventsForAdmin: jest.fn(),
+  createEvent: jest.fn(),
+  updateEvent: jest.fn(),
+  deleteEvent: jest.fn()
+};
+
+const mockLotteryService = {
+  drawSingleWinner: jest.fn(),
+  drawAllRemainingParticipants: jest.fn(),
+  getDrawResults: jest.fn()
+};
+
+const mockAuthService = {
+  validateAdminAccess: jest.fn(),
+  login: jest.fn(),
+  logout: jest.fn(),
+  validateSession: jest.fn()
+};
 
 describe('/api/events/* API Routes', () => {
-  let eventService: jest.Mocked<EventService>;
-  let lotteryService: jest.Mocked<LotteryService>;
-  let authService: jest.Mocked<AuthService>;
-
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
 
-    // Create mocked instances
-    eventService = new EventService() as jest.Mocked<EventService>;
-    lotteryService = new LotteryService() as jest.Mocked<LotteryService>;
-    authService = new AuthService() as jest.Mocked<AuthService>;
+    // Set up test services
+    setEventsTestServices({
+      eventService: mockEventService as any,
+      authService: mockAuthService as any
+    });
+
+    setEventTestServices({
+      eventService: mockEventService as any,
+      authService: mockAuthService as any
+    });
   });
 
   afterEach(() => {
@@ -77,8 +101,8 @@ describe('/api/events/* API Routes', () => {
         }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.getEventsForAdmin.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.getEventsForAdmin.mockResolvedValue({
         success: true,
         events: mockEvents
       });
@@ -100,12 +124,12 @@ describe('/api/events/* API Routes', () => {
       expect(responseData.events).toHaveLength(2);
       expect(responseData.events[0].name).toBe('Test Event 1');
       expect(responseData.events[1].name).toBe('Test Event 2');
-      expect(eventService.getEventsForAdmin).toHaveBeenCalledWith('admin-123');
+      expect(mockEventService.getEventsForAdmin).toHaveBeenCalledWith('admin-123');
     });
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      authService.validateSession.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue({
         valid: false,
         session: null
       });
@@ -122,7 +146,7 @@ describe('/api/events/* API Routes', () => {
       expect(response.status).toBe(401);
       expect(responseData.success).toBe(false);
       expect(responseData.error).toBe('Authentication required');
-      expect(eventService.getEventsForAdmin).not.toHaveBeenCalled();
+      expect(mockEventService.getEventsForAdmin).not.toHaveBeenCalled();
     });
 
     it('should filter events by state when query parameter provided', async () => {
@@ -142,8 +166,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.getEventsByState.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.getEventsByState.mockResolvedValue({
         success: true,
         events: mockActiveEvents
       });
@@ -163,7 +187,7 @@ describe('/api/events/* API Routes', () => {
       expect(response.status).toBe(200);
       expect(responseData.events).toHaveLength(1);
       expect(responseData.events[0].state).toBe(EventState.REGISTRATION);
-      expect(eventService.getEventsByState).toHaveBeenCalledWith('admin-123', EventState.REGISTRATION);
+      expect(mockEventService.getEventsByState).toHaveBeenCalledWith('admin-123', EventState.REGISTRATION);
     });
 
     it('should handle pagination parameters', async () => {
@@ -186,8 +210,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.getEventsForAdmin.mockResolvedValue(mockPaginatedEvents);
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.getEventsForAdmin.mockResolvedValue(mockPaginatedEvents);
 
       const request = new NextRequest('http://localhost/api/events?page=2&pageSize=10', {
         method: 'GET',
@@ -205,7 +229,7 @@ describe('/api/events/* API Routes', () => {
       expect(responseData.pagination.page).toBe(2);
       expect(responseData.pagination.pageSize).toBe(10);
       expect(responseData.pagination.total).toBe(25);
-      expect(eventService.getEventsForAdmin).toHaveBeenCalledWith('admin-123', {
+      expect(mockEventService.getEventsForAdmin).toHaveBeenCalledWith('admin-123', {
         page: 2,
         pageSize: 10
       });
@@ -239,8 +263,8 @@ describe('/api/events/* API Routes', () => {
         createdAt: new Date()
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.createEvent.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.createEvent.mockResolvedValue({
         success: true,
         event: mockCreatedEvent
       });
@@ -264,7 +288,7 @@ describe('/api/events/* API Routes', () => {
       expect(responseData.event.name).toBe('New Test Event');
       expect(responseData.event.createdBy).toBe('admin-123');
       expect(responseData.event.state).toBe(EventState.INIT);
-      expect(eventService.createEvent).toHaveBeenCalledWith({
+      expect(mockEventService.createEvent).toHaveBeenCalledWith({
         ...eventData,
         createdBy: 'admin-123'
       });
@@ -284,7 +308,7 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
 
       // Act & Assert
       for (const invalidData of invalidEventData) {
@@ -318,8 +342,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.createEvent.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.createEvent.mockResolvedValue({
         success: false,
         error: 'Insufficient permissions'
       });
@@ -368,8 +392,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.getEventDetails.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.getEventDetails.mockResolvedValue({
         success: true,
         event: mockEvent
       });
@@ -390,7 +414,7 @@ describe('/api/events/* API Routes', () => {
       expect(responseData.success).toBe(true);
       expect(responseData.event.id).toBe(eventId);
       expect(responseData.event.participants).toHaveLength(2);
-      expect(eventService.getEventDetails).toHaveBeenCalledWith(eventId, 'admin-123');
+      expect(mockEventService.getEventDetails).toHaveBeenCalledWith(eventId, 'admin-123');
     });
 
     it('should return 404 for non-existent event', async () => {
@@ -402,8 +426,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.getEventDetails.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.getEventDetails.mockResolvedValue({
         success: false,
         error: 'Event not found'
       });
@@ -434,8 +458,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-456' } // Different admin
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.getEventDetails.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.getEventDetails.mockResolvedValue({
         success: false,
         error: 'Access denied - not event creator'
       });
@@ -483,8 +507,8 @@ describe('/api/events/* API Routes', () => {
         updatedAt: new Date()
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.updateEvent.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.updateEvent.mockResolvedValue({
         success: true,
         event: mockUpdatedEvent
       });
@@ -507,7 +531,7 @@ describe('/api/events/* API Routes', () => {
       expect(responseData.success).toBe(true);
       expect(responseData.event.name).toBe('Updated Event Name');
       expect(responseData.event.description).toBe('Updated description');
-      expect(eventService.updateEvent).toHaveBeenCalledWith(eventId, updateData, 'admin-123');
+      expect(mockEventService.updateEvent).toHaveBeenCalledWith(eventId, updateData, 'admin-123');
     });
 
     it('should prevent updating closed events', async () => {
@@ -522,8 +546,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.updateEvent.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.updateEvent.mockResolvedValue({
         success: false,
         error: 'Cannot modify closed event'
       });
@@ -559,8 +583,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.updateEvent.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.updateEvent.mockResolvedValue({
         success: false,
         error: 'Invalid state transition'
       });
@@ -595,8 +619,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.deleteEvent.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.deleteEvent.mockResolvedValue({
         success: true,
         message: 'Event deleted successfully'
       });
@@ -616,7 +640,7 @@ describe('/api/events/* API Routes', () => {
       expect(response.status).toBe(200);
       expect(responseData.success).toBe(true);
       expect(responseData.message).toBe('Event deleted successfully');
-      expect(eventService.deleteEvent).toHaveBeenCalledWith(eventId, 'admin-123');
+      expect(mockEventService.deleteEvent).toHaveBeenCalledWith(eventId, 'admin-123');
     });
 
     it('should prevent deletion of active events with participants', async () => {
@@ -628,8 +652,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.deleteEvent.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.deleteEvent.mockResolvedValue({
         success: false,
         error: 'Cannot delete event with registered participants'
       });
@@ -661,7 +685,7 @@ describe('/api/events/* API Routes', () => {
       };
 
       // Request without confirmation
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
 
       const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
         method: 'DELETE',
@@ -706,8 +730,8 @@ describe('/api/events/* API Routes', () => {
         }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      lotteryService.drawSingleWinner.mockResolvedValue(mockDrawResult);
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockLotteryService.drawSingleWinner.mockResolvedValue(mockDrawResult);
 
       const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
         method: 'POST',
@@ -727,7 +751,7 @@ describe('/api/events/* API Routes', () => {
       expect(responseData.success).toBe(true);
       expect(responseData.winner.participantName).toBe('Alice');
       expect(responseData.winner.drawOrder).toBe(1);
-      expect(lotteryService.drawSingleWinner).toHaveBeenCalledWith(eventId, 'admin-123');
+      expect(mockLotteryService.drawSingleWinner).toHaveBeenCalledWith(eventId, 'admin-123');
     });
 
     it('should execute draw all remaining participants', async () => {
@@ -765,8 +789,8 @@ describe('/api/events/* API Routes', () => {
         eventClosed: true
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      lotteryService.drawAllRemaining.mockResolvedValue(mockDrawAllResult);
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockLotteryService.drawAllRemaining.mockResolvedValue(mockDrawAllResult);
 
       const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
         method: 'POST',
@@ -787,7 +811,7 @@ describe('/api/events/* API Routes', () => {
       expect(responseData.winners).toHaveLength(3);
       expect(responseData.totalDrawn).toBe(3);
       expect(responseData.eventClosed).toBe(true);
-      expect(lotteryService.drawAllRemaining).toHaveBeenCalledWith(eventId, 'admin-123');
+      expect(mockLotteryService.drawAllRemaining).toHaveBeenCalledWith(eventId, 'admin-123');
     });
 
     it('should prevent draw execution when event not in DRAW state', async () => {
@@ -802,8 +826,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      lotteryService.drawSingleWinner.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockLotteryService.drawSingleWinner.mockResolvedValue({
         success: false,
         error: 'Cannot draw winners - event is not in DRAW state'
       });
@@ -839,8 +863,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      lotteryService.drawSingleWinner.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockLotteryService.drawSingleWinner.mockResolvedValue({
         success: false,
         error: 'No participants available for drawing'
       });
@@ -876,7 +900,7 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
 
       const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
         method: 'POST',
@@ -918,8 +942,8 @@ describe('/api/events/* API Routes', () => {
         }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      lotteryService.drawSingleWinner.mockResolvedValue(mockDrawResult);
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockLotteryService.drawSingleWinner.mockResolvedValue(mockDrawResult);
 
       // Mock broadcast service
       const mockBroadcast = jest.fn();
@@ -955,8 +979,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.getEventsForAdmin.mockRejectedValue(new Error('Database connection failed'));
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.getEventsForAdmin.mockRejectedValue(new Error('Database connection failed'));
 
       const request = new NextRequest(new Request('http://localhost/api/events', {
         method: 'GET',
@@ -982,7 +1006,7 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
 
       const request = new NextRequest('http://localhost/api/events', {
         method: 'POST',
@@ -1015,8 +1039,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      lotteryService.drawSingleWinner.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockLotteryService.drawSingleWinner.mockResolvedValue({
         success: false,
         error: 'Draw operation already in progress'
       });
@@ -1047,8 +1071,8 @@ describe('/api/events/* API Routes', () => {
         session: { adminId: 'admin-123' }
       };
 
-      authService.validateSession.mockResolvedValue(mockSessionValidation);
-      eventService.getEventsForAdmin.mockResolvedValue({
+      mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
+      mockEventService.getEventsForAdmin.mockResolvedValue({
         success: true,
         events: []
       });
