@@ -6,7 +6,6 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/Badge';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { EventManagement } from './EventManagement';
-import { ParticipantManagement } from './ParticipantManagement';
 import { LotteryControl } from './LotteryControl';
 import { EventList } from './EventList';
 import { EventStats } from './EventStats';
