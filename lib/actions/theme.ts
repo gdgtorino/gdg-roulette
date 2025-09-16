@@ -1,8 +1,10 @@
 'use server';
 
 import { cookies } from 'next/headers';
+import { unstable_noStore } from 'next/cache';
 
 export async function setTheme(theme: 'light' | 'dark') {
+  unstable_noStore();
   const cookieStore = cookies();
   cookieStore.set('theme', theme, {
     path: '/',

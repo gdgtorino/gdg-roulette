@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Force dynamic to handle cookies
+export const dynamic = 'force-dynamic';
+
 function getAuthToken(request: NextRequest): string | null {
   // Check for auth_token cookie
   const cookieToken = request.cookies.get('auth_token')?.value;

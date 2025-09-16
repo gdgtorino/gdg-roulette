@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_noStore } from 'next/cache';
 import { appRouter } from '../trpc/root';
 import { verifyToken } from '../utils/auth';
 import { redisService } from '../redis';
@@ -9,6 +9,7 @@ import { TRPCError } from '@trpc/server';
 import type { Context } from '../trpc/context';
 
 async function getAuthenticatedContext(): Promise<Context | null> {
+  unstable_noStore();
   const { cookies } = await import('next/headers');
   const cookieStore = cookies();
   const token = cookieStore.get('auth_token')?.value;

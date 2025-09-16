@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import { unstable_noStore } from 'next/cache';
 import { appRouter } from '../trpc/root';
 import type { Context } from '../trpc/context';
 import { redisService } from '../redis';
@@ -12,6 +13,7 @@ export async function login(
   formData: FormData,
 ): Promise<{ success: boolean; error: string }> {
   try {
+    unstable_noStore();
     const username = formData.get('username') as string;
     const password = formData.get('password') as string;
 
@@ -82,6 +84,7 @@ export async function login(
 }
 
 export async function logout() {
+  unstable_noStore();
   const cookieStore = cookies();
   cookieStore.delete('auth_token');
   redirect('/admin');
@@ -90,6 +93,7 @@ export async function logout() {
 // For forms that use useFormState
 export async function logoutWithState(): Promise<{ success: boolean; error: string }> {
   try {
+    unstable_noStore();
     const cookieStore = cookies();
     cookieStore.delete('auth_token');
     redirect('/admin');

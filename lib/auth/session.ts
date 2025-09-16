@@ -2,11 +2,13 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { unstable_noStore } from 'next/cache';
 import { verifyToken } from '../utils/auth';
 import type { JWTPayload } from '../types';
 
 export async function getSession(): Promise<JWTPayload | null> {
   try {
+    unstable_noStore();
     const cookieStore = cookies();
     const token = cookieStore.get('auth_token')?.value;
 

@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
+import { unstable_noStore } from 'next/cache';
 import '../globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
@@ -18,6 +19,9 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
+  // Mark as dynamic due to cookies usage
+  unstable_noStore();
+
   // Validate that the incoming `locale` parameter is valid
   if (!locales.includes(locale)) notFound();
 
