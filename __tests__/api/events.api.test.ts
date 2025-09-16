@@ -8,6 +8,33 @@
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { NextRequest } from 'next/server';
+
+// Helper function to create mock NextRequest
+function createMockRequest(data: any, headers: Record<string, string> = {}): NextRequest {
+  return {
+    json: async () => {
+      if (typeof data === 'string') {
+        return JSON.parse(data); // This will throw for invalid JSON
+      }
+      return data;
+    },
+    headers: {
+      get: (name: string) => headers[name] || null,
+    },
+    url: headers.url || 'http://localhost/api/events',
+  } as any as NextRequest;
+}
+
+// Helper function to create mock GET NextRequest (no body)
+function createMockGetRequest(headers: Record<string, string> = {}): NextRequest {
+  return {
+    headers: {
+      get: (name: string) => headers[name] || null,
+    },
+    url: headers.url || 'http://localhost/api/events',
+  } as any as NextRequest;
+}
+
 import {
   GET as getEventsHandler,
   POST as createEventHandler,
@@ -127,11 +154,9 @@ describe('/api/events/* API Routes', () => {
         events: mockEvents,
       });
 
-      const request = new NextRequest('http://localhost/api/events', {
-        method: 'GET',
-        headers: {
-          Cookie: 'sessionToken=session-token-123',
-        },
+      const request = createMockGetRequest({
+        Cookie: 'sessionToken=session-token-123',
+        url: 'http://localhost/api/events',
       });
 
       // Act
@@ -154,8 +179,8 @@ describe('/api/events/* API Routes', () => {
         session: null,
       });
 
-      const request = new NextRequest('http://localhost/api/events', {
-        method: 'GET',
+      const request = createMockGetRequest({
+        url: 'http://localhost/api/events',
       });
 
       // Act
@@ -294,18 +319,16 @@ describe('/api/events/* API Routes', () => {
         event: mockCreatedEvent,
       });
 
-      const request = new NextRequest('http://localhost/api/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(eventData),
+      const request = createMockRequest(eventData, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: 'http://localhost/api/events',
       });
 
       // Act
       const response = await createEventHandler(request);
       const responseData = await response.json();
+
 
       // Assert
       expect(response.status).toBe(201);
@@ -373,13 +396,10 @@ describe('/api/events/* API Routes', () => {
         error: 'Insufficient permissions',
       });
 
-      const request = new NextRequest('http://localhost/api/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(eventData),
+      const request = createMockRequest(eventData, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: 'http://localhost/api/events',
       });
 
       // Act
@@ -538,13 +558,10 @@ describe('/api/events/* API Routes', () => {
         event: mockUpdatedEvent,
       });
 
-      const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(updateData),
+      const request = createMockRequest(updateData, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: `http://localhost/api/events/${eventId}`,
       });
 
       // Act
