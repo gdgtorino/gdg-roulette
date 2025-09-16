@@ -242,11 +242,15 @@ export function CreateAdminForm({
           Create a new administrator account with specific permissions and access levels.
         </p>
         {(creatorAdmin || currentAdmin) && (
-          <p className="text-sm text-gray-500 mt-2">Creating as: {(currentAdmin || creatorAdmin)?.username}</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Creating as: {(currentAdmin || creatorAdmin)?.username}
+          </p>
         )}
         {isFormDisabled && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md" role="alert">
-            <p className="text-red-800 text-sm">Insufficient permissions to create admin accounts</p>
+            <p className="text-red-800 text-sm">
+              Insufficient permissions to create admin accounts
+            </p>
           </div>
         )}
       </div>
@@ -346,7 +350,9 @@ export function CreateAdminForm({
 
         {/* Role Selection */}
         <div>
-          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-3">Role *</label>
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-3">
+            Role *
+          </label>
           <select
             id="role"
             name="role"
@@ -372,7 +378,10 @@ export function CreateAdminForm({
               >
                 <div className="flex items-center space-x-2 mb-1">
                   <span className="font-medium text-gray-900">{role.label}</span>
-                  <Badge variant={role.badge as 'primary' | 'secondary' | 'danger'} className="text-xs">
+                  <Badge
+                    variant={role.badge as 'primary' | 'secondary' | 'danger'}
+                    className="text-xs"
+                  >
                     {role.value.replace('_', ' ')}
                   </Badge>
                 </div>
@@ -408,7 +417,11 @@ export function CreateAdminForm({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button type="submit" disabled={isSubmitting || isFormDisabled} className="w-full sm:w-auto">
+          <Button
+            type="submit"
+            disabled={isSubmitting || isFormDisabled}
+            className="w-full sm:w-auto"
+          >
             {isSubmitting ? (
               <>
                 <LoadingSpinner className="mr-2 h-4 w-4" />

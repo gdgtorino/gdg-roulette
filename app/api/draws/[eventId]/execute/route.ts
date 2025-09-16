@@ -3,14 +3,14 @@ import { LotteryService } from '../../../../../lib/services/LotteryService';
 import { AuthService } from '../../../../../lib/services/AuthService';
 
 // Global service instances that can be overridden in tests
-let lotteryService: LotteryService;
-let authService: AuthService;
+let lotteryService: LotteryService | undefined;
+let authService: AuthService | undefined;
 
-// Initialize services
-// eslint-disable-next-line prefer-const
-lotteryService = new LotteryService();
-// eslint-disable-next-line prefer-const
-authService = new AuthService();
+// Initialize services - only in non-test environment
+if (process.env.NODE_ENV !== 'test') {
+  lotteryService = new LotteryService();
+  authService = new AuthService();
+}
 
 // Function to set test services
 export function setTestServices(services: {
@@ -29,6 +29,17 @@ interface RouteParams {
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
+    // Ensure services are available
+    if (!authService || !lotteryService) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Services not properly initialized',
+        },
+        { status: 500 },
+      );
+    }
+
     // Extract session token from cookies
     let sessionToken;
     try {
@@ -64,7 +75,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     let body;
     try {
       body = await request.json();
-    } catch {
+    } catch (error) {
+      console.error('JSON parsing error:', error);
       return NextResponse.json(
         {
           success: false,

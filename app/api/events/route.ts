@@ -61,7 +61,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-
     if (process.env.NODE_ENV === 'test') {
       return await handleCreateEventTestMode(request);
     }
@@ -86,7 +85,7 @@ export async function POST(request: NextRequest) {
 }
 
 function extractSessionToken(cookies: string): string | null {
-  const sessionCookie = cookies.split(';').find(c => c.trim().startsWith('sessionToken='));
+  const sessionCookie = cookies.split(';').find((c) => c.trim().startsWith('sessionToken='));
   return sessionCookie ? sessionCookie.split('=')[1] : null;
 }
 
@@ -111,10 +110,13 @@ async function handleGetEventsTestMode(request: NextRequest): Promise<NextRespon
     // Validate session using mock auth service
     const sessionValidation = await authService.validateSession(sessionToken);
     if (!sessionValidation.valid || !sessionValidation.session) {
-      return NextResponse.json({
-        success: false,
-        error: 'Authentication required',
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Authentication required',
+        },
+        { status: 401 },
+      );
     }
 
     const adminId = sessionValidation.session.adminId;
@@ -135,11 +137,13 @@ async function handleGetEventsTestMode(request: NextRequest): Promise<NextRespon
         userAgent = 'Test Browser';
       } else {
         // For other tests, try to get headers normally
-        ip = request.headers?.get('X-Forwarded-For') || request.headers?.get('X-Real-IP') || 'unknown';
+        ip =
+          request.headers?.get('X-Forwarded-For') || request.headers?.get('X-Real-IP') || 'unknown';
         userAgent = request.headers?.get('User-Agent') || 'unknown';
       }
     } else {
-      ip = (request.headers?.get('X-Forwarded-For')) || (request.headers?.get('X-Real-IP')) || 'unknown';
+      ip =
+        request.headers?.get('X-Forwarded-For') || request.headers?.get('X-Real-IP') || 'unknown';
       userAgent = request.headers?.get('User-Agent') || 'unknown';
     }
 
@@ -153,7 +157,9 @@ async function handleGetEventsTestMode(request: NextRequest): Promise<NextRespon
     });
 
     // Handle query parameters
-    let state, page = 1, pageSize = 10;
+    let state,
+      page = 1,
+      pageSize = 10;
     try {
       const url = new URL(request.url || 'http://localhost/api/events');
       state = url.searchParams.get('state');
@@ -176,19 +182,25 @@ async function handleGetEventsTestMode(request: NextRequest): Promise<NextRespon
     }
 
     if (!eventsResult.success) {
-      return NextResponse.json({
-        success: false,
-        error: eventsResult.error,
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: eventsResult.error,
+        },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json(eventsResult);
   } catch (error) {
     console.error('Get events test mode error:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Internal server error',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Internal server error',
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -199,10 +211,13 @@ async function handleCreateEventTestMode(request: NextRequest): Promise<NextResp
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid JSON format',
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid JSON format',
+        },
+        { status: 400 },
+      );
     }
 
     // In test mode, try to extract session token but fall back to mock validation
@@ -224,10 +239,13 @@ async function handleCreateEventTestMode(request: NextRequest): Promise<NextResp
     // Validate session using mock auth service
     const sessionValidation = await authService.validateSession(sessionToken);
     if (!sessionValidation.valid || !sessionValidation.session) {
-      return NextResponse.json({
-        success: false,
-        error: 'Authentication required',
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Authentication required',
+        },
+        { status: 401 },
+      );
     }
 
     const adminId = sessionValidation.session.adminId;
@@ -235,17 +253,26 @@ async function handleCreateEventTestMode(request: NextRequest): Promise<NextResp
     // Basic validation
     const { name, description, maxParticipants } = body;
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      return NextResponse.json({
-        success: false,
-        error: 'Event name is required',
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Event name is required',
+        },
+        { status: 400 },
+      );
     }
 
-    if (maxParticipants !== undefined && (typeof maxParticipants !== 'number' || maxParticipants <= 0)) {
-      return NextResponse.json({
-        success: false,
-        error: 'Max participants must be a positive number',
-      }, { status: 400 });
+    if (
+      maxParticipants !== undefined &&
+      (typeof maxParticipants !== 'number' || maxParticipants <= 0)
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Max participants must be a positive number',
+        },
+        { status: 400 },
+      );
     }
 
     // Use injected eventService
@@ -260,23 +287,32 @@ async function handleCreateEventTestMode(request: NextRequest): Promise<NextResp
 
     if (!createResult.success) {
       if (createResult.error === 'Insufficient permissions') {
-        return NextResponse.json({
+        return NextResponse.json(
+          {
+            success: false,
+            error: createResult.error,
+          },
+          { status: 403 },
+        );
+      }
+      return NextResponse.json(
+        {
           success: false,
           error: createResult.error,
-        }, { status: 403 });
-      }
-      return NextResponse.json({
-        success: false,
-        error: createResult.error,
-      }, { status: 400 });
+        },
+        { status: 400 },
+      );
     }
 
     return NextResponse.json(createResult, { status: 201 });
   } catch (error) {
     console.error('Create event test mode error:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Internal server error',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Internal server error',
+      },
+      { status: 500 },
+    );
   }
 }

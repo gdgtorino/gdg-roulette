@@ -126,7 +126,10 @@ export default function AdminDashboardPage() {
         fetchEvents();
       } else {
         const data = await response.json();
-        setMessage({ type: 'error', text: data.message || 'No participants available for drawing' });
+        setMessage({
+          type: 'error',
+          text: data.message || 'No participants available for drawing',
+        });
       }
     } catch {
       setMessage({ type: 'error', text: 'Draw failed' });
@@ -209,9 +212,7 @@ export default function AdminDashboardPage() {
             <form onSubmit={handleCreateEvent}>
               <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Event Name
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Name</label>
                   <input
                     data-testid="event-name-input"
                     type="text"
@@ -250,7 +251,9 @@ export default function AdminDashboardPage() {
                     data-testid="max-participants-input"
                     type="number"
                     value={newEvent.maxParticipants}
-                    onChange={(e) => setNewEvent({ ...newEvent, maxParticipants: parseInt(e.target.value) || 0 })}
+                    onChange={(e) =>
+                      setNewEvent({ ...newEvent, maxParticipants: parseInt(e.target.value) || 0 })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
                   {newEvent.maxParticipants <= 0 && message.type === 'error' && (
@@ -288,18 +291,28 @@ export default function AdminDashboardPage() {
             </div>
           ) : (
             events.map((event) => (
-              <div key={event.id} data-testid="event-card" className="bg-white p-6 rounded-lg shadow">
+              <div
+                key={event.id}
+                data-testid="event-card"
+                className="bg-white p-6 rounded-lg shadow"
+              >
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="text-lg font-semibold">{event.name}</h3>
                     <p className="text-gray-600">{event.description}</p>
                     <div className="mt-2">
-                      <span data-testid="event-state" className={`px-2 py-1 rounded text-sm ${
-                        event.state === 'INIT' ? 'bg-gray-100 text-gray-800' :
-                        event.state === 'REGISTRATION' ? 'bg-blue-100 text-blue-800' :
-                        event.state === 'DRAW' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
+                      <span
+                        data-testid="event-state"
+                        className={`px-2 py-1 rounded text-sm ${
+                          event.state === 'INIT'
+                            ? 'bg-gray-100 text-gray-800'
+                            : event.state === 'REGISTRATION'
+                              ? 'bg-blue-100 text-blue-800'
+                              : event.state === 'DRAW'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-green-100 text-green-800'
+                        }`}
+                      >
                         {event.state}
                       </span>
                     </div>
@@ -308,9 +321,7 @@ export default function AdminDashboardPage() {
                     <p className="text-sm text-gray-600">
                       Participants: {event.participantCount}/{event.maxParticipants}
                     </p>
-                    <p className="text-sm text-gray-600">
-                      Winners: {event.winnersCount}
-                    </p>
+                    <p className="text-sm text-gray-600">Winners: {event.winnersCount}</p>
                   </div>
                 </div>
 
@@ -335,7 +346,10 @@ export default function AdminDashboardPage() {
                       >
                         Start Draw
                       </button>
-                      <div data-testid="registration-open-indicator" className="text-green-600 text-sm">
+                      <div
+                        data-testid="registration-open-indicator"
+                        className="text-green-600 text-sm"
+                      >
                         ✓ Registration Open
                       </div>
                     </>
@@ -381,7 +395,11 @@ export default function AdminDashboardPage() {
                   <button
                     data-testid="delete-event-button"
                     onClick={() => {
-                      if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+                      if (
+                        confirm(
+                          'Are you sure you want to delete this event? This action cannot be undone.',
+                        )
+                      ) {
                         // Handle delete
                       }
                     }}

@@ -216,13 +216,18 @@ describe('/api/events/* API Routes', () => {
         success: true,
         events: mockActiveEvents,
       });
-
-      const request = new NextRequest('http://localhost/api/events?state=REGISTRATION', {
-        method: 'GET',
-        headers: {
-          Cookie: 'sessionToken=session-token-123',
-        },
+      // Add default mock for getEventsForAdmin in case URL parsing fails
+      mockEventService.getEventsForAdmin.mockResolvedValue({
+        success: true,
+        events: mockActiveEvents,
       });
+
+      const request = {
+        url: 'http://localhost/api/events?state=REGISTRATION',
+        headers: {
+          get: (name: string) => (name === 'Cookie' ? 'sessionToken=session-token-123' : null),
+        },
+      } as NextRequest;
 
       // Act
       const response = await getEventsHandler(request);
@@ -263,12 +268,12 @@ describe('/api/events/* API Routes', () => {
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockEventService.getEventsForAdmin.mockResolvedValue(mockPaginatedEvents);
 
-      const request = new NextRequest('http://localhost/api/events?page=2&pageSize=10', {
-        method: 'GET',
+      const request = {
+        url: 'http://localhost/api/events?page=2&pageSize=10',
         headers: {
-          Cookie: 'sessionToken=session-token-123',
+          get: (name: string) => (name === 'Cookie' ? 'sessionToken=session-token-123' : null),
         },
-      });
+      } as NextRequest;
 
       // Act
       const response = await getEventsHandler(request);
@@ -328,7 +333,6 @@ describe('/api/events/* API Routes', () => {
       // Act
       const response = await createEventHandler(request);
       const responseData = await response.json();
-
 
       // Assert
       expect(response.status).toBe(201);
@@ -594,13 +598,10 @@ describe('/api/events/* API Routes', () => {
         error: 'Cannot modify closed event',
       });
 
-      const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(updateData),
+      const request = createMockRequest(updateData, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: `http://localhost/api/events/${eventId}`,
       });
 
       // Act
@@ -631,13 +632,10 @@ describe('/api/events/* API Routes', () => {
         error: 'Invalid state transition',
       });
 
-      const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(invalidStateUpdate),
+      const request = createMockRequest(invalidStateUpdate, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: `http://localhost/api/events/${eventId}`,
       });
 
       // Act
@@ -667,13 +665,15 @@ describe('/api/events/* API Routes', () => {
         message: 'Event deleted successfully',
       });
 
-      const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
-        method: 'DELETE',
+      const request = {
         headers: {
-          Cookie: 'sessionToken=session-token-123',
-          'X-Confirm-Delete': 'true',
+          get: (name: string) => {
+            if (name === 'Cookie') return 'sessionToken=session-token-123';
+            if (name === 'X-Confirm-Delete') return 'true';
+            return null;
+          },
         },
-      });
+      } as NextRequest;
 
       // Act
       const response = await deleteEventHandler(request, { params: { eventId } });
@@ -701,13 +701,15 @@ describe('/api/events/* API Routes', () => {
         error: 'Cannot delete event with registered participants',
       });
 
-      const request = new NextRequest(`http://localhost/api/events/${eventId}`, {
-        method: 'DELETE',
+      const request = {
         headers: {
-          Cookie: 'sessionToken=session-token-123',
-          'X-Confirm-Delete': 'true',
+          get: (name: string) => {
+            if (name === 'Cookie') return 'sessionToken=session-token-123';
+            if (name === 'X-Confirm-Delete') return 'true';
+            return null;
+          },
         },
-      });
+      } as NextRequest;
 
       // Act
       const response = await deleteEventHandler(request, { params: { eventId } });
@@ -777,13 +779,10 @@ describe('/api/events/* API Routes', () => {
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockLotteryService.drawSingleWinner.mockResolvedValue(mockDrawResult);
 
-      const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(drawRequest),
+      const request = createMockRequest(drawRequest, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: `http://localhost/api/draws/${eventId}/execute`,
       });
 
       // Act
@@ -836,13 +835,10 @@ describe('/api/events/* API Routes', () => {
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
       mockLotteryService.drawAllRemaining.mockResolvedValue(mockDrawAllResult);
 
-      const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(drawRequest),
+      const request = createMockRequest(drawRequest, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: `http://localhost/api/draws/${eventId}/execute`,
       });
 
       // Act
@@ -876,13 +872,10 @@ describe('/api/events/* API Routes', () => {
         error: 'Cannot draw winners - event is not in DRAW state',
       });
 
-      const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(drawRequest),
+      const request = createMockRequest(drawRequest, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: `http://localhost/api/draws/${eventId}/execute`,
       });
 
       // Act
@@ -913,13 +906,10 @@ describe('/api/events/* API Routes', () => {
         error: 'No participants available for drawing',
       });
 
-      const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(drawRequest),
+      const request = createMockRequest(drawRequest, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: `http://localhost/api/draws/${eventId}/execute`,
       });
 
       // Act
@@ -946,13 +936,10 @@ describe('/api/events/* API Routes', () => {
 
       mockAuthService.validateSession.mockResolvedValue(mockSessionValidation);
 
-      const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(invalidDrawRequest),
+      const request = createMockRequest(invalidDrawRequest, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: `http://localhost/api/draws/${eventId}/execute`,
       });
 
       // Act
@@ -993,13 +980,10 @@ describe('/api/events/* API Routes', () => {
       const mockBroadcast = jest.fn();
       (global as any).broadcastDrawUpdate = mockBroadcast;
 
-      const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(drawRequest),
+      const request = createMockRequest(drawRequest, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: `http://localhost/api/draws/${eventId}/execute`,
       });
 
       // Act
@@ -1091,13 +1075,10 @@ describe('/api/events/* API Routes', () => {
         error: 'Draw operation already in progress',
       });
 
-      const request = new NextRequest(`http://localhost/api/draws/${eventId}/execute`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: 'sessionToken=session-token-123',
-        },
-        body: JSON.stringify(drawRequest),
+      const request = createMockRequest(drawRequest, {
+        'Content-Type': 'application/json',
+        Cookie: 'sessionToken=session-token-123',
+        url: `http://localhost/api/draws/${eventId}/execute`,
       });
 
       // Act

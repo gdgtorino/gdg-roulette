@@ -23,26 +23,26 @@ const mockParticipantService = {
   findById: jest.fn(),
   create: jest.fn(),
   findByEventId: jest.fn(),
-  delete: jest.fn()
+  delete: jest.fn(),
 };
 
 const mockEventService = {
   findById: jest.fn(),
   create: jest.fn(),
   updateState: jest.fn(),
-  findAll: jest.fn()
+  findAll: jest.fn(),
 };
 
 const mockSessionService = {
   createUserSession: jest.fn(),
   validateUserSession: jest.fn(),
   extendSession: jest.fn(),
-  invalidateSession: jest.fn()
+  invalidateSession: jest.fn(),
 };
 
 const mockQRCodeService = {
   generateRegistrationUrl: jest.fn(),
-  generateQRCode: jest.fn()
+  generateQRCode: jest.fn(),
 };
 
 describe('User Registration System', () => {
@@ -56,7 +56,7 @@ describe('User Registration System', () => {
     registrationService = new RegistrationService(
       mockParticipantService as any,
       mockEventService as any,
-      mockSessionService as any
+      mockSessionService as any,
     );
 
     // Inject QRCodeService for QR code related tests
@@ -79,7 +79,7 @@ describe('User Registration System', () => {
         state: EventState.REGISTRATION,
         registrationOpen: true,
         closed: false,
-        participants: []
+        participants: [],
       };
 
       const mockParticipant = {
@@ -87,7 +87,7 @@ describe('User Registration System', () => {
         eventId,
         name: userName,
         registeredAt: new Date(),
-        sessionId: 'session-123'
+        sessionId: 'session-123',
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -105,7 +105,7 @@ describe('User Registration System', () => {
       expect(mockParticipantService.findByEventAndName).toHaveBeenCalledWith(eventId, userName);
       expect(mockParticipantService.create).toHaveBeenCalledWith({
         eventId,
-        name: userName
+        name: userName,
       });
       expect(mockSessionService.createUserSession).toHaveBeenCalledWith('participant-123', eventId);
     });
@@ -120,14 +120,14 @@ describe('User Registration System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const existingParticipant = {
         id: 'participant-456',
         eventId,
         name: duplicateName,
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -155,7 +155,7 @@ describe('User Registration System', () => {
         name: 'Event 1',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const mockEvent2 = {
@@ -163,12 +163,10 @@ describe('User Registration System', () => {
         name: 'Event 2',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
-      mockEventService.findById
-        .mockResolvedValueOnce(mockEvent1)
-        .mockResolvedValueOnce(mockEvent2);
+      mockEventService.findById.mockResolvedValueOnce(mockEvent1).mockResolvedValueOnce(mockEvent2);
 
       mockParticipantService.findByEventAndName.mockResolvedValue(null);
       mockParticipantService.create
@@ -177,14 +175,14 @@ describe('User Registration System', () => {
           eventId: event1Id,
           name: sameName,
           registeredAt: new Date(),
-          sessionId: 'session-123'
+          sessionId: 'session-123',
         })
         .mockResolvedValueOnce({
           id: 'participant-456',
           eventId: event2Id,
           name: sameName,
           registeredAt: new Date(),
-          sessionId: 'session-456'
+          sessionId: 'session-456',
         });
 
       mockSessionService.createUserSession
@@ -213,7 +211,7 @@ describe('User Registration System', () => {
         'B'.repeat(101), // Too long
         '123',
         '@#$%',
-        'Name with \n newline'
+        'Name with \n newline',
       ];
 
       // Act & Assert
@@ -231,10 +229,10 @@ describe('User Registration System', () => {
         'John Doe',
         'María García',
         'Jean-Pierre Dupont',
-        'O\'Sullivan',
+        "O'Sullivan",
         '李明',
         'Giuseppe Verdi Jr.',
-        'Anne-Marie'
+        'Anne-Marie',
       ];
 
       const mockEvent = {
@@ -242,23 +240,25 @@ describe('User Registration System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
       mockParticipantService.findByEventAndName.mockResolvedValue(null);
 
       // Mock successful creation for all valid names
-      mockParticipantService.create.mockImplementation((data) => Promise.resolve({
-        id: `participant-${Math.random()}`,
-        eventId: data.eventId,
-        name: data.name,
-        registeredAt: new Date(),
-        sessionId: `session-${Math.random()}`
-      }));
+      mockParticipantService.create.mockImplementation((data) =>
+        Promise.resolve({
+          id: `participant-${Math.random()}`,
+          eventId: data.eventId,
+          name: data.name,
+          registeredAt: new Date(),
+          sessionId: `session-${Math.random()}`,
+        }),
+      );
 
       mockSessionService.createUserSession.mockImplementation(() =>
-        Promise.resolve(`session-${Math.random()}`)
+        Promise.resolve(`session-${Math.random()}`),
       );
 
       // Act & Assert
@@ -281,7 +281,7 @@ describe('User Registration System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const mockParticipant = {
@@ -289,7 +289,7 @@ describe('User Registration System', () => {
         eventId,
         name: userName,
         registeredAt: new Date(),
-        sessionId: 'session-123'
+        sessionId: 'session-123',
       };
 
       mockEventService.findById.mockResolvedValue(registrationEvent);
@@ -314,7 +314,7 @@ describe('User Registration System', () => {
         name: 'Test Event',
         state: EventState.INIT,
         registrationOpen: false,
-        closed: false
+        closed: false,
       };
 
       mockEventService.findById.mockResolvedValue(initEvent);
@@ -338,7 +338,7 @@ describe('User Registration System', () => {
         name: 'Test Event',
         state: EventState.DRAW,
         registrationOpen: false,
-        closed: false
+        closed: false,
       };
 
       mockEventService.findById.mockResolvedValue(drawEvent);
@@ -362,7 +362,7 @@ describe('User Registration System', () => {
         name: 'Test Event',
         state: EventState.CLOSED,
         registrationOpen: false,
-        closed: true
+        closed: true,
       };
 
       mockEventService.findById.mockResolvedValue(closedEvent);
@@ -386,7 +386,7 @@ describe('User Registration System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: false,
-        closed: false
+        closed: false,
       };
 
       mockEventService.findById.mockResolvedValue(closedRegistrationEvent);
@@ -412,14 +412,14 @@ describe('User Registration System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const mockParticipant = {
         id: 'participant-123',
         eventId,
         name: userName,
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -444,14 +444,14 @@ describe('User Registration System', () => {
         participantId: 'participant-123',
         eventId: 'event-123',
         createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       };
 
       const mockParticipant = {
         id: 'participant-123',
         eventId: 'event-123',
         name: 'John Doe',
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       mockSessionService.validateUserSession.mockResolvedValue(mockSession);
@@ -488,7 +488,7 @@ describe('User Registration System', () => {
         participantId: 'participant-123',
         eventId: 'event-123',
         createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       };
 
       mockSessionService.validateUserSession.mockResolvedValue(mockSession);
@@ -514,7 +514,7 @@ describe('User Registration System', () => {
         participantId: 'participant-123',
         eventId: 'event-123',
         createdAt: new Date(),
-        expiresAt: newExpiryTime
+        expiresAt: newExpiryTime,
       });
 
       // Act
@@ -565,7 +565,9 @@ describe('User Registration System', () => {
     it('should handle QR code generation errors', async () => {
       // Arrange
       const eventId = 'event-123';
-      mockQRCodeService.generateRegistrationUrl.mockReturnValue('https://example.com/register/event-123');
+      mockQRCodeService.generateRegistrationUrl.mockReturnValue(
+        'https://example.com/register/event-123',
+      );
       mockQRCodeService.generateQRCode.mockRejectedValue(new Error('QR generation failed'));
 
       // Act
@@ -617,7 +619,7 @@ describe('User Registration System', () => {
         id: 'event-123',
         name: 'Test Event',
         state: EventState.REGISTRATION,
-        registrationOpen: true
+        registrationOpen: true,
       };
 
       // Act
@@ -636,7 +638,7 @@ describe('User Registration System', () => {
         id: 'event-123',
         name: 'Test Event',
         state: EventState.REGISTRATION,
-        registrationOpen: true
+        registrationOpen: true,
       };
 
       const onSubmit = jest.fn();
@@ -654,7 +656,7 @@ describe('User Registration System', () => {
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
           eventId: 'event-123',
-          name: 'John Doe'
+          name: 'John Doe',
         });
       });
     });
@@ -666,7 +668,7 @@ describe('User Registration System', () => {
         id: 'event-123',
         name: 'Test Event',
         state: EventState.REGISTRATION,
-        registrationOpen: true
+        registrationOpen: true,
       };
 
       // Act
@@ -687,7 +689,7 @@ describe('User Registration System', () => {
         id: 'event-123',
         name: 'Closed Event',
         state: EventState.DRAW,
-        registrationOpen: false
+        registrationOpen: false,
       };
 
       // Act
@@ -706,10 +708,10 @@ describe('User Registration System', () => {
         id: 'event-123',
         name: 'Test Event',
         state: EventState.REGISTRATION,
-        registrationOpen: true
+        registrationOpen: true,
       };
 
-      const slowSubmit = jest.fn(() => new Promise(resolve => setTimeout(resolve, 1000)));
+      const slowSubmit = jest.fn(() => new Promise((resolve) => setTimeout(resolve, 1000)));
 
       // Act
       render(<RegistrationForm event={mockEvent} onSubmit={slowSubmit} />);
@@ -732,13 +734,15 @@ describe('User Registration System', () => {
         id: 'event-123',
         name: 'Test Event',
         state: EventState.REGISTRATION,
-        registrationOpen: true
+        registrationOpen: true,
       };
 
-      const successSubmit = jest.fn(() => Promise.resolve({
-        success: true,
-        participant: { name: 'John Doe' }
-      }));
+      const successSubmit = jest.fn(() =>
+        Promise.resolve({
+          success: true,
+          participant: { name: 'John Doe' },
+        }),
+      );
 
       // Act
       render(<RegistrationForm event={mockEvent} onSubmit={successSubmit} />);
@@ -763,13 +767,15 @@ describe('User Registration System', () => {
         id: 'event-123',
         name: 'Test Event',
         state: EventState.REGISTRATION,
-        registrationOpen: true
+        registrationOpen: true,
       };
 
-      const errorSubmit = jest.fn(() => Promise.resolve({
-        success: false,
-        error: 'Name already registered for this event'
-      }));
+      const errorSubmit = jest.fn(() =>
+        Promise.resolve({
+          success: false,
+          error: 'Name already registered for this event',
+        }),
+      );
 
       // Act
       render(<RegistrationForm event={mockEvent} onSubmit={errorSubmit} />);
@@ -813,7 +819,7 @@ describe('User Registration System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -838,14 +844,14 @@ describe('User Registration System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const mockParticipant = {
         id: 'participant-123',
         eventId,
         name: userName,
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -872,7 +878,7 @@ describe('User Registration System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       mockEventService.findById.mockResolvedValue(mockEvent);
@@ -881,13 +887,15 @@ describe('User Registration System', () => {
         id: 'participant-123',
         eventId,
         name: userName,
-        registeredAt: new Date()
+        registeredAt: new Date(),
       });
       mockSessionService.createUserSession.mockRejectedValue(new Error('Session creation failed'));
       mockParticipantService.delete.mockResolvedValue(true);
 
       // Act
-      const result = await registrationService.registerParticipant(eventId, userName, { rollbackOnSessionFailure: true });
+      const result = await registrationService.registerParticipant(eventId, userName, {
+        rollbackOnSessionFailure: true,
+      });
 
       // Assert
       expect(result.success).toBe(false);

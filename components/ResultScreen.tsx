@@ -73,7 +73,11 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
 }) => {
   // Trigger confetti for winners
   useEffect(() => {
-      if (isWinner && showConfetti && typeof (globalThis as { confetti?: () => void }).confetti === 'function') {
+    if (
+      isWinner &&
+      showConfetti &&
+      typeof (globalThis as { confetti?: () => void }).confetti === 'function'
+    ) {
       (globalThis as { confetti: () => void }).confetti();
     }
   }, [isWinner, showConfetti]);
@@ -103,7 +107,11 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           <h1>Congratulations!</h1>
           <h2>{winner.participantName}</h2>
 
-          {showPosition && <p>Position {winner.drawOrder} - {getPositionText(winner.drawOrder)}</p>}
+          {showPosition && (
+            <p>
+              Position {winner.drawOrder} - {getPositionText(winner.drawOrder)}
+            </p>
+          )}
 
           {showTimestamp && winner.drawnAt && (
             <div>

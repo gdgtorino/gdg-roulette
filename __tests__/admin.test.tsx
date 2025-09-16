@@ -48,7 +48,7 @@ describe('Admin Management System', () => {
       adminRepository,
       passwordService,
       permissionService,
-      eventService
+      eventService,
     );
   });
 
@@ -58,7 +58,7 @@ describe('Admin Management System', () => {
       id: 'creator-123',
       username: 'creator',
       role: 'SUPER_ADMIN',
-      permissions: ['MANAGE_USERS']
+      permissions: ['MANAGE_USERS'],
     };
     adminRepository.findById.mockResolvedValue(defaultCreatorAdmin);
 
@@ -83,7 +83,7 @@ describe('Admin Management System', () => {
         username: 'newadmin',
         password: 'SecurePass123!',
         email: 'admin@example.com',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       const hashedPassword = 'hashed-secure-password';
@@ -95,12 +95,16 @@ describe('Admin Management System', () => {
         role: 'ADMIN',
         createdAt: new Date(),
         isActive: true,
-        permissions: ['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS']
+        permissions: ['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS'],
       };
 
       // Override specific mocks for this test
       passwordService.hash.mockResolvedValue(hashedPassword);
-      permissionService.getDefaultPermissions.mockReturnValue(['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS']);
+      permissionService.getDefaultPermissions.mockReturnValue([
+        'CREATE_EVENT',
+        'MANAGE_USERS',
+        'VIEW_ANALYTICS',
+      ]);
       adminRepository.create.mockResolvedValue(createdAdmin);
 
       // Act
@@ -118,7 +122,7 @@ describe('Admin Management System', () => {
         email: 'admin@example.com',
         role: 'ADMIN',
         createdBy: 'creator-admin-id',
-        permissions: ['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS']
+        permissions: ['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS'],
       });
     });
 
@@ -128,14 +132,14 @@ describe('Admin Management System', () => {
         username: 'newadmin',
         password: 'SecurePass123!',
         email: 'admin@example.com',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       const creatorAdmin = {
         id: 'creator-123',
         username: 'creator',
         role: 'ADMIN',
-        permissions: ['CREATE_EVENT'] // Missing MANAGE_USERS permission
+        permissions: ['CREATE_EVENT'], // Missing MANAGE_USERS permission
       };
 
       adminRepository.findById.mockResolvedValue(creatorAdmin);
@@ -156,21 +160,21 @@ describe('Admin Management System', () => {
         username: 'superadmin',
         password: 'SecurePass123!',
         email: 'super@example.com',
-        role: 'SUPER_ADMIN'
+        role: 'SUPER_ADMIN',
       };
 
       const regularAdminData = {
         username: 'regularadmin',
         password: 'SecurePass123!',
         email: 'regular@example.com',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       const moderatorData = {
         username: 'moderator',
         password: 'SecurePass123!',
         email: 'mod@example.com',
-        role: 'MODERATOR'
+        role: 'MODERATOR',
       };
 
       permissionService.getDefaultPermissions
@@ -187,21 +191,21 @@ describe('Admin Management System', () => {
           username: data.username,
           role: data.role,
           permissions: data.permissions, // Use the permissions passed from the service
-          createdAt: new Date()
+          createdAt: new Date(),
         }))
         .mockImplementationOnce(async (data) => ({
           id: 'admin-123',
           username: data.username,
           role: data.role,
           permissions: data.permissions,
-          createdAt: new Date()
+          createdAt: new Date(),
         }))
         .mockImplementationOnce(async (data) => ({
           id: 'mod-123',
           username: data.username,
           role: data.role,
           permissions: data.permissions,
-          createdAt: new Date()
+          createdAt: new Date(),
         }));
 
       // Act
@@ -211,7 +215,11 @@ describe('Admin Management System', () => {
 
       // Assert
       expect(superResult.admin.permissions).toEqual(['*']);
-      expect(adminResult.admin.permissions).toEqual(['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS']);
+      expect(adminResult.admin.permissions).toEqual([
+        'CREATE_EVENT',
+        'MANAGE_USERS',
+        'VIEW_ANALYTICS',
+      ]);
       expect(modResult.admin.permissions).toEqual(['VIEW_EVENTS', 'VIEW_ANALYTICS']);
     });
 
@@ -240,7 +248,7 @@ describe('Admin Management System', () => {
         username: 'audited-admin',
         password: 'SecurePass123!',
         email: 'audited@example.com',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       adminRepository.findByUsername.mockResolvedValue(null);
@@ -253,7 +261,7 @@ describe('Admin Management System', () => {
         id: 'admin-123',
         username: 'audited-admin',
         role: 'ADMIN',
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
       const auditLogSpy = jest.spyOn(adminService, 'logActivity');
@@ -269,8 +277,8 @@ describe('Admin Management System', () => {
         details: {
           username: 'audited-admin',
           role: 'ADMIN',
-          timestamp: expect.any(Date)
-        }
+          timestamp: expect.any(Date),
+        },
       });
     });
   });
@@ -282,14 +290,14 @@ describe('Admin Management System', () => {
         username: 'existing-admin',
         password: 'SecurePass123!',
         email: 'new@example.com',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       const existingAdmin = {
         id: 'existing-123',
         username: 'existing-admin',
         email: 'existing@example.com',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findByUsername.mockResolvedValue(existingAdmin);
@@ -310,14 +318,14 @@ describe('Admin Management System', () => {
         username: 'new-admin',
         password: 'SecurePass123!',
         email: 'existing@example.com',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       const existingAdmin = {
         id: 'existing-123',
         username: 'existing-admin',
         email: 'existing@example.com',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findByUsername.mockResolvedValue(null);
@@ -339,14 +347,14 @@ describe('Admin Management System', () => {
         username: 'Admin',
         password: 'SecurePass123!',
         email: 'admin1@example.com',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       const adminData2 = {
         username: 'admin',
         password: 'SecurePass123!',
         email: 'admin2@example.com',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       adminRepository.findByUsername.mockResolvedValue(null);
@@ -360,13 +368,13 @@ describe('Admin Management System', () => {
           id: 'admin-1',
           username: 'Admin',
           email: 'admin1@example.com',
-          createdAt: new Date()
+          createdAt: new Date(),
         })
         .mockResolvedValueOnce({
           id: 'admin-2',
           username: 'admin',
           email: 'admin2@example.com',
-          createdAt: new Date()
+          createdAt: new Date(),
         });
 
       // Act
@@ -386,7 +394,7 @@ describe('Admin Management System', () => {
         username: '  trimmed-admin  ',
         password: 'SecurePass123!',
         email: '  trimmed@example.com  ',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       adminRepository.findByUsername.mockImplementation((username) => {
@@ -407,7 +415,7 @@ describe('Admin Management System', () => {
         id: 'admin-123',
         username: 'trimmed-admin',
         email: 'trimmed@example.com',
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
       // Act
@@ -429,14 +437,14 @@ describe('Admin Management System', () => {
       const admin = {
         id: adminId,
         username: 'test-admin',
-        permissions: ['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS']
+        permissions: ['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS'],
       };
 
       adminRepository.findById.mockResolvedValue(admin);
 
       permissionService.hasPermission
-        .mockReturnValueOnce(true)  // CREATE_EVENT
-        .mockReturnValueOnce(true)  // MANAGE_USERS
+        .mockReturnValueOnce(true) // CREATE_EVENT
+        .mockReturnValueOnce(true) // MANAGE_USERS
         .mockReturnValueOnce(false); // DELETE_EVENT
 
       // Act
@@ -460,21 +468,21 @@ describe('Admin Management System', () => {
         id: superAdminId,
         username: 'super-admin',
         role: 'SUPER_ADMIN',
-        permissions: ['*'] // All permissions
+        permissions: ['*'], // All permissions
       };
 
       const admin = {
         id: adminId,
         username: 'admin',
         role: 'ADMIN',
-        permissions: ['CREATE_EVENT', 'MANAGE_USERS']
+        permissions: ['CREATE_EVENT', 'MANAGE_USERS'],
       };
 
       const moderator = {
         id: moderatorId,
         username: 'moderator',
         role: 'MODERATOR',
-        permissions: ['VIEW_EVENTS']
+        permissions: ['VIEW_EVENTS'],
       };
 
       adminRepository.findById
@@ -493,9 +501,9 @@ describe('Admin Management System', () => {
       const modCanDelete = await adminService.hasPermission(moderatorId, 'DELETE_EVENT');
 
       // Assert
-      expect(superCanDelete).toBe(true);  // Super admin can do everything
+      expect(superCanDelete).toBe(true); // Super admin can do everything
       expect(adminCanDelete).toBe(false); // Admin doesn't have DELETE_EVENT
-      expect(modCanDelete).toBe(false);   // Moderator doesn't have DELETE_EVENT
+      expect(modCanDelete).toBe(false); // Moderator doesn't have DELETE_EVENT
     });
 
     it('should update admin permissions dynamically', async () => {
@@ -506,24 +514,31 @@ describe('Admin Management System', () => {
       const existingAdmin = {
         id: adminId,
         username: 'admin',
-        permissions: ['CREATE_EVENT', 'VIEW_ANALYTICS']
+        permissions: ['CREATE_EVENT', 'VIEW_ANALYTICS'],
       };
 
       // Mock the admin being updated
       adminRepository.findById.mockResolvedValueOnce(existingAdmin);
       // Mock the modifier admin
-      adminRepository.findById.mockResolvedValueOnce({ id: 'modifier-admin-id', permissions: ['*'] });
+      adminRepository.findById.mockResolvedValueOnce({
+        id: 'modifier-admin-id',
+        permissions: ['*'],
+      });
       permissionService.canGrantPermission.mockReturnValue(true); // Modifier can grant all permissions
       permissionService.validatePermissions.mockReturnValue({ valid: true, errors: [] });
 
       adminRepository.updatePermissions.mockResolvedValue({
         ...existingAdmin,
         permissions: newPermissions,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
 
       // Act
-      const result = await adminService.updatePermissions(adminId, newPermissions, 'modifier-admin-id');
+      const result = await adminService.updatePermissions(
+        adminId,
+        newPermissions,
+        'modifier-admin-id',
+      );
 
       // Assert
       expect(result.success).toBe(true);
@@ -541,7 +556,7 @@ describe('Admin Management System', () => {
         id: attackerAdminId,
         username: 'attacker',
         role: 'ADMIN',
-        permissions: ['CREATE_EVENT', 'MANAGE_USERS']
+        permissions: ['CREATE_EVENT', 'MANAGE_USERS'],
       };
 
       adminRepository.findById.mockResolvedValue(attacker);
@@ -549,7 +564,11 @@ describe('Admin Management System', () => {
       permissionService.canGrantPermission.mockReturnValue(false);
 
       // Act
-      const result = await adminService.updatePermissions(adminId, escalatedPermissions, attackerAdminId);
+      const result = await adminService.updatePermissions(
+        adminId,
+        escalatedPermissions,
+        attackerAdminId,
+      );
 
       // Assert
       expect(result.success).toBe(false);
@@ -569,11 +588,15 @@ describe('Admin Management System', () => {
       permissionService.canGrantPermission.mockReturnValue(true); // Modifier can grant permissions
       permissionService.validatePermissions.mockReturnValue({
         valid: false,
-        errors: ['Cannot combine DELETE_ALL_EVENTS with READ_ONLY_MODE']
+        errors: ['Cannot combine DELETE_ALL_EVENTS with READ_ONLY_MODE'],
       });
 
       // Act
-      const result = await adminService.updatePermissions(adminId, conflictingPermissions, 'modifier-123');
+      const result = await adminService.updatePermissions(
+        adminId,
+        conflictingPermissions,
+        'modifier-123',
+      );
 
       // Assert
       expect(result.success).toBe(false);
@@ -588,7 +611,7 @@ describe('Admin Management System', () => {
         id: 'admin-123',
         username: 'test-admin',
         role: 'ADMIN',
-        permissions: ['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS']
+        permissions: ['CREATE_EVENT', 'MANAGE_USERS', 'VIEW_ANALYTICS'],
       };
 
       const dashboardData = {
@@ -597,8 +620,8 @@ describe('Admin Management System', () => {
         totalParticipants: 1250,
         recentActivities: [
           { id: '1', action: 'Event Created', timestamp: new Date(), user: 'admin1' },
-          { id: '2', action: 'User Registered', timestamp: new Date(), user: 'participant1' }
-        ]
+          { id: '2', action: 'User Registered', timestamp: new Date(), user: 'participant1' },
+        ],
       };
 
       // Act
@@ -619,21 +642,21 @@ describe('Admin Management System', () => {
         id: 'super-123',
         username: 'super-admin',
         role: 'SUPER_ADMIN',
-        permissions: ['*']
+        permissions: ['*'],
       };
 
       const regularAdmin = {
         id: 'admin-123',
         username: 'admin',
         role: 'ADMIN',
-        permissions: ['CREATE_EVENT', 'VIEW_ANALYTICS']
+        permissions: ['CREATE_EVENT', 'VIEW_ANALYTICS'],
       };
 
       const moderator = {
         id: 'mod-123',
         username: 'moderator',
         role: 'MODERATOR',
-        permissions: ['VIEW_EVENTS']
+        permissions: ['VIEW_EVENTS'],
       };
 
       // Act
@@ -655,12 +678,10 @@ describe('Admin Management System', () => {
       const admin = {
         id: 'admin-123',
         username: 'admin',
-        permissions: ['VIEW_ANALYTICS']
+        permissions: ['VIEW_ANALYTICS'],
       };
 
-      const loadDashboardData = jest.fn(() =>
-        new Promise(resolve => setTimeout(resolve, 1000))
-      );
+      const loadDashboardData = jest.fn(() => new Promise((resolve) => setTimeout(resolve, 1000)));
 
       // Act
       render(<AdminDashboard admin={admin} onLoadData={loadDashboardData} />);
@@ -675,12 +696,10 @@ describe('Admin Management System', () => {
       const admin = {
         id: 'admin-123',
         username: 'admin',
-        permissions: ['CREATE_EVENT']
+        permissions: ['CREATE_EVENT'],
       };
 
-      const failingOperation = jest.fn(() =>
-        Promise.reject(new Error('Failed to create event'))
-      );
+      const failingOperation = jest.fn(() => Promise.reject(new Error('Failed to create event')));
 
       // Act
       render(<AdminDashboard admin={admin} onCreateEvent={failingOperation} />);
@@ -702,13 +721,13 @@ describe('Admin Management System', () => {
       const eventData = {
         name: 'New Test Event',
         description: 'Test event description',
-        maxParticipants: 100
+        maxParticipants: 100,
       };
 
       const admin = {
         id: adminId,
         username: 'admin',
-        permissions: ['CREATE_EVENT']
+        permissions: ['CREATE_EVENT'],
       };
 
       const createdEvent = {
@@ -716,7 +735,7 @@ describe('Admin Management System', () => {
         name: 'New Test Event',
         createdBy: adminId,
         createdAt: new Date(),
-        state: 'INIT'
+        state: 'INIT',
       };
 
       adminRepository.findById.mockResolvedValue(admin);
@@ -731,7 +750,7 @@ describe('Admin Management System', () => {
       expect(result.event).toEqual(createdEvent);
       expect(eventService.createEvent).toHaveBeenCalledWith({
         ...eventData,
-        createdBy: adminId
+        createdBy: adminId,
       });
     });
 
@@ -742,18 +761,20 @@ describe('Admin Management System', () => {
         id: adminId,
         username: 'admin',
         role: 'ADMIN',
-        permissions: ['VIEW_EVENTS']
+        permissions: ['VIEW_EVENTS'],
       };
 
       const allEvents = [
         { id: 'e1', name: 'Event 1', createdBy: adminId, state: 'REGISTRATION' },
         { id: 'e2', name: 'Event 2', createdBy: 'other-admin', state: 'DRAW' },
-        { id: 'e3', name: 'Event 3', createdBy: adminId, state: 'CLOSED' }
+        { id: 'e3', name: 'Event 3', createdBy: adminId, state: 'CLOSED' },
       ];
 
       adminRepository.findById.mockResolvedValue(admin);
       permissionService.hasPermission.mockReturnValue(false); // Regular admin, can't view all events
-      eventService.getEventsForAdmin.mockResolvedValue(allEvents.filter(e => e.createdBy === adminId));
+      eventService.getEventsForAdmin.mockResolvedValue(
+        allEvents.filter((e) => e.createdBy === adminId),
+      );
 
       // Act
       const result = await adminService.getEventsForAdmin(adminId);
@@ -761,7 +782,7 @@ describe('Admin Management System', () => {
       // Assert
       expect(result.success).toBe(true);
       expect(result.events).toHaveLength(2); // Only admin's events
-      expect(result.events.every(e => e.createdBy === adminId)).toBe(true);
+      expect(result.events.every((e) => e.createdBy === adminId)).toBe(true);
     });
 
     it('should allow super admin to view all events', async () => {
@@ -771,13 +792,13 @@ describe('Admin Management System', () => {
         id: superAdminId,
         username: 'super-admin',
         role: 'SUPER_ADMIN',
-        permissions: ['*']
+        permissions: ['*'],
       };
 
       const allEvents = [
         { id: 'e1', name: 'Event 1', createdBy: 'admin1', state: 'REGISTRATION' },
         { id: 'e2', name: 'Event 2', createdBy: 'admin2', state: 'DRAW' },
-        { id: 'e3', name: 'Event 3', createdBy: 'admin3', state: 'CLOSED' }
+        { id: 'e3', name: 'Event 3', createdBy: 'admin3', state: 'CLOSED' },
       ];
 
       adminRepository.findById.mockResolvedValue(superAdmin);
@@ -801,14 +822,14 @@ describe('Admin Management System', () => {
       const admin = {
         id: adminId,
         username: 'admin',
-        permissions: ['VIEW_EVENTS'] // No MODIFY_EVENT permission
+        permissions: ['VIEW_EVENTS'], // No MODIFY_EVENT permission
       };
 
       const event = {
         id: eventId,
         name: 'Original Event',
         createdBy: 'other-admin', // Not created by current admin
-        state: 'REGISTRATION'
+        state: 'REGISTRATION',
       };
 
       adminRepository.findById.mockResolvedValue(admin);
@@ -833,20 +854,20 @@ describe('Admin Management System', () => {
       const admin = {
         id: adminId,
         username: 'admin',
-        permissions: ['CREATE_EVENT', 'MODIFY_EVENT']
+        permissions: ['CREATE_EVENT', 'MODIFY_EVENT'],
       };
 
       const event = {
         id: eventId,
         name: 'Original Event',
         createdBy: adminId, // Created by current admin
-        state: 'REGISTRATION'
+        state: 'REGISTRATION',
       };
 
       const updatedEvent = {
         ...event,
         name: 'Updated Event Name',
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       adminRepository.findById.mockResolvedValue(admin);
@@ -870,7 +891,7 @@ describe('Admin Management System', () => {
       const onSubmit = jest.fn();
       const currentAdmin = {
         id: 'admin-123',
-        permissions: ['MANAGE_USERS']
+        permissions: ['MANAGE_USERS'],
       };
 
       // Act
@@ -891,7 +912,7 @@ describe('Admin Management System', () => {
       const onSubmit = jest.fn();
       const currentAdmin = {
         id: 'admin-123',
-        permissions: ['MANAGE_USERS']
+        permissions: ['MANAGE_USERS'],
       };
 
       // Act
@@ -916,7 +937,7 @@ describe('Admin Management System', () => {
       const onSubmit = jest.fn();
       const currentAdmin = {
         id: 'admin-123',
-        permissions: ['MANAGE_USERS']
+        permissions: ['MANAGE_USERS'],
       };
 
       // Act
@@ -944,7 +965,7 @@ describe('Admin Management System', () => {
       const onSubmit = jest.fn(() => Promise.resolve({ success: true }));
       const currentAdmin = {
         id: 'admin-123',
-        permissions: ['MANAGE_USERS']
+        permissions: ['MANAGE_USERS'],
       };
 
       // Act
@@ -965,7 +986,7 @@ describe('Admin Management System', () => {
           username: 'newadmin',
           email: 'admin@example.com',
           password: 'SecurePass123!',
-          role: 'ADMIN'
+          role: 'ADMIN',
         });
       });
     });
@@ -973,13 +994,15 @@ describe('Admin Management System', () => {
     it('should display success message after admin creation', async () => {
       // Arrange
       const user = userEvent.setup();
-      const onSubmit = jest.fn(() => Promise.resolve({
-        success: true,
-        admin: { username: 'newadmin', email: 'admin@example.com' }
-      }));
+      const onSubmit = jest.fn(() =>
+        Promise.resolve({
+          success: true,
+          admin: { username: 'newadmin', email: 'admin@example.com' },
+        }),
+      );
       const currentAdmin = {
         id: 'admin-123',
-        permissions: ['MANAGE_USERS']
+        permissions: ['MANAGE_USERS'],
       };
 
       // Act
@@ -1004,13 +1027,15 @@ describe('Admin Management System', () => {
     it('should display error messages for creation failures', async () => {
       // Arrange
       const user = userEvent.setup();
-      const onSubmit = jest.fn(() => Promise.resolve({
-        success: false,
-        error: 'Username already exists'
-      }));
+      const onSubmit = jest.fn(() =>
+        Promise.resolve({
+          success: false,
+          error: 'Username already exists',
+        }),
+      );
       const currentAdmin = {
         id: 'admin-123',
-        permissions: ['MANAGE_USERS']
+        permissions: ['MANAGE_USERS'],
       };
 
       // Act
@@ -1035,7 +1060,7 @@ describe('Admin Management System', () => {
       // Arrange
       const currentAdmin = {
         id: 'admin-123',
-        permissions: ['VIEW_EVENTS'] // No MANAGE_USERS permission
+        permissions: ['VIEW_EVENTS'], // No MANAGE_USERS permission
       };
 
       // Act
@@ -1056,14 +1081,15 @@ describe('Admin Management System', () => {
         username: 'newadmin',
         password: 'SecurePass123!',
         email: 'admin@example.com',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       adminRepository.findByUsername.mockRejectedValue(new Error('Database connection failed'));
 
       // Act & Assert
-      await expect(adminService.createAdmin(adminData, 'creator-123'))
-        .rejects.toThrow('Database connection failed');
+      await expect(adminService.createAdmin(adminData, 'creator-123')).rejects.toThrow(
+        'Database connection failed',
+      );
     });
 
     it('should handle password hashing failures', async () => {
@@ -1072,7 +1098,7 @@ describe('Admin Management System', () => {
         username: 'newadmin',
         password: 'SecurePass123!',
         email: 'admin@example.com',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       adminRepository.findByUsername.mockResolvedValue(null);
@@ -1107,13 +1133,13 @@ describe('Admin Management System', () => {
         username: 'newadmin',
         password: 'SecurePass123!',
         email: 'admin@example.com',
-        role: 'ADMIN'
+        role: 'ADMIN',
       };
 
       const createdAdmin = {
         id: 'admin-123',
         username: 'newadmin',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       adminRepository.findByUsername.mockResolvedValue(null);
@@ -1132,7 +1158,7 @@ describe('Admin Management System', () => {
       // Act
       const result = await adminService.createAdmin(adminData, 'creator-123', {
         sendWelcomeEmail: true,
-        rollbackOnFailure: true
+        rollbackOnFailure: true,
       });
 
       // Assert

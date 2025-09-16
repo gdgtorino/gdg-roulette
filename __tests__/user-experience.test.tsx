@@ -27,28 +27,28 @@ const mockSessionService = {
   validateSession: jest.fn(),
   createUserSession: jest.fn(),
   extendSession: jest.fn(),
-  invalidateSession: jest.fn()
+  invalidateSession: jest.fn(),
 };
 
 const mockEventService = {
   findById: jest.fn(),
   create: jest.fn(),
   updateState: jest.fn(),
-  findAll: jest.fn()
+  findAll: jest.fn(),
 };
 
 const mockParticipantService = {
   findById: jest.fn(),
   findByEventAndName: jest.fn(),
   create: jest.fn(),
-  findByEventId: jest.fn()
+  findByEventId: jest.fn(),
 };
 
 const mockNotificationService = {
   connectToLiveUpdates: jest.fn(),
   sendNotification: jest.fn(),
   subscribeToEvents: jest.fn(),
-  disconnect: jest.fn()
+  disconnect: jest.fn(),
 };
 
 const mockUserStateManager = {
@@ -59,7 +59,7 @@ const mockUserStateManager = {
   createDefaultState: jest.fn(),
   saveUserState: jest.fn(),
   loadUserState: jest.fn(),
-  isStoredStateValid: jest.fn()
+  isStoredStateValid: jest.fn(),
 };
 
 describe('User Experience System', () => {
@@ -75,7 +75,7 @@ describe('User Experience System', () => {
       mockEventService as any,
       mockParticipantService as any,
       mockNotificationService as any,
-      mockUserStateManager as any
+      mockUserStateManager as any,
     );
 
     // Setup default mock returns
@@ -101,8 +101,8 @@ describe('User Experience System', () => {
         getItem: jest.fn(),
         setItem: jest.fn(),
         removeItem: jest.fn(),
-        clear: jest.fn()
-      }
+        clear: jest.fn(),
+      },
     });
   });
 
@@ -117,7 +117,7 @@ describe('User Experience System', () => {
       const storedState = {
         eventId,
         userStatus: 'UNREGISTERED',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       const mockEvent = {
@@ -125,7 +125,7 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(storedState));
@@ -133,7 +133,7 @@ describe('User Experience System', () => {
       mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'UNREGISTERED',
         screen: 'REGISTRATION',
-        event: mockEvent
+        event: mockEvent,
       });
 
       // Act
@@ -156,7 +156,7 @@ describe('User Experience System', () => {
         sessionId,
         userStatus: 'REGISTERED',
         participantId: 'participant-789',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       const mockSession = {
@@ -164,14 +164,14 @@ describe('User Experience System', () => {
         participantId: 'participant-789',
         eventId,
         valid: true,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       };
 
       const mockParticipant = {
         id: 'participant-789',
         name: 'John Doe',
         eventId,
-        registeredAt: new Date()
+        registeredAt: new Date(),
       };
 
       const mockEvent = {
@@ -179,7 +179,7 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.DRAW,
         registrationOpen: false,
-        closed: false
+        closed: false,
       };
 
       mockUserStateManager.loadUserState.mockReturnValue(storedState);
@@ -191,7 +191,7 @@ describe('User Experience System', () => {
         screen: 'WAITING',
         event: mockEvent,
         participant: mockParticipant,
-        session: mockSession
+        session: mockSession,
       });
 
       // Act
@@ -215,7 +215,7 @@ describe('User Experience System', () => {
         sessionId,
         userStatus: 'REGISTERED',
         participantId: 'participant-789',
-        timestamp: Date.now() - (25 * 60 * 60 * 1000) // 25 hours ago
+        timestamp: Date.now() - 25 * 60 * 60 * 1000, // 25 hours ago
       };
 
       const mockEvent = {
@@ -223,7 +223,7 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       mockUserStateManager.loadUserState.mockReturnValue(storedState);
@@ -234,7 +234,7 @@ describe('User Experience System', () => {
         screen: 'REGISTRATION',
         event: mockEvent,
         message: 'Session expired. Please register again.',
-        action: 'SHOW_REAUTH_FORM'
+        action: 'SHOW_REAUTH_FORM',
       });
 
       // Act
@@ -254,13 +254,13 @@ describe('User Experience System', () => {
       const participantData = {
         id: 'participant-456',
         name: 'Jane Doe',
-        eventId
+        eventId,
       };
 
       const sessionData = {
         id: 'session-789',
         participantId: 'participant-456',
-        eventId
+        eventId,
       };
 
       const newUserState = {
@@ -268,21 +268,21 @@ describe('User Experience System', () => {
         sessionId: 'session-789',
         userStatus: 'REGISTERED',
         participantId: 'participant-456',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       // Act
       await userExperienceService.saveUserState(eventId, {
         status: 'REGISTERED',
         participant: participantData,
-        session: sessionData
+        session: sessionData,
       });
 
       // Assert
       expect(mockUserStateManager.saveUserState).toHaveBeenCalledWith(eventId, {
         status: 'REGISTERED',
         participant: participantData,
-        session: sessionData
+        session: sessionData,
       });
     });
 
@@ -294,7 +294,7 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       // Simulate corrupted localStorage data - loadUserState returns null due to parse error
@@ -303,7 +303,7 @@ describe('User Experience System', () => {
       mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'UNREGISTERED',
         screen: 'REGISTRATION',
-        event: mockEvent
+        event: mockEvent,
       });
 
       // Act
@@ -324,23 +324,27 @@ describe('User Experience System', () => {
         sessionId,
         userStatus: 'REGISTERED',
         participantId: 'participant-123',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       const mockSession = {
         id: sessionId,
         participantId: 'participant-123',
         eventId,
-        valid: true
+        valid: true,
       };
 
       mockUserStateManager.loadUserState.mockReturnValue(storedState);
       mockSessionService.validateSession.mockResolvedValue(mockSession);
-      mockEventService.findById.mockResolvedValue({ id: eventId, name: 'Test Event', state: EventState.DRAW });
+      mockEventService.findById.mockResolvedValue({
+        id: eventId,
+        name: 'Test Event',
+        state: EventState.DRAW,
+      });
       mockParticipantService.findById.mockResolvedValue({ id: 'participant-123', name: 'User' });
       mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'REGISTERED',
-        screen: 'WAITING'
+        screen: 'WAITING',
       });
 
       // Act - Simulate multiple recoveries (page refreshes)
@@ -364,13 +368,13 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'UNREGISTERED',
         screen: 'REGISTRATION',
-        event: mockEvent
+        event: mockEvent,
       });
 
       // Act
@@ -390,25 +394,25 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.DRAW,
         registrationOpen: false,
-        closed: false
+        closed: false,
       };
 
       const mockParticipant = {
         id: 'participant-123',
         name: 'John Doe',
-        eventId
+        eventId,
       };
 
       mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'REGISTERED',
         screen: 'WAITING',
         event: mockEvent,
-        participant: mockParticipant
+        participant: mockParticipant,
       });
 
       // Act
       const result = await userExperienceService.determineUserScreen(eventId, {
-        participantId: 'participant-123'
+        participantId: 'participant-123',
       });
 
       // Assert
@@ -427,26 +431,26 @@ describe('User Experience System', () => {
         state: EventState.DRAW,
         registrationOpen: false,
         closed: false,
-        isLive: true
+        isLive: true,
       };
 
       const mockParticipant = {
         id: 'participant-123',
         name: 'John Doe',
-        eventId
+        eventId,
       };
 
       mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'REGISTERED',
         screen: 'LOTTERY_LIVE',
         event: mockEvent,
-        participant: mockParticipant
+        participant: mockParticipant,
       });
 
       // Act
       const result = await userExperienceService.determineUserScreen(eventId, {
         participantId: 'participant-123',
-        liveDrawActive: true
+        liveDrawActive: true,
       });
 
       // Assert
@@ -464,13 +468,13 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.CLOSED,
         registrationOpen: false,
-        closed: true
+        closed: true,
       };
 
       const mockParticipant = {
         id: 'participant-123',
         name: 'John Doe',
-        eventId
+        eventId,
       };
 
       const mockWinner = {
@@ -478,7 +482,7 @@ describe('User Experience System', () => {
         participantId: 'participant-123',
         participantName: 'John Doe',
         drawOrder: 3,
-        drawnAt: new Date()
+        drawnAt: new Date(),
       };
 
       mockUserStateManager.determineUserState.mockResolvedValue({
@@ -486,12 +490,12 @@ describe('User Experience System', () => {
         screen: 'WINNER_RESULT',
         event: mockEvent,
         participant: mockParticipant,
-        winner: mockWinner
+        winner: mockWinner,
       });
 
       // Act
       const result = await userExperienceService.determineUserScreen(eventId, {
-        participantId: 'participant-123'
+        participantId: 'participant-123',
       });
 
       // Assert
@@ -510,25 +514,25 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.CLOSED,
         registrationOpen: false,
-        closed: true
+        closed: true,
       };
 
       const mockParticipant = {
         id: 'participant-456',
         name: 'Jane Doe',
-        eventId
+        eventId,
       };
 
       mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'NOT_WINNER',
         screen: 'NOT_WINNER_RESULT',
         event: mockEvent,
-        participant: mockParticipant
+        participant: mockParticipant,
       });
 
       // Act
       const result = await userExperienceService.determineUserScreen(eventId, {
-        participantId: 'participant-456'
+        participantId: 'participant-456',
       });
 
       // Assert
@@ -545,7 +549,7 @@ describe('User Experience System', () => {
       mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'ERROR',
         screen: 'ERROR',
-        error: 'Event not found'
+        error: 'Event not found',
       });
 
       // Act
@@ -565,13 +569,13 @@ describe('User Experience System', () => {
         name: 'Closed Event',
         state: EventState.CLOSED,
         registrationOpen: false,
-        closed: true
+        closed: true,
       };
 
       mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'EVENT_CLOSED',
         screen: 'EVENT_CLOSED',
-        event: mockEvent
+        event: mockEvent,
       });
 
       // Act
@@ -596,7 +600,7 @@ describe('User Experience System', () => {
         onmessage: jest.fn(),
         onopen: jest.fn(),
         onerror: jest.fn(),
-        readyState: 1 // WebSocket.OPEN
+        readyState: 1, // WebSocket.OPEN
       };
 
       (global as any).WebSocket = jest.fn().mockImplementation(() => mockWebSocket);
@@ -608,7 +612,10 @@ describe('User Experience System', () => {
       // Assert
       expect(connection.connected).toBe(true);
       expect(connection.socket).toBe(mockWebSocket);
-      expect(mockNotificationService.connectToLiveUpdates).toHaveBeenCalledWith(eventId, participantId);
+      expect(mockNotificationService.connectToLiveUpdates).toHaveBeenCalledWith(
+        eventId,
+        participantId,
+      );
     });
 
     it('should handle winner announcement updates', async () => {
@@ -622,7 +629,7 @@ describe('User Experience System', () => {
         onmessage: null,
         onopen: null,
         onerror: null,
-        readyState: 1 // WebSocket.OPEN
+        readyState: 1, // WebSocket.OPEN
       };
 
       mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
@@ -632,24 +639,22 @@ describe('User Experience System', () => {
         winner: {
           participantId: 'participant-123',
           participantName: 'Alice',
-          drawOrder: 1
+          drawOrder: 1,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       const updateHandler = jest.fn();
 
       // Act
-      const connection = await userExperienceService.connectToLiveUpdates(
-        eventId,
-        participantId,
-        { onWinnerUpdate: updateHandler }
-      );
+      const connection = await userExperienceService.connectToLiveUpdates(eventId, participantId, {
+        onWinnerUpdate: updateHandler,
+      });
 
       // Simulate receiving winner update
       if (mockWebSocket.onmessage) {
         mockWebSocket.onmessage({
-          data: JSON.stringify(winnerUpdate)
+          data: JSON.stringify(winnerUpdate),
         } as MessageEvent);
       }
 
@@ -664,7 +669,7 @@ describe('User Experience System', () => {
 
       const mockWebSocket = {
         onmessage: null,
-        readyState: 1 // WebSocket.OPEN
+        readyState: 1, // WebSocket.OPEN
       };
 
       mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
@@ -673,29 +678,27 @@ describe('User Experience System', () => {
         type: 'PARTICIPANT_COUNT_UPDATE',
         totalParticipants: 25,
         remainingParticipants: 20,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       const countUpdateHandler = jest.fn();
 
       // Act
-      await userExperienceService.connectToLiveUpdates(
-        eventId,
-        participantId,
-        { onParticipantCountUpdate: countUpdateHandler }
-      );
+      await userExperienceService.connectToLiveUpdates(eventId, participantId, {
+        onParticipantCountUpdate: countUpdateHandler,
+      });
 
       // Simulate receiving participant count update
       if (mockWebSocket.onmessage) {
         mockWebSocket.onmessage({
-          data: JSON.stringify(participantUpdate)
+          data: JSON.stringify(participantUpdate),
         } as MessageEvent);
       }
 
       // Assert
       expect(countUpdateHandler).toHaveBeenCalledWith({
         total: 25,
-        remaining: 20
+        remaining: 20,
       });
     });
 
@@ -706,7 +709,7 @@ describe('User Experience System', () => {
 
       const mockWebSocket = {
         onmessage: null,
-        readyState: 1 // WebSocket.OPEN
+        readyState: 1, // WebSocket.OPEN
       };
 
       mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
@@ -716,32 +719,30 @@ describe('User Experience System', () => {
         winner: {
           participantId: 'participant-456',
           participantName: 'John Doe',
-          drawOrder: 5
+          drawOrder: 5,
         },
         congratulationsMessage: 'Congratulations! You have been selected!',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       const winnerHandler = jest.fn();
 
       // Act
-      await userExperienceService.connectToLiveUpdates(
-        eventId,
-        participantId,
-        { onPersonalWinnerNotification: winnerHandler }
-      );
+      await userExperienceService.connectToLiveUpdates(eventId, participantId, {
+        onPersonalWinnerNotification: winnerHandler,
+      });
 
       // Simulate receiving personal winner notification
       if (mockWebSocket.onmessage) {
         mockWebSocket.onmessage({
-          data: JSON.stringify(personalWinUpdate)
+          data: JSON.stringify(personalWinUpdate),
         } as MessageEvent);
       }
 
       // Assert
       expect(winnerHandler).toHaveBeenCalledWith({
         drawOrder: 5,
-        message: 'Congratulations! You have been selected!'
+        message: 'Congratulations! You have been selected!',
       });
     });
 
@@ -752,7 +753,7 @@ describe('User Experience System', () => {
 
       const mockWebSocket = {
         onmessage: null,
-        readyState: 1 // WebSocket.OPEN
+        readyState: 1, // WebSocket.OPEN
       };
 
       mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
@@ -762,29 +763,27 @@ describe('User Experience System', () => {
         totalWinners: 10,
         eventClosed: true,
         finalResults: true,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       const completionHandler = jest.fn();
 
       // Act
-      await userExperienceService.connectToLiveUpdates(
-        eventId,
-        participantId,
-        { onDrawCompletion: completionHandler }
-      );
+      await userExperienceService.connectToLiveUpdates(eventId, participantId, {
+        onDrawCompletion: completionHandler,
+      });
 
       // Simulate receiving draw completion
       if (mockWebSocket.onmessage) {
         mockWebSocket.onmessage({
-          data: JSON.stringify(drawCompleteUpdate)
+          data: JSON.stringify(drawCompleteUpdate),
         } as MessageEvent);
       }
 
       // Assert
       expect(completionHandler).toHaveBeenCalledWith({
         totalWinners: 10,
-        eventClosed: true
+        eventClosed: true,
       });
     });
 
@@ -794,17 +793,15 @@ describe('User Experience System', () => {
       const participantId = 'participant-456';
 
       mockNotificationService.connectToLiveUpdates.mockRejectedValue(
-        new Error('WebSocket connection failed')
+        new Error('WebSocket connection failed'),
       );
 
       const errorHandler = jest.fn();
 
       // Act
-      const connection = await userExperienceService.connectToLiveUpdates(
-        eventId,
-        participantId,
-        { onConnectionError: errorHandler }
-      );
+      const connection = await userExperienceService.connectToLiveUpdates(eventId, participantId, {
+        onConnectionError: errorHandler,
+      });
 
       // Assert
       expect(connection.connected).toBe(false);
@@ -825,22 +822,18 @@ describe('User Experience System', () => {
         }
         return Promise.resolve({
           onmessage: null,
-          readyState: 1 // WebSocket.OPEN
+          readyState: 1, // WebSocket.OPEN
         });
       });
 
       const reconnectionHandler = jest.fn();
 
       // Act
-      const connection = await userExperienceService.connectToLiveUpdates(
-        eventId,
-        participantId,
-        {
-          onReconnection: reconnectionHandler,
-          autoReconnect: true,
-          maxReconnectAttempts: 3
-        }
-      );
+      const connection = await userExperienceService.connectToLiveUpdates(eventId, participantId, {
+        onReconnection: reconnectionHandler,
+        autoReconnect: true,
+        maxReconnectAttempts: 3,
+      });
 
       // Assert
       expect(connection.connected).toBe(true);
@@ -857,14 +850,14 @@ describe('User Experience System', () => {
         participantName: 'John Doe',
         drawOrder: 1,
         drawnAt: new Date(),
-        eventName: 'Test Event'
+        eventName: 'Test Event',
       };
 
       const mockEvent = {
         id: 'event-123',
         name: 'Test Event',
         state: EventState.CLOSED,
-        closed: true
+        closed: true,
       };
 
       // Mock confetti library
@@ -873,12 +866,7 @@ describe('User Experience System', () => {
 
       // Act
       render(
-        <ResultScreen
-          isWinner={true}
-          winner={mockWinner}
-          event={mockEvent}
-          showConfetti={true}
-        />
+        <ResultScreen isWinner={true} winner={mockWinner} event={mockEvent} showConfetti={true} />,
       );
 
       // Assert
@@ -897,14 +885,14 @@ describe('User Experience System', () => {
         participantName: 'Jane Doe',
         drawOrder: 3,
         drawnAt: new Date(),
-        eventName: 'Amazing Contest'
+        eventName: 'Amazing Contest',
       };
 
       const mockEvent = {
         id: 'event-123',
         name: 'Amazing Contest',
         state: EventState.CLOSED,
-        closed: true
+        closed: true,
       };
 
       const shareHandler = jest.fn();
@@ -916,7 +904,7 @@ describe('User Experience System', () => {
           winner={mockWinner}
           event={mockEvent}
           onShare={shareHandler}
-        />
+        />,
       );
 
       const shareButton = screen.getByRole('button', { name: /share/i });
@@ -927,7 +915,7 @@ describe('User Experience System', () => {
         type: 'WINNER',
         participantName: 'Jane Doe',
         eventName: 'Amazing Contest',
-        drawOrder: 3
+        drawOrder: 3,
       });
     });
 
@@ -936,19 +924,19 @@ describe('User Experience System', () => {
       const mockParticipant = {
         id: 'participant-456',
         name: 'Bob Smith',
-        eventId: 'event-123'
+        eventId: 'event-123',
       };
 
       const mockEvent = {
         id: 'event-123',
         name: 'Test Event',
         state: EventState.CLOSED,
-        closed: true
+        closed: true,
       };
 
       const eventStats = {
         totalParticipants: 100,
-        totalWinners: 10
+        totalWinners: 10,
       };
 
       // Act
@@ -958,7 +946,7 @@ describe('User Experience System', () => {
           participant={mockParticipant}
           event={mockEvent}
           eventStats={eventStats}
-        />
+        />,
       );
 
       // Assert
@@ -977,24 +965,19 @@ describe('User Experience System', () => {
         participantName: 'Alice Johnson',
         drawOrder: 5,
         drawnAt: drawTime,
-        eventName: 'Lucky Draw 2024'
+        eventName: 'Lucky Draw 2024',
       };
 
       const mockEvent = {
         id: 'event-123',
         name: 'Lucky Draw 2024',
         state: EventState.CLOSED,
-        closed: true
+        closed: true,
       };
 
       // Act
       render(
-        <ResultScreen
-          isWinner={true}
-          winner={mockWinner}
-          event={mockEvent}
-          showTimestamp={true}
-        />
+        <ResultScreen isWinner={true} winner={mockWinner} event={mockEvent} showTimestamp={true} />,
       );
 
       // Assert
@@ -1010,14 +993,14 @@ describe('User Experience System', () => {
       const mockParticipant = {
         id: 'participant-456',
         name: 'Charlie Brown',
-        eventId: 'event-123'
+        eventId: 'event-123',
       };
 
       const mockEvent = {
         id: 'event-123',
         name: 'Test Event',
         state: EventState.CLOSED,
-        closed: true
+        closed: true,
       };
 
       const navigationHandler = jest.fn();
@@ -1029,7 +1012,7 @@ describe('User Experience System', () => {
           participant={mockParticipant}
           event={mockEvent}
           onNavigateBack={navigationHandler}
-        />
+        />,
       );
 
       const backButton = screen.getByRole('button', { name: /back to events/i });
@@ -1046,21 +1029,21 @@ describe('User Experience System', () => {
         participantName: 'Diana Prince',
         drawOrder: 2,
         drawnAt: new Date(),
-        eventName: 'Superhero Contest'
+        eventName: 'Superhero Contest',
       };
 
       const mockEvent = {
         id: 'event-123',
         name: 'Superhero Contest',
         state: EventState.CLOSED,
-        closed: true
+        closed: true,
       };
 
       const lotteryStats = {
         totalParticipants: 50,
         totalWinners: 5,
         yourOdds: '10%',
-        drawDuration: '15 minutes'
+        drawDuration: '15 minutes',
       };
 
       // Act
@@ -1071,7 +1054,7 @@ describe('User Experience System', () => {
           event={mockEvent}
           stats={lotteryStats}
           showStats={true}
-        />
+        />,
       );
 
       // Assert
@@ -1087,16 +1070,12 @@ describe('User Experience System', () => {
         id: 'event-123',
         name: 'Test Event',
         state: EventState.CLOSED,
-        closed: true
+        closed: true,
       };
 
       // Act
       render(
-        <ResultScreen
-          event={mockEvent}
-          loading={true}
-          loadingMessage="Checking your result..."
-        />
+        <ResultScreen event={mockEvent} loading={true} loadingMessage="Checking your result..." />,
       );
 
       // Assert
@@ -1110,7 +1089,7 @@ describe('User Experience System', () => {
         { order: 1, message: /first place/i },
         { order: 2, message: /second place/i },
         { order: 3, message: /third place/i },
-        { order: 10, message: /10th place/i }
+        { order: 10, message: /10th place/i },
       ];
 
       for (const position of positions) {
@@ -1119,14 +1098,14 @@ describe('User Experience System', () => {
           participantName: 'Test Winner',
           drawOrder: position.order,
           drawnAt: new Date(),
-          eventName: 'Test Event'
+          eventName: 'Test Event',
         };
 
         const mockEvent = {
           id: 'event-123',
           name: 'Test Event',
           state: EventState.CLOSED,
-          closed: true
+          closed: true,
         };
 
         // Act
@@ -1136,7 +1115,7 @@ describe('User Experience System', () => {
             winner={mockWinner}
             event={mockEvent}
             showPosition={true}
-          />
+          />,
         );
 
         // Assert
@@ -1155,7 +1134,7 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       // Act
@@ -1175,13 +1154,13 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const mockParticipant = {
         id: 'participant-123',
         name: 'John Doe',
-        eventId: 'event-123'
+        eventId: 'event-123',
       };
 
       // Act
@@ -1191,7 +1170,7 @@ describe('User Experience System', () => {
           participant={mockParticipant}
           participantCount={25}
           liveUpdates={true}
-        />
+        />,
       );
 
       // Assert
@@ -1208,12 +1187,12 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.DRAW,
         registrationOpen: false,
-        closed: false
+        closed: false,
       };
 
       const currentWinners = [
         { id: 'w1', participantName: 'Alice', drawOrder: 1 },
-        { id: 'w2', participantName: 'Bob', drawOrder: 2 }
+        { id: 'w2', participantName: 'Bob', drawOrder: 2 },
       ];
 
       // Act
@@ -1223,7 +1202,7 @@ describe('User Experience System', () => {
           isLive={true}
           currentWinners={currentWinners}
           showAnimation={true}
-        />
+        />,
       );
 
       // Assert
@@ -1241,7 +1220,7 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       const onStateChange = jest.fn();
@@ -1252,14 +1231,14 @@ describe('User Experience System', () => {
           event={initialEvent}
           userState={{ status: 'UNREGISTERED', screen: 'REGISTRATION' }}
           onStateChange={onStateChange}
-        />
+        />,
       );
 
       // Simulate state change to waiting
       const updatedEvent = {
         ...initialEvent,
         state: EventState.DRAW,
-        registrationOpen: false
+        registrationOpen: false,
       };
 
       rerender(
@@ -1267,7 +1246,7 @@ describe('User Experience System', () => {
           event={updatedEvent}
           userState={{ status: 'REGISTERED', screen: 'WAITING' }}
           onStateChange={onStateChange}
-        />
+        />,
       );
 
       // Assert
@@ -1284,7 +1263,7 @@ describe('User Experience System', () => {
         name: 'Accessible Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       // Act
@@ -1304,13 +1283,13 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       // Mock offline state
       Object.defineProperty(navigator, 'onLine', {
         writable: true,
-        value: false
+        value: false,
       });
 
       // Act
@@ -1339,7 +1318,7 @@ describe('User Experience System', () => {
       expect(result.fallbackState).toEqual({
         status: 'ERROR',
         screen: 'ERROR',
-        message: 'Unable to connect to event service'
+        message: 'Unable to connect to event service',
       });
     });
 
@@ -1352,7 +1331,7 @@ describe('User Experience System', () => {
         close: jest.fn(),
         onclose: null,
         onerror: null,
-        readyState: 1 // WebSocket.OPEN initially
+        readyState: 1, // WebSocket.OPEN initially
       };
 
       mockNotificationService.connectToLiveUpdates.mockResolvedValue(mockWebSocket);
@@ -1360,11 +1339,9 @@ describe('User Experience System', () => {
       const disconnectionHandler = jest.fn();
 
       // Act
-      await userExperienceService.connectToLiveUpdates(
-        eventId,
-        participantId,
-        { onDisconnection: disconnectionHandler }
-      );
+      await userExperienceService.connectToLiveUpdates(eventId, participantId, {
+        onDisconnection: disconnectionHandler,
+      });
 
       // Simulate disconnection
       if (mockWebSocket.onclose) {
@@ -1375,7 +1352,7 @@ describe('User Experience System', () => {
       expect(disconnectionHandler).toHaveBeenCalledWith({
         code: 1006,
         reason: 'Connection lost',
-        reconnecting: true
+        reconnecting: true,
       });
     });
 
@@ -1386,7 +1363,7 @@ describe('User Experience System', () => {
         name: 'Test Event',
         state: EventState.REGISTRATION,
         registrationOpen: true,
-        closed: false
+        closed: false,
       };
 
       // Mock unsupported browser (no WebSocket)
@@ -1410,18 +1387,18 @@ describe('User Experience System', () => {
       mockEventService.findById.mockResolvedValue({
         id: eventId,
         name: 'Test Event',
-        state: EventState.DRAW
+        state: EventState.DRAW,
       });
       mockUserStateManager.determineUserState.mockResolvedValue({
         status: 'SESSION_EXPIRED',
         screen: 'REGISTRATION',
         message: 'Your session has expired. Please register again.',
-        action: 'SHOW_REAUTH_FORM'
+        action: 'SHOW_REAUTH_FORM',
       });
 
       // Act
       const result = await userExperienceService.recoverUserState(eventId, {
-        sessionId: expiredSessionId
+        sessionId: expiredSessionId,
       });
 
       // Assert

@@ -45,10 +45,7 @@ interface LotteryControlProps {
   onDrawComplete?: () => void;
 }
 
-export function ParticipantManagement({
-  eventId,
-  participants,
-}: ParticipantManagementProps) {
+export function ParticipantManagement({ eventId, participants }: ParticipantManagementProps) {
   return (
     <Card className="p-6">
       <h3 className="text-lg font-semibold mb-4">Participant Management</h3>
@@ -242,12 +239,13 @@ export function AdminDashboard({ admin, data, onLoadData, onCreateEvent }: Admin
               )}
 
               {/* Moderator sections */}
-              {admin.permissions?.includes('VIEW_EVENTS') && !admin.permissions?.includes('CREATE_EVENT') && (
-                <Card className="p-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">View Events</h4>
-                  <p className="text-gray-600">View and monitor events</p>
-                </Card>
-              )}
+              {admin.permissions?.includes('VIEW_EVENTS') &&
+                !admin.permissions?.includes('CREATE_EVENT') && (
+                  <Card className="p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">View Events</h4>
+                    <p className="text-gray-600">View and monitor events</p>
+                  </Card>
+                )}
             </div>
 
             {/* Statistics Cards */}
@@ -261,7 +259,9 @@ export function AdminDashboard({ admin, data, onLoadData, onCreateEvent }: Admin
                       </div>
                     </div>
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Total Events: {dashboardData.totalEvents}</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Total Events: {dashboardData.totalEvents}
+                      </p>
                       <p className="text-2xl font-bold text-gray-900">
                         {dashboardData.totalEvents}
                       </p>
@@ -277,7 +277,9 @@ export function AdminDashboard({ admin, data, onLoadData, onCreateEvent }: Admin
                       </div>
                     </div>
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Active Events: {dashboardData.activeEvents}</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Active Events: {dashboardData.activeEvents}
+                      </p>
                       <p className="text-2xl font-bold text-gray-900">
                         {dashboardData.activeEvents}
                       </p>
@@ -293,7 +295,9 @@ export function AdminDashboard({ admin, data, onLoadData, onCreateEvent }: Admin
                       </div>
                     </div>
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Total Participants: {dashboardData.totalParticipants.toLocaleString()}</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        Total Participants: {dashboardData.totalParticipants.toLocaleString()}
+                      </p>
                       <p className="text-2xl font-bold text-gray-900">
                         {dashboardData.totalParticipants.toLocaleString()}
                       </p>
@@ -330,7 +334,10 @@ export function AdminDashboard({ admin, data, onLoadData, onCreateEvent }: Admin
               {dashboardData?.recentEvents ? (
                 <div className="space-y-3">
                   {dashboardData.recentEvents.map((event, index) => (
-                    <div key={event.id || index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div
+                      key={event.id || index}
+                      className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                    >
                       <div className="flex-shrink-0">
                         <span className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-medium">
                           {event.name?.charAt(0) || 'E'}
@@ -340,9 +347,7 @@ export function AdminDashboard({ admin, data, onLoadData, onCreateEvent }: Admin
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {event.name || 'Unnamed Event'}
                         </p>
-                        <p className="text-sm text-gray-500">
-                          Event activity
-                        </p>
+                        <p className="text-sm text-gray-500">Event activity</p>
                       </div>
                     </div>
                   ))}

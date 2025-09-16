@@ -39,7 +39,9 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
           </div>
 
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">Welcome, {user?.name || user?.email || 'Admin'}</span>
+            <span className="text-sm text-gray-600">
+              Welcome, {user?.name || user?.email || 'Admin'}
+            </span>
             <form action={signOut}>
               <Button variant="outline" size="sm" type="submit">
                 Logout
