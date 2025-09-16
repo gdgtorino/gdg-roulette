@@ -158,8 +158,26 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       error: 'Invalid credentials',
     };
 
-    // Test credentials for E2E tests
-    if (username === 'admin1' && password === 'SecurePass123!') {
+    // Call auth service first - let the mock handle the response
+    try {
+      const authServiceResult = await authService.login(username, password);
+      loginResult = authServiceResult;
+    } catch (error) {
+      // Handle service errors - return 500 status
+      const response = NextResponse.json(
+        {
+          success: false,
+          error: 'Internal server error',
+          timestamp: new Date().toISOString(),
+        },
+        { status: 500 },
+      );
+      addSecurityHeaders(response);
+      return response;
+    }
+
+    // Fallback for E2E tests when auth service doesn't provide the expected response
+    if (!loginResult.success && username === 'admin1' && password === 'SecurePass123!') {
       loginResult = {
         success: true,
         admin: {
@@ -169,15 +187,6 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
           permissions: ['CREATE_EVENT', 'MANAGE_USERS'],
         },
       };
-    } else {
-      // Call auth service for other credentials if needed
-      try {
-        const authServiceResult = await authService.login(username, password);
-        loginResult = authServiceResult;
-      } catch {
-        // If auth service fails, keep the default failed result
-      }
-      // For other auth failures, keep the default failed result
     }
 
     if (!loginResult.success) {
@@ -204,7 +213,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
     }
 
     // Create session
-    const session = await sessionManager.createSession(loginResult.admin?.id || 'admin-123');
+    const session = await sessionManager.createAdminSession(loginResult.admin?.id || 'admin-123');
 
     // Create JWT token for the middleware
     const adminData = loginResult.admin || {
@@ -231,7 +240,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
       {
         success: true,
         token: token,
-        sessionToken: session || 'session-token-123',
+        sessionToken: session?.id || 'session-token-123',
         admin: adminData,
         timestamp: new Date().toISOString(),
       },
@@ -241,11 +250,11 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
     // Set auth cookie for middleware
     response.headers.set(
       'Set-Cookie',
-      `auth_token=${token}; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=86400`,
+      `sessionToken=${session?.id || 'session-token-123'}; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=86400`,
     );
 
     addSecurityHeaders(response);
-    addCorsHeaders(response);
+    addCorsHeaders(response, request);
     return response;
   } catch {
     const response = NextResponse.json(
@@ -270,8 +279,9 @@ function addSecurityHeaders(response: NextResponse) {
   response.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'");
 }
 
-function addCorsHeaders(response: NextResponse) {
-  response.headers.set('Access-Control-Allow-Origin', 'http://localhost:3000');
+function addCorsHeaders(response: NextResponse, request?: NextRequest) {
+  const origin = request?.headers.get('Origin') || 'http://localhost:3000';
+  response.headers.set('Access-Control-Allow-Origin', origin);
   response.headers.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   response.headers.set('Access-Control-Allow-Credentials', 'true');
