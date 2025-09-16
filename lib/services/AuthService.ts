@@ -101,7 +101,7 @@ export class AuthService {
         valid: session !== null,
         session,
       };
-    } catch (error) {
+    } catch {
       return {
         valid: false,
         session: null,
@@ -226,7 +226,7 @@ export class AuthService {
     try {
       const admin = await this.adminRepository.findByUsername(username);
       return admin !== null;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -242,7 +242,7 @@ export class AuthService {
       }
 
       return await this.adminRepository.findById(validationResult.session.adminId);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -253,7 +253,7 @@ export class AuthService {
   async extendSession(sessionToken: string): Promise<SessionData | null> {
     try {
       return await this.sessionManager.extendSession(sessionToken);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -264,7 +264,7 @@ export class AuthService {
   async getSessionInfo(sessionToken: string): Promise<SessionData | null> {
     try {
       return await this.sessionManager.getSession(sessionToken);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -275,7 +275,7 @@ export class AuthService {
   async cleanupExpiredSessions(): Promise<number> {
     try {
       return await this.sessionManager.cleanupExpiredSessions();
-    } catch (error) {
+    } catch {
       return 0;
     }
   }
@@ -312,7 +312,7 @@ export class AuthService {
   async forceLogoutAdmin(adminId: string): Promise<boolean> {
     try {
       return await this.sessionManager.destroyAllSessionsForAdmin(adminId);
-    } catch (error) {
+    } catch {
       return false;
     }
   }

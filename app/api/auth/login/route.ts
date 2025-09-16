@@ -162,7 +162,7 @@ async function handleAuthTestMode(request: NextRequest): Promise<NextResponse> {
     try {
       const authServiceResult = await authService.login(username, password);
       loginResult = authServiceResult;
-    } catch (error) {
+    } catch {
       // Handle service errors - return 500 status
       const response = NextResponse.json(
         {
