@@ -4,10 +4,12 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { ThemeToggle } from './theme-toggle';
 import { LanguageToggle } from './language-toggle';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export function AdminNavbar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' });
@@ -28,7 +30,7 @@ export function AdminNavbar() {
               </svg>
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              GDG Torino
+              {t('gdg_torino')}
             </span>
           </Link>
 
@@ -46,7 +48,7 @@ export function AdminNavbar() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                Events
+                {t('events')}
               </span>
             </Link>
 
@@ -62,7 +64,7 @@ export function AdminNavbar() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                Admins
+                {t('admins')}
               </span>
             </Link>
 
@@ -78,7 +80,7 @@ export function AdminNavbar() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              Logout
+              {t('logout')}
             </button>
           </div>
         </div>
