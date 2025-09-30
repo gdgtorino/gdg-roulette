@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { requireAuth } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { EventStatus } from '@prisma/client';
+import { emitToEvent } from '@/lib/socket-server';
 
 const statusSchema = z.object({
   status: z.nativeEnum(EventStatus),
@@ -50,6 +51,12 @@ export async function POST(
     const updated = await prisma.event.update({
       where: { id },
       data: { status },
+    });
+
+    // Emit Socket.IO event for status change
+    emitToEvent(id, 'event-status-changed', {
+      eventId: id,
+      status: updated.status,
     });
 
     return NextResponse.json(updated);

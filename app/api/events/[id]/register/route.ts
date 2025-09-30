@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { EventStatus } from '@prisma/client';
+import { emitToEvent } from '@/lib/socket-server';
 
 const registerSchema = z.object({
   name: z.string().min(1),
@@ -54,6 +55,16 @@ export async function POST(
       data: {
         name,
         eventId: id,
+      },
+    });
+
+    // Emit Socket.IO event for new participant
+    emitToEvent(id, 'participant-joined', {
+      participant: {
+        id: participant.id,
+        name: participant.name,
+        registeredAt: participant.registeredAt,
+        isWinner: false,
       },
     });
 

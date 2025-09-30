@@ -3,7 +3,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'Event Management System',
+  title: 'GDG Torino',
   description: 'Event management with random winner drawing',
 };
 

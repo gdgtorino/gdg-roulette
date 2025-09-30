@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 import { prisma } from '@/lib/db/prisma';
 import { EventStatus } from '@prisma/client';
 import crypto from 'crypto';
+import { emitToEvent } from '@/lib/socket-server';
 
 // draw one random winner
 export async function POST(
@@ -72,6 +73,19 @@ export async function POST(
       });
 
       return winner;
+    });
+
+    // Emit Socket.IO event for new winner
+    emitToEvent(id, 'winner-drawn', {
+      winner: {
+        id: result.id,
+        participantId: result.participantId,
+        drawOrder: result.drawOrder,
+        participant: {
+          id: result.participant.id,
+          name: result.participant.name,
+        },
+      },
     });
 
     return NextResponse.json(result);

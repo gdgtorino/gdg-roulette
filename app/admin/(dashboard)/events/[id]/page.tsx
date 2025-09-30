@@ -7,6 +7,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import confetti from 'canvas-confetti';
 import { Modal } from '@/components/modal';
 import { useTranslation } from '@/hooks/useTranslation';
+import { getSocket } from '@/lib/socket';
 
 interface Participant {
   id: string;
@@ -62,9 +63,35 @@ export default function EventDetailPage() {
 
   useEffect(() => {
     fetchEvent();
-    // Polling ogni 3 secondi per aggiornare la lista partecipanti live
-    const interval = setInterval(fetchEvent, 3000);
-    return () => clearInterval(interval);
+
+    // Setup Socket.IO connection for real-time updates
+    const socket = getSocket();
+    socket.emit('join-event', params.id);
+
+    // Listen for new participant
+    socket.on('participant-joined', (data: any) => {
+      console.log('Participant joined:', data);
+      fetchEvent(); // Refresh event data
+    });
+
+    // Listen for winner drawn
+    socket.on('winner-drawn', (data: any) => {
+      console.log('Winner drawn:', data);
+      fetchEvent(); // Refresh event data
+    });
+
+    // Listen for event status changed
+    socket.on('event-status-changed', (data: any) => {
+      console.log('Event status changed:', data);
+      fetchEvent(); // Refresh event data
+    });
+
+    return () => {
+      socket.emit('leave-event', params.id);
+      socket.off('participant-joined');
+      socket.off('winner-drawn');
+      socket.off('event-status-changed');
+    };
   }, []);
 
   const fetchEvent = async () => {
@@ -172,7 +199,7 @@ export default function EventDetailPage() {
       triggerConfetti();
 
       // Aspetta che l'animazione finisca prima di aggiornare
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
       fetchEvent();
       setShowWinnerAnimation(false);
@@ -353,9 +380,69 @@ export default function EventDetailPage() {
               <p className="text-lg text-gray-600 dark:text-gray-400">{event.description}</p>
             )}
           </div>
-          <span className={`px-4 py-2 rounded-full text-sm font-bold text-white bg-gradient-to-r ${getStatusColor(event.status)} whitespace-nowrap`}>
-            {event.status.replace(/_/g, ' ')}
-          </span>
+
+          {/* Status Badge + Event Controls (top right) */}
+          <div className="flex items-center gap-3 flex-wrap justify-end">
+            <span className={`px-4 py-2 rounded-full text-sm font-bold text-white bg-gradient-to-r ${getStatusColor(event.status)} whitespace-nowrap`}>
+              {event.status.replace(/_/g, ' ')}
+            </span>
+
+            {event.status === EventStatus.INIT && (
+              <button
+                onClick={() => handleStatusChange(EventStatus.REGISTRATION_OPEN)}
+                className="py-2 px-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center gap-2 text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {t('open_registration')}
+              </button>
+            )}
+            {event.status === EventStatus.REGISTRATION_OPEN && (
+              <button
+                onClick={() => handleStatusChange(EventStatus.REGISTRATION_CLOSED)}
+                className="py-2 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center gap-2 text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                {t('close_registration')}
+              </button>
+            )}
+            {event.status === EventStatus.REGISTRATION_CLOSED && (
+              <>
+                <button
+                  onClick={() => handleStatusChange(EventStatus.REGISTRATION_OPEN)}
+                  className="py-2 px-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center gap-2 text-sm"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                  </svg>
+                  {t('reopen_registration')}
+                </button>
+                <button
+                  onClick={() => handleStatusChange(EventStatus.DRAWING)}
+                  className="py-2 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center gap-2 text-sm"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {t('start_drawing')}
+                </button>
+              </>
+            )}
+            {event.status === EventStatus.DRAWING && (
+              <button
+                onClick={() => handleStatusChange(EventStatus.CLOSED)}
+                className="py-2 px-4 rounded-xl bg-gradient-to-r from-red-500 to-pink-600 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center gap-2 text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {t('close_event')}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Stats */}
@@ -368,68 +455,6 @@ export default function EventDetailPage() {
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t('winners_drawn')}</p>
             <p className="text-4xl font-bold text-purple-600 dark:text-purple-400">{event._count.winners}</p>
           </div>
-        </div>
-      </div>
-
-      {/* Event Controls */}
-      <div className="backdrop-blur-xl bg-white/50 dark:bg-gray-900/40 rounded-3xl shadow-2xl shadow-purple-200/50 dark:shadow-none border border-white/20 dark:border-gray-700/30 p-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('event_controls')}</h2>
-        <div className="flex gap-3 flex-wrap">
-          {event.status === EventStatus.INIT && (
-            <button
-              onClick={() => handleStatusChange(EventStatus.REGISTRATION_OPEN)}
-              className="py-3 px-6 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              {t('open_registration')}
-            </button>
-          )}
-          {event.status === EventStatus.REGISTRATION_OPEN && (
-            <button
-              onClick={() => handleStatusChange(EventStatus.REGISTRATION_CLOSED)}
-              className="py-3 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              {t('close_registration')}
-            </button>
-          )}
-          {event.status === EventStatus.REGISTRATION_CLOSED && (
-            <>
-              <button
-                onClick={() => handleStatusChange(EventStatus.REGISTRATION_OPEN)}
-                className="py-3 px-6 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                </svg>
-                {t('reopen_registration')}
-              </button>
-              <button
-                onClick={() => handleStatusChange(EventStatus.DRAWING)}
-                className="py-3 px-6 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {t('start_drawing')}
-              </button>
-            </>
-          )}
-          {event.status === EventStatus.DRAWING && (
-            <button
-              onClick={() => handleStatusChange(EventStatus.CLOSED)}
-              className="py-3 px-6 rounded-2xl bg-gradient-to-r from-red-500 to-pink-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {t('close_event')}
-            </button>
-          )}
         </div>
       </div>
 
@@ -521,97 +546,100 @@ export default function EventDetailPage() {
         </div>
       )}
 
-      {/* Winners List */}
-      {event.winners.length > 0 && (
-        <div className="backdrop-blur-xl bg-white/50 dark:bg-gray-900/40 rounded-3xl shadow-2xl shadow-purple-200/50 dark:shadow-none border border-white/20 dark:border-gray-700/30 p-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            {t('winners')}
-          </h2>
-          <div className="space-y-3">
-            {event.winners.map((winner, index) => (
-              <div
-                key={winner.id}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20"
-              >
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
-                  #{winner.drawOrder}
-                </div>
-                <div className="flex-1">
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">{winner.participant.name}</p>
-                </div>
-                {index === 0 && (
-                  <svg className="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Participants List */}
-      <div className="backdrop-blur-xl bg-white/50 dark:bg-gray-900/40 rounded-3xl shadow-2xl shadow-purple-200/50 dark:shadow-none border border-white/20 dark:border-gray-700/30 p-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          {t('participants')} ({event.participants.length})
-        </h2>
-        {event.participants.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-xl text-gray-600 dark:text-gray-400">{t('no_participants_yet')}</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {event.participants.map((participant) => (
-              <div
-                key={participant.id}
-                className="flex items-center justify-between p-4 rounded-2xl bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all"
-              >
-                <div className="flex items-center gap-4 flex-1">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                    participant.isWinner
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                  }`}>
-                    {participant.isWinner ? '✓' : '•'}
+      {/* Winners and Participants Lists - Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Winners List */}
+        {event.winners.length > 0 && (
+          <div className="backdrop-blur-xl bg-white/50 dark:bg-gray-900/40 rounded-3xl shadow-2xl shadow-purple-200/50 dark:shadow-none border border-white/20 dark:border-gray-700/30 p-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              {t('winners')}
+            </h2>
+            <div className="space-y-3">
+              {event.winners.map((winner, index) => (
+                <div
+                  key={winner.id}
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20"
+                >
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
+                    #{winner.drawOrder}
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900 dark:text-white">{participant.name}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(participant.registeredAt).toLocaleString()}
-                    </p>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-white">{winner.participant.name}</p>
                   </div>
-                  <div>
-                    {participant.isWinner ? (
-                      <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-green-500 to-emerald-600">
-                        {t('winner')}
-                      </span>
-                    ) : (
-                      <span className="px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-gray-700">
-                        {t('waiting')}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {event.status === EventStatus.REGISTRATION_OPEN && !participant.isWinner && (
-                  <button
-                    onClick={() => handleRemoveParticipant(participant.id)}
-                    className="ml-3 p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-all"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  {index === 0 && (
+                    <svg className="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
-                  </button>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
+
+        {/* Participants List */}
+        <div className={`backdrop-blur-xl bg-white/50 dark:bg-gray-900/40 rounded-3xl shadow-2xl shadow-purple-200/50 dark:shadow-none border border-white/20 dark:border-gray-700/30 p-8 ${event.winners.length === 0 ? 'lg:col-span-2' : ''}`}>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            {t('participants')} ({event.participants.length})
+          </h2>
+          {event.participants.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-xl text-gray-600 dark:text-gray-400">{t('no_participants_yet')}</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {event.participants.map((participant) => (
+                <div
+                  key={participant.id}
+                  className="flex items-center justify-between p-4 rounded-2xl bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all"
+                >
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                      participant.isWinner
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                    }`}>
+                      {participant.isWinner ? '✓' : '•'}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 dark:text-white">{participant.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(participant.registeredAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      {participant.isWinner ? (
+                        <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-green-500 to-emerald-600">
+                          {t('winner')}
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-gray-700">
+                          {t('waiting')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {event.status === EventStatus.REGISTRATION_OPEN && !participant.isWinner && (
+                    <button
+                      onClick={() => handleRemoveParticipant(participant.id)}
+                      className="ml-3 p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-all"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Fullscreen QR Modal */}

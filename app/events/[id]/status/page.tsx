@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { EventStatus } from '@prisma/client';
 import confetti from 'canvas-confetti';
 import { useTranslation } from '@/hooks/useTranslation';
+import { getSocket } from '@/lib/socket';
 
 interface ParticipantStatus {
   id: string;
@@ -33,8 +34,28 @@ export default function StatusPage() {
 
   useEffect(() => {
     checkRegistration();
-    const interval = setInterval(fetchStatus, 3000); // poll every 3 seconds
-    return () => clearInterval(interval);
+
+    // Setup Socket.IO connection
+    const socket = getSocket();
+    socket.emit('join-event', params.id);
+
+    // Listen for winner drawn event
+    socket.on('winner-drawn', (data: any) => {
+      console.log('Winner drawn event received:', data);
+      fetchStatus(); // Refresh status when winner is drawn
+    });
+
+    // Listen for event status changed
+    socket.on('event-status-changed', (data: any) => {
+      console.log('Event status changed:', data);
+      fetchStatus(); // Refresh when event status changes
+    });
+
+    return () => {
+      socket.emit('leave-event', params.id);
+      socket.off('winner-drawn');
+      socket.off('event-status-changed');
+    };
   }, []);
 
   useEffect(() => {
@@ -191,29 +212,50 @@ export default function StatusPage() {
           </div>
         )}
 
-        {/* Drawing in Progress */}
+        {/* Drawing in Progress or Winner Announcement */}
         {status.event.status === EventStatus.DRAWING && (
-          <div className="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm">
-            <div className="flex flex-col items-center text-center">
-              <div className="relative mb-4">
-                <div className="w-16 h-16 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin"></div>
-                <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-orange-600 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
+          <>
+            {status.isWinner ? (
+              <div className="p-6 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 backdrop-blur-sm relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 animate-pulse"></div>
+                <div className="relative flex flex-col items-center text-center">
+                  <div className="text-6xl mb-4 animate-bounce">🎉</div>
+                  <p className="font-bold text-3xl bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+                    {t('you_won')}
+                  </p>
+                  {status.winner && (
+                    <div className="mt-4 px-4 py-2 rounded-full bg-white/50 dark:bg-gray-800/50 border border-green-500/30">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {t('draw_order')}: <span className="font-bold text-green-600 dark:text-green-400">#{status.winner.drawOrder}</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <p className="font-bold text-xl text-gray-900 dark:text-white mb-2">{t('drawing_in_progress')}</p>
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <span className="font-medium">{status.event._count.winners}</span>
-                <span>/</span>
-                <span className="font-medium">{status.event._count.participants}</span>
-                <span>{t('drawn')}</span>
+            ) : (
+              <div className="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm">
+                <div className="flex flex-col items-center text-center">
+                  <div className="relative mb-4">
+                    <div className="w-16 h-16 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin"></div>
+                    <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-orange-600 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
+                  </div>
+                  <p className="font-bold text-xl text-gray-900 dark:text-white mb-2">{t('drawing_in_progress')}</p>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <span className="font-medium">{status.event._count.winners}</span>
+                    <span>/</span>
+                    <span className="font-medium">{status.event._count.participants}</span>
+                    <span>{t('drawn')}</span>
+                  </div>
+                  <div className="mt-4 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
+                      style={{ width: `${(status.event._count.winners / status.event._count.participants) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
               </div>
-              <div className="mt-4 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
-                  style={{ width: `${(status.event._count.winners / status.event._count.participants) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
+            )}
+          </>
         )}
 
         {/* Results */}
@@ -256,28 +298,19 @@ export default function StatusPage() {
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={fetchStatus}
-            className="flex-1 py-3 px-4 rounded-2xl bg-white/50 dark:bg-gray-800/50 border-2 border-gray-300/50 dark:border-gray-600/50 text-gray-700 dark:text-gray-300 font-medium hover:bg-white/80 dark:hover:bg-gray-800/80 hover:border-purple-500/50 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            {t('refresh')}
-          </button>
-          {status.event.status === EventStatus.REGISTRATION_OPEN && (
+        {status.event.status === EventStatus.REGISTRATION_OPEN && (
+          <div className="mt-6">
             <button
               onClick={handleCancelRegistration}
-              className="flex-1 py-3 px-4 rounded-2xl bg-red-500/10 border-2 border-red-500/20 text-red-600 dark:text-red-400 font-medium hover:bg-red-500/20 hover:border-red-500/40 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 rounded-2xl bg-red-500/10 border-2 border-red-500/20 text-red-600 dark:text-red-400 font-medium hover:bg-red-500/20 hover:border-red-500/40 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
               {t('cancel')}
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
