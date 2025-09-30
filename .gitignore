@@ -36,3 +36,4 @@ next-env.d.ts
 # prisma
 prisma/migrations/*_migration_lock.toml
 /app/generated/prisma
+TASK.md
