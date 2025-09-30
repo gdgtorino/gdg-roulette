@@ -5,6 +5,7 @@ A complete Next.js application for managing events with user registration and ra
 ## Features
 
 ### Admin Features
+
 - **Authentication**: JWT-based login system
 - **Event Management**: Create, edit, delete events with status transitions
 - **Drawing System**: Cryptographically secure random winner selection
@@ -13,12 +14,14 @@ A complete Next.js application for managing events with user registration and ra
 - **Admin Management**: Create and manage multiple admin accounts
 
 ### User Features
+
 - **Easy Registration**: Register with just a name via QR code or link
 - **Status Tracking**: Real-time event status updates (polling every 3s)
 - **Winner Notification**: Confetti animation for winners
 - **Cancel Registration**: Users can cancel while registration is open
 
 ### Technical Features
+
 - **TypeScript**: Strict mode, no `any` types
 - **Server Components**: React Server Components by default
 - **Theme System**: Light/dark mode with OS detection
@@ -30,35 +33,40 @@ A complete Next.js application for managing events with user registration and ra
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js 22 LTS
 - Docker and Docker Compose
 
 ### Installation
 
 1. **Clone and setup**:
+
    ```bash
    npm install
    cp .env.example .env
    ```
 
 2. **Start services**:
+
    ```bash
    docker-compose up -d postgres redis
    ```
 
 3. **Run migrations and seed**:
+
    ```bash
    npm run db:migrate
    npm run db:seed
    ```
 
 4. **Start development server**:
+
    ```bash
    npm run dev
    ```
 
 5. **Access the application**:
-   - Admin: http://localhost:3004/admin/login
+   - Admin: <http://localhost:3004/admin/login>
    - Default credentials: `admin` / `password`
 
 ## Project Structure
@@ -112,6 +120,7 @@ INIT → REGISTRATION_OPEN → REGISTRATION_CLOSED → DRAWING → CLOSED
 ## API Routes
 
 ### Admin Routes (Protected)
+
 - `POST /api/admin/login` - Admin login
 - `POST /api/admin/logout` - Admin logout
 - `GET /api/admin/me` - Get current admin
@@ -125,6 +134,7 @@ INIT → REGISTRATION_OPEN → REGISTRATION_CLOSED → DRAWING → CLOSED
 - `DELETE /api/admin/events/[id]/participants/[participantId]` - Remove participant
 
 ### Public Routes
+
 - `GET /api/events/[id]` - Get event info
 - `POST /api/events/[id]/register` - Register participant
 - `DELETE /api/events/[id]/register/[participantId]` - Cancel registration
@@ -183,6 +193,7 @@ docker-compose up -d --build
 ## Production Deployment
 
 1. **Build the application**:
+
    ```bash
    npm run build
    ```
@@ -193,11 +204,13 @@ docker-compose up -d --build
    - Set NEXT_PUBLIC_BASE_URL to your domain
 
 3. **Deploy with Docker**:
+
    ```bash
    docker-compose up -d
    ```
 
 4. **Run migrations**:
+
    ```bash
    docker-compose exec app npx prisma migrate deploy
    docker-compose exec app npx prisma db seed
@@ -242,10 +255,3 @@ docker-compose up -d --build
 - Phase 12: Testing suite
 - Phase 15: Email notifications, export, templates
 
-## License
-
-ISC
-
-## Support
-
-For issues or questions, refer to TASK.md for detailed specifications.
