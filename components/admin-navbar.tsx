@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { ThemeToggle } from './theme-toggle';
+import { LanguageToggle } from './language-toggle';
 
 export function AdminNavbar() {
   const router = useRouter();
@@ -65,7 +66,8 @@ export function AdminNavbar() {
               </span>
             </Link>
 
-            <div className="ml-2">
+            <div className="ml-2 flex items-center gap-2">
+              <LanguageToggle />
               <ThemeToggle />
             </div>
 
