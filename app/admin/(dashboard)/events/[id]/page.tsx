@@ -6,6 +6,7 @@ import { EventStatus } from '@prisma/client';
 import { QRCodeSVG } from 'qrcode.react';
 import confetti from 'canvas-confetti';
 import { Modal } from '@/components/modal';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface Participant {
   id: string;
@@ -37,6 +38,7 @@ interface Event {
 
 export default function EventDetailPage() {
   const params = useParams();
+  const { t } = useTranslation();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [showQR, setShowQR] = useState(false);
@@ -74,8 +76,8 @@ export default function EventDetailPage() {
       setModal({
         isOpen: true,
         type: 'error',
-        title: 'Error',
-        message: 'Failed to load event',
+        title: t('error'),
+        message: t('failed_to_load') + ' event',
       });
     } finally {
       setLoading(false);
@@ -95,8 +97,8 @@ export default function EventDetailPage() {
         setModal({
           isOpen: true,
           type: 'error',
-          title: 'Error',
-          message: data.error || 'Failed to update status',
+          title: t('error'),
+          message: data.error || t('failed_to_update_status'),
         });
         return;
       }
@@ -106,8 +108,8 @@ export default function EventDetailPage() {
       setModal({
         isOpen: true,
         type: 'error',
-        title: 'Error',
-        message: 'Failed to update status',
+        title: t('error'),
+        message: t('failed_to_update_status'),
       });
     }
   };
@@ -158,8 +160,8 @@ export default function EventDetailPage() {
         setModal({
           isOpen: true,
           type: 'error',
-          title: 'Error',
-          message: data.error || 'Failed to draw winner',
+          title: t('error'),
+          message: data.error || t('failed_to_draw_winner'),
         });
         setShowWinnerAnimation(false);
         return;
@@ -179,8 +181,8 @@ export default function EventDetailPage() {
       setModal({
         isOpen: true,
         type: 'error',
-        title: 'Error',
-        message: 'Failed to draw winner',
+        title: t('error'),
+        message: t('failed_to_draw_winner'),
       });
       setShowWinnerAnimation(false);
     } finally {
@@ -193,8 +195,8 @@ export default function EventDetailPage() {
     setModal({
       isOpen: true,
       type: 'success',
-      title: 'Copied!',
-      message: 'Registration link copied to clipboard',
+      title: t('copied'),
+      message: t('link_copied_to_clipboard'),
     });
   };
 
@@ -202,8 +204,8 @@ export default function EventDetailPage() {
     setModal({
       isOpen: true,
       type: 'confirm',
-      title: 'Remove Participant',
-      message: 'Are you sure you want to remove this participant?',
+      title: t('remove_participant'),
+      message: t('remove_participant_confirm'),
       onConfirm: async () => {
         try {
           const res = await fetch(`/api/admin/events/${params.id}/participants/${participantId}`, {
@@ -214,8 +216,8 @@ export default function EventDetailPage() {
             setModal({
               isOpen: true,
               type: 'error',
-              title: 'Error',
-              message: 'Failed to remove participant',
+              title: t('error'),
+              message: t('failed_to_remove_participant'),
             });
             return;
           }
@@ -224,15 +226,15 @@ export default function EventDetailPage() {
           setModal({
             isOpen: true,
             type: 'success',
-            title: 'Success',
-            message: 'Participant removed successfully',
+            title: t('success'),
+            message: t('participant_removed_success'),
           });
         } catch {
           setModal({
             isOpen: true,
             type: 'error',
-            title: 'Error',
-            message: 'Failed to remove participant',
+            title: t('error'),
+            message: t('failed_to_remove_participant'),
           });
         }
       },
@@ -263,7 +265,7 @@ export default function EventDetailPage() {
   if (!event) {
     return (
       <div className="text-center py-20">
-        <p className="text-xl text-gray-600 dark:text-gray-400">Event not found</p>
+        <p className="text-xl text-gray-600 dark:text-gray-400">{t('event_not_found')}</p>
       </div>
     );
   }
@@ -276,8 +278,8 @@ export default function EventDetailPage() {
         title={modal.title}
         type={modal.type}
         onConfirm={modal.onConfirm}
-        confirmText={modal.type === 'confirm' ? 'Confirm' : 'OK'}
-        cancelText="Cancel"
+        confirmText={modal.type === 'confirm' ? t('confirm') : 'OK'}
+        cancelText={t('cancel')}
       >
         {modal.message}
       </Modal>
@@ -306,7 +308,7 @@ export default function EventDetailPage() {
                 </div>
 
                 <div className="text-5xl font-bold text-white mb-6 mt-64">
-                  Drawing Winner
+                  {t('drawing_winner')}
                 </div>
                 <div className="flex gap-2 justify-center">
                   <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
@@ -324,7 +326,7 @@ export default function EventDetailPage() {
                     </svg>
                   </div>
                   <div className="text-4xl font-bold text-white/60 mb-4 tracking-widest uppercase">
-                    Winner Selected
+                    {t('winner_selected')}
                   </div>
                 </div>
 
@@ -359,11 +361,11 @@ export default function EventDetailPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4">
           <div className="p-6 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Participants</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t('participants')}</p>
             <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">{event._count.participants}</p>
           </div>
           <div className="p-6 rounded-2xl bg-purple-500/10 border border-purple-500/20">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Winners Drawn</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t('winners_drawn')}</p>
             <p className="text-4xl font-bold text-purple-600 dark:text-purple-400">{event._count.winners}</p>
           </div>
         </div>
@@ -371,7 +373,7 @@ export default function EventDetailPage() {
 
       {/* Event Controls */}
       <div className="backdrop-blur-xl bg-white/50 dark:bg-gray-900/40 rounded-3xl shadow-2xl shadow-purple-200/50 dark:shadow-none border border-white/20 dark:border-gray-700/30 p-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Event Controls</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('event_controls')}</h2>
         <div className="flex gap-3 flex-wrap">
           {event.status === EventStatus.INIT && (
             <button
@@ -381,7 +383,7 @@ export default function EventDetailPage() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              Open Registration
+              {t('open_registration')}
             </button>
           )}
           {event.status === EventStatus.REGISTRATION_OPEN && (
@@ -392,7 +394,7 @@ export default function EventDetailPage() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              Close Registration
+              {t('close_registration')}
             </button>
           )}
           {event.status === EventStatus.REGISTRATION_CLOSED && (
@@ -404,7 +406,7 @@ export default function EventDetailPage() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
                 </svg>
-                Reopen Registration
+                {t('reopen_registration')}
               </button>
               <button
                 onClick={() => handleStatusChange(EventStatus.DRAWING)}
@@ -413,7 +415,7 @@ export default function EventDetailPage() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Start Drawing
+                {t('start_drawing')}
               </button>
             </>
           )}
@@ -425,7 +427,7 @@ export default function EventDetailPage() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Close Event
+              {t('close_event')}
             </button>
           )}
         </div>
@@ -438,14 +440,14 @@ export default function EventDetailPage() {
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
-            Registration
+            {t('registration')}
           </h2>
           <div className="flex gap-8 items-center flex-wrap">
             <div className="p-4 bg-white rounded-2xl shadow-lg">
               <QRCodeSVG value={registrationUrl} size={180} />
             </div>
             <div className="flex-1 min-w-[300px] space-y-4">
-              <p className="text-gray-600 dark:text-gray-400">Scan QR code or share link:</p>
+              <p className="text-gray-600 dark:text-gray-400">{t('scan_qr_or_share_link')}</p>
               <div className="flex gap-3">
                 <input
                   type="text"
@@ -460,7 +462,7 @@ export default function EventDetailPage() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
-                  Copy
+                  {t('copy')}
                 </button>
               </div>
               <button
@@ -470,7 +472,7 @@ export default function EventDetailPage() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
-                Fullscreen QR
+                {t('fullscreen_qr')}
               </button>
             </div>
           </div>
@@ -484,7 +486,7 @@ export default function EventDetailPage() {
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
-            Drawing
+            {t('drawing')}
           </h2>
           <button
             onClick={handleDrawWinner}
@@ -494,14 +496,14 @@ export default function EventDetailPage() {
             {drawing ? (
               <span className="flex items-center justify-center gap-3">
                 <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <span>Drawing...</span>
+                <span>{t('drawing_ellipsis')}</span>
               </span>
             ) : (
               <span className="flex items-center justify-center gap-3">
                 <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
-                DRAW NEXT WINNER
+                {t('draw_next_winner')}
                 <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
@@ -513,7 +515,7 @@ export default function EventDetailPage() {
               <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              All participants have been drawn!
+              {t('all_participants_drawn')}
             </p>
           )}
         </div>
@@ -526,7 +528,7 @@ export default function EventDetailPage() {
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            Winners
+            {t('winners')}
           </h2>
           <div className="space-y-3">
             {event.winners.map((winner, index) => (
@@ -557,11 +559,11 @@ export default function EventDetailPage() {
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
-          Participants ({event.participants.length})
+          {t('participants')} ({event.participants.length})
         </h2>
         {event.participants.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-xl text-gray-600 dark:text-gray-400">No participants yet</p>
+            <p className="text-xl text-gray-600 dark:text-gray-400">{t('no_participants_yet')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -587,11 +589,11 @@ export default function EventDetailPage() {
                   <div>
                     {participant.isWinner ? (
                       <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-green-500 to-emerald-600">
-                        Winner
+                        {t('winner')}
                       </span>
                     ) : (
                       <span className="px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-gray-700">
-                        Waiting
+                        {t('waiting')}
                       </span>
                     )}
                   </div>
@@ -617,7 +619,7 @@ export default function EventDetailPage() {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-12 max-w-2xl">
             <h3 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Scan to Register
+              {t('scan_to_register')}
             </h3>
             <div className="flex justify-center mb-8 p-6 bg-white rounded-2xl">
               <QRCodeSVG value={registrationUrl} size={400} />
@@ -626,7 +628,7 @@ export default function EventDetailPage() {
               onClick={() => setShowQR(false)}
               className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all"
             >
-              Close
+              {t('close')}
             </button>
           </div>
         </div>

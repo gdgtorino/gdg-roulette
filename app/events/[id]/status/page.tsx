@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { EventStatus } from '@prisma/client';
 import confetti from 'canvas-confetti';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ParticipantStatus {
   id: string;
@@ -24,6 +25,7 @@ interface ParticipantStatus {
 export default function StatusPage() {
   const params = useParams();
   const router = useRouter();
+  const { t } = useTranslation();
   const [status, setStatus] = useState<ParticipantStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -71,14 +73,14 @@ export default function StatusPage() {
       const data = await res.json();
       setStatus(data);
     } catch {
-      setError('failed to load status');
+      setError(t('failed_to_load_status'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancelRegistration = async () => {
-    if (!confirm('are you sure you want to cancel your registration?')) {
+    if (!confirm(t('cancel_registration_confirm'))) {
       return;
     }
 
@@ -94,10 +96,10 @@ export default function StatusPage() {
         localStorage.removeItem(`event_${params.id}_registrationId`);
         router.push(`/events/${params.id}/register`);
       } else {
-        alert('failed to cancel registration');
+        alert(t('failed_to_cancel_registration'));
       }
     } catch {
-      alert('failed to cancel registration');
+      alert(t('failed_to_cancel_registration'));
     }
   };
 
@@ -151,9 +153,9 @@ export default function StatusPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">Error</h2>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">{t('error')}</h2>
           </div>
-          <p className="text-gray-700 dark:text-gray-300">{error || 'Failed to load status'}</p>
+          <p className="text-gray-700 dark:text-gray-300">{error || t('failed_to_load_status')}</p>
         </div>
       </div>
     );
@@ -164,7 +166,7 @@ export default function StatusPage() {
       <div className="w-full max-w-md backdrop-blur-xl bg-white/40 dark:bg-gray-900/40 rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-8 transform transition-all duration-500">
         <div className="mb-6">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            Hello, {status.name}!
+            {t('hello')}, {status.name}!
           </h1>
           <div className="h-1 w-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full"></div>
         </div>
@@ -180,9 +182,9 @@ export default function StatusPage() {
                 </svg>
               </div>
               <div>
-                <p className="font-bold text-lg text-gray-900 dark:text-white mb-1">Waiting for drawing</p>
+                <p className="font-bold text-lg text-gray-900 dark:text-white mb-1">{t('waiting_for_drawing')}</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {status.event._count.participants} participants registered
+                  {status.event._count.participants} {t('participants_registered')}
                 </p>
               </div>
             </div>
@@ -197,12 +199,12 @@ export default function StatusPage() {
                 <div className="w-16 h-16 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin"></div>
                 <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-orange-600 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
               </div>
-              <p className="font-bold text-xl text-gray-900 dark:text-white mb-2">Drawing in progress...</p>
+              <p className="font-bold text-xl text-gray-900 dark:text-white mb-2">{t('drawing_in_progress')}</p>
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <span className="font-medium">{status.event._count.winners}</span>
                 <span>/</span>
                 <span className="font-medium">{status.event._count.participants}</span>
-                <span>drawn</span>
+                <span>{t('drawn')}</span>
               </div>
               <div className="mt-4 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                 <div
@@ -223,12 +225,12 @@ export default function StatusPage() {
                 <div className="relative flex flex-col items-center text-center">
                   <div className="text-6xl mb-4 animate-bounce">🎉</div>
                   <p className="font-bold text-3xl bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
-                    You Won!
+                    {t('you_won')}
                   </p>
                   {status.winner && (
                     <div className="mt-4 px-4 py-2 rounded-full bg-white/50 dark:bg-gray-800/50 border border-green-500/30">
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Draw Order: <span className="font-bold text-green-600 dark:text-green-400">#{status.winner.drawOrder}</span>
+                        {t('draw_order')}: <span className="font-bold text-green-600 dark:text-green-400">#{status.winner.drawOrder}</span>
                       </p>
                     </div>
                   )}
@@ -242,10 +244,10 @@ export default function StatusPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <p className="font-bold text-xl text-gray-900 dark:text-white mb-2">Drawing completed</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">You were not selected this time</p>
+                  <p className="font-bold text-xl text-gray-900 dark:text-white mb-2">{t('drawing_completed')}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('not_selected')}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-500">
-                    {status.event._count.winners} winners from {status.event._count.participants} participants
+                    {status.event._count.winners} {t('winners_from')} {status.event._count.participants} {t('participants')}
                   </p>
                 </div>
               </div>
@@ -262,7 +264,7 @@ export default function StatusPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            Refresh
+            {t('refresh')}
           </button>
           {status.event.status === EventStatus.REGISTRATION_OPEN && (
             <button
@@ -272,7 +274,7 @@ export default function StatusPage() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              Cancel
+              {t('cancel')}
             </button>
           )}
         </div>
