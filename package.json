@@ -41,6 +41,7 @@
     "next-intl": "^4.3.9",
     "prisma": "^6.16.2",
     "qrcode": "^1.5.4",
+    "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hot-toast": "^2.6.0",
