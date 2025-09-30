@@ -4,7 +4,7 @@ const next = require('next');
 const { Server } = require('socket.io');
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
+const hostname = process.env.HOSTNAME || '0.0.0.0';
 const port = parseInt(process.env.PORT || '3000', 10);
 
 const app = next({ dev, hostname, port });
@@ -24,6 +24,7 @@ app.prepare().then(() => {
 
   // Socket.IO server
   const io = new Server(httpServer, {
+    path: '/socket.io',
     cors: {
       origin: '*',
       methods: ['GET', 'POST']

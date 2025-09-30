@@ -9,6 +9,8 @@ RUN npm install --frozen-lockfile
 
 # builder stage
 FROM base AS builder
+ARG NEXT_PUBLIC_BASE_URL
+ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
