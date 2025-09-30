@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { EventStatus } from '@prisma/client';
 import { Modal } from '@/components/modal';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface Event {
   id: string;
@@ -17,6 +18,7 @@ interface Event {
 }
 
 export default function EventsPage() {
+  const { t } = useTranslation();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -47,7 +49,7 @@ export default function EventsPage() {
       const data = await res.json();
       setEvents(data);
     } catch {
-      setModal({ isOpen: true, type: 'error', title: 'Error', message: 'Failed to load events' });
+      setModal({ isOpen: true, type: 'error', title: t('error'), message: t('failed_to_load') + ' events' });
     } finally {
       setLoading(false);
     }
@@ -57,8 +59,8 @@ export default function EventsPage() {
     setModal({
       isOpen: true,
       type: 'confirm',
-      title: 'Delete Event',
-      message: `Are you sure you want to permanently delete "${eventName}"? This cannot be undone.`,
+      title: t('delete_event'),
+      message: t('delete_event_confirm', { name: eventName }),
       onConfirm: async () => {
         try {
           const res = await fetch(`/api/admin/events/${eventId}`, {
@@ -66,13 +68,13 @@ export default function EventsPage() {
           });
 
           if (!res.ok) {
-            setModal({ isOpen: true, type: 'error', title: 'Error', message: 'Failed to delete event' });
+            setModal({ isOpen: true, type: 'error', title: t('error'), message: t('failed_to_delete') + ' event' });
             return;
           }
 
           fetchEvents();
         } catch {
-          setModal({ isOpen: true, type: 'error', title: 'Error', message: 'Failed to delete event' });
+          setModal({ isOpen: true, type: 'error', title: t('error'), message: t('failed_to_delete') + ' event' });
         }
       }
     });
@@ -91,7 +93,7 @@ export default function EventsPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setModal({ isOpen: true, type: 'error', title: 'Error', message: data.error || 'Failed to create event' });
+        setModal({ isOpen: true, type: 'error', title: t('error'), message: data.error || t('failed_to_create') + ' event' });
         return;
       }
 
@@ -100,7 +102,7 @@ export default function EventsPage() {
       setShowCreate(false);
       fetchEvents();
     } catch {
-      setModal({ isOpen: true, type: 'error', title: 'Error', message: 'Failed to create event' });
+      setModal({ isOpen: true, type: 'error', title: t('error'), message: t('failed_to_create') + ' event' });
     } finally {
       setCreating(false);
     }
@@ -154,12 +156,12 @@ export default function EventsPage() {
       </Modal>
       <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Events</h1>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">{t('events')}</h1>
         <button
           onClick={() => setShowCreate(true)}
           className="py-3 px-6 rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-semibold shadow-lg hover:shadow-2xl transform hover:scale-[1.05] active:scale-[0.98] transition-all duration-300"
         >
-          + Create Event
+          + {t('create_event')}
         </button>
       </div>
 
@@ -174,7 +176,7 @@ export default function EventsPage() {
                 : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
             }`}
           >
-            All ({statusCounts.ALL})
+            {t('all')} ({statusCounts.ALL})
           </button>
           <button
             onClick={() => setStatusFilter(EventStatus.INIT)}
@@ -184,7 +186,7 @@ export default function EventsPage() {
                 : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
             }`}
           >
-            Init ({statusCounts.INIT})
+            {t('init')} ({statusCounts.INIT})
           </button>
           <button
             onClick={() => setStatusFilter(EventStatus.REGISTRATION_OPEN)}
@@ -194,7 +196,7 @@ export default function EventsPage() {
                 : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
             }`}
           >
-            Open ({statusCounts.REGISTRATION_OPEN})
+            {t('open')} ({statusCounts.REGISTRATION_OPEN})
           </button>
           <button
             onClick={() => setStatusFilter(EventStatus.REGISTRATION_CLOSED)}
@@ -204,7 +206,7 @@ export default function EventsPage() {
                 : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
             }`}
           >
-            Closed ({statusCounts.REGISTRATION_CLOSED})
+            {t('closed')} ({statusCounts.REGISTRATION_CLOSED})
           </button>
           <button
             onClick={() => setStatusFilter(EventStatus.DRAWING)}
@@ -214,7 +216,7 @@ export default function EventsPage() {
                 : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
             }`}
           >
-            Drawing ({statusCounts.DRAWING})
+            {t('drawing')} ({statusCounts.DRAWING})
           </button>
           <button
             onClick={() => setStatusFilter(EventStatus.CLOSED)}
@@ -224,7 +226,7 @@ export default function EventsPage() {
                 : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
             }`}
           >
-            Finished ({statusCounts.CLOSED})
+            {t('finished')} ({statusCounts.CLOSED})
           </button>
         </div>
       </div>
@@ -232,10 +234,10 @@ export default function EventsPage() {
       {showCreate && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="w-full max-w-md backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-8">
-            <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Create New Event</h3>
+            <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{t('create_new_event')}</h3>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">Event Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">{t('event_name')}</label>
                 <input
                   type="text"
                   className="w-full px-4 py-3 rounded-2xl bg-white/70 dark:bg-gray-800/70 border-2 border-transparent focus:border-purple-500 outline-none transition-all text-gray-900 dark:text-white"
@@ -247,7 +249,7 @@ export default function EventsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">Description (Optional)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">{t('description_optional')}</label>
                 <textarea
                   className="w-full px-4 py-3 rounded-2xl bg-white/70 dark:bg-gray-800/70 border-2 border-transparent focus:border-purple-500 outline-none transition-all text-gray-900 dark:text-white resize-none"
                   rows={3}
@@ -264,14 +266,14 @@ export default function EventsPage() {
                   onClick={() => setShowCreate(false)}
                   disabled={creating}
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50"
                   disabled={creating}
                 >
-                  {creating ? 'Creating...' : 'Create'}
+                  {creating ? t('creating') : t('create')}
                 </button>
               </div>
             </form>
@@ -310,11 +312,11 @@ export default function EventsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Participants</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('participants')}</p>
                   <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{event._count.participants}</p>
                 </div>
                 <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Winners</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('winners')}</p>
                   <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{event._count.winners}</p>
                 </div>
               </div>
@@ -325,13 +327,13 @@ export default function EventsPage() {
 
       {filteredEvents.length === 0 && events.length > 0 && (
         <div className="text-center py-20">
-          <p className="text-xl text-gray-600 dark:text-gray-400">No events with this status</p>
+          <p className="text-xl text-gray-600 dark:text-gray-400">{t('no_events_status')}</p>
         </div>
       )}
 
       {events.length === 0 && (
         <div className="text-center py-20">
-          <p className="text-xl text-gray-600 dark:text-gray-400">No events yet. Create one to get started!</p>
+          <p className="text-xl text-gray-600 dark:text-gray-400">{t('no_events_yet')}</p>
         </div>
       )}
       </div>
