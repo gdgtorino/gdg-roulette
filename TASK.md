@@ -55,11 +55,11 @@ Use this checklist to track progress. Mark tasks as complete by changing `- [ ]`
 - [x] Implement create event API route (`POST /api/admin/events`)
 - [x] Create event creation form/modal
 - [x] Implement update event API route (`PUT /api/admin/events/[id]`)
-- [ ] Create event edit form (only for INIT status)
+- [x] Create event edit form (only for INIT status)
 - [x] Implement delete event API route (`DELETE /api/admin/events/[id]`)
-- [ ] Add event deletion with confirmation
+- [x] Add event deletion with confirmation
 - [x] Implement event status transition API (`POST /api/admin/events/[id]/status`)
-- [ ] Add status transition buttons with validation
+- [x] Add status transition buttons with validation
 - [x] Create event statistics component (participants, winners, etc.)
 - [ ] Add event search/filter functionality
 
