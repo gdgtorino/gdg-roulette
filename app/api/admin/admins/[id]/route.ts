@@ -13,7 +13,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const currentAdmin = await requireAuth();
+    await requireAuth();
     const { id } = await params;
 
     const body = await request.json();

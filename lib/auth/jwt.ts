@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
@@ -21,7 +21,9 @@ export async function verifyPassword(
 }
 
 export function signToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN as SignOptions['expiresIn'],
+  });
 }
 
 export function verifyToken(token: string): JWTPayload | null {
