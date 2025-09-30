@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Event {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  description  String?
+  status       EventStatus   @default(INIT)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  participants Participant[]
+  winners      Winner[]
+}
+
+enum EventStatus {
+  INIT
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  DRAWING
+  CLOSED
+}
+
+model Participant {
+  id           String   @id @default(cuid())
+  name         String
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registeredAt DateTime @default(now())
+  isWinner     Boolean  @default(false)
+  winner       Winner?
+
+  @@unique([eventId, name])
+}
+
+model Winner {
+  id            String      @id @default(cuid())
+  participantId String      @unique
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  eventId       String
+  event         Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  drawnAt       DateTime    @default(now())
+  drawOrder     Int
+}
