@@ -22,6 +22,7 @@ export default function EventsPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [creating, setCreating] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<EventStatus | 'ALL'>('ALL');
 
   useEffect(() => {
     fetchEvents();
@@ -109,6 +110,20 @@ export default function EventsPage() {
     );
   }
 
+  const filteredEvents = events.filter(event => {
+    if (statusFilter === 'ALL') return true;
+    return event.status === statusFilter;
+  });
+
+  const statusCounts = {
+    ALL: events.length,
+    INIT: events.filter(e => e.status === EventStatus.INIT).length,
+    REGISTRATION_OPEN: events.filter(e => e.status === EventStatus.REGISTRATION_OPEN).length,
+    REGISTRATION_CLOSED: events.filter(e => e.status === EventStatus.REGISTRATION_CLOSED).length,
+    DRAWING: events.filter(e => e.status === EventStatus.DRAWING).length,
+    CLOSED: events.filter(e => e.status === EventStatus.CLOSED).length,
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -119,6 +134,72 @@ export default function EventsPage() {
         >
           + Create Event
         </button>
+      </div>
+
+      {/* Status Filter */}
+      <div className="backdrop-blur-xl bg-white/40 dark:bg-gray-900/40 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 p-6">
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => setStatusFilter('ALL')}
+            className={`px-4 py-2 rounded-xl font-medium transition-all ${
+              statusFilter === 'ALL'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
+            }`}
+          >
+            All ({statusCounts.ALL})
+          </button>
+          <button
+            onClick={() => setStatusFilter(EventStatus.INIT)}
+            className={`px-4 py-2 rounded-xl font-medium transition-all ${
+              statusFilter === EventStatus.INIT
+                ? 'bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-lg'
+                : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
+            }`}
+          >
+            Init ({statusCounts.INIT})
+          </button>
+          <button
+            onClick={() => setStatusFilter(EventStatus.REGISTRATION_OPEN)}
+            className={`px-4 py-2 rounded-xl font-medium transition-all ${
+              statusFilter === EventStatus.REGISTRATION_OPEN
+                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg'
+                : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
+            }`}
+          >
+            Open ({statusCounts.REGISTRATION_OPEN})
+          </button>
+          <button
+            onClick={() => setStatusFilter(EventStatus.REGISTRATION_CLOSED)}
+            className={`px-4 py-2 rounded-xl font-medium transition-all ${
+              statusFilter === EventStatus.REGISTRATION_CLOSED
+                ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg'
+                : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
+            }`}
+          >
+            Closed ({statusCounts.REGISTRATION_CLOSED})
+          </button>
+          <button
+            onClick={() => setStatusFilter(EventStatus.DRAWING)}
+            className={`px-4 py-2 rounded-xl font-medium transition-all ${
+              statusFilter === EventStatus.DRAWING
+                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
+            }`}
+          >
+            Drawing ({statusCounts.DRAWING})
+          </button>
+          <button
+            onClick={() => setStatusFilter(EventStatus.CLOSED)}
+            className={`px-4 py-2 rounded-xl font-medium transition-all ${
+              statusFilter === EventStatus.CLOSED
+                ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg'
+                : 'bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80'
+            }`}
+          >
+            Finished ({statusCounts.CLOSED})
+          </button>
+        </div>
       </div>
 
       {showCreate && (
@@ -172,7 +253,7 @@ export default function EventsPage() {
       )}
 
       <div className="grid gap-6">
-        {events.map((event) => (
+        {filteredEvents.map((event) => (
           <Link key={event.id} href={`/admin/events/${event.id}`}>
             <div className="backdrop-blur-xl bg-white/40 dark:bg-gray-900/40 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 p-6 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
               <div className="flex justify-between items-start mb-4">
@@ -215,9 +296,14 @@ export default function EventsPage() {
         ))}
       </div>
 
+      {filteredEvents.length === 0 && events.length > 0 && (
+        <div className="text-center py-20">
+          <p className="text-xl text-gray-600 dark:text-gray-400">No events with this status</p>
+        </div>
+      )}
+
       {events.length === 0 && (
         <div className="text-center py-20">
-          <div className="text-6xl mb-4">🎉</div>
           <p className="text-xl text-gray-600 dark:text-gray-400">No events yet. Create one to get started!</p>
         </div>
       )}
