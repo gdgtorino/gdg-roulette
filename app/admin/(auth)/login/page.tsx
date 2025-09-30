@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -48,16 +50,16 @@ export default function LoginPage() {
             </svg>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            GDG Torino Admin
+            {t('gdg_torino_admin')}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">Sign in to manage events</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('sign_in_to_manage')}</p>
         </div>
 
         <div className="backdrop-blur-xl bg-white/40 dark:bg-gray-900/40 rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-                Username
+                {t('username')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -67,7 +69,7 @@ export default function LoginPage() {
                 </div>
                 <input
                   type="text"
-                  placeholder="Enter your username"
+                  placeholder={t('enter_username')}
                   className="w-full pl-12 pr-4 py-3 rounded-2xl bg-white/50 dark:bg-gray-800/50 border-2 border-transparent focus:border-purple-500 dark:focus:border-purple-400 outline-none transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 disabled:opacity-50"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -79,17 +81,17 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-                Password
+                {t('password')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z" />
                   </svg>
                 </div>
                 <input
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t('enter_password')}
                   className="w-full pl-12 pr-4 py-3 rounded-2xl bg-white/50 dark:bg-gray-800/50 border-2 border-transparent focus:border-purple-500 dark:focus:border-purple-400 outline-none transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 disabled:opacity-50"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -117,11 +119,11 @@ export default function LoginPage() {
                 {loading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Signing in...</span>
+                    <span>{t('signing_in')}</span>
                   </>
                 ) : (
                   <>
-                    <span>Sign In</span>
+                    <span>{t('sign_in')}</span>
                     <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
