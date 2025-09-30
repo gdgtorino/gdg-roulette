@@ -35,8 +35,8 @@ Use this checklist to track progress. Mark tasks as complete by changing `- [ ]`
 - [x] Create authentication middleware for protected routes
 - [x] Implement "get current admin" API route (`GET /api/admin/me`)
 - [x] Create admin CRUD API routes (`GET, POST, PUT, DELETE /api/admin/admins`)
-- [ ] Create admin management UI (list, create, edit, delete, set password)
-- [ ] Add confirmation dialogs for destructive actions
+- [x] Create admin management UI (list, create, edit, delete, set password)
+- [x] Add confirmation dialogs for destructive actions
 
 ### Phase 3: Internationalization (i18n)
 - [ ] Install and configure next-intl or similar i18n library
@@ -64,26 +64,26 @@ Use this checklist to track progress. Mark tasks as complete by changing `- [ ]`
 - [ ] Add event search/filter functionality
 
 ### Phase 5: Event Detail & Participant Management (Admin)
-- [ ] Create event detail page layout (`/admin/events/[id]`)
+- [x] Create event detail page layout (`/admin/events/[id]`)
 - [x] Implement get event details API (`GET /api/admin/events/[id]`)
-- [ ] Implement get participants API (`GET /api/admin/events/[id]/participants`)
-- [ ] Create participants list component with real-time updates
-- [ ] Implement remove participant API (`DELETE /api/admin/events/[id]/participants/[participantId]`)
-- [ ] Add remove participant button with confirmation
-- [ ] Create QR code generation component
-- [ ] Implement QR code fullscreen mode (modal or separate page)
-- [ ] Add "Copy registration link" button
+- [x] Implement get participants API (`GET /api/admin/events/[id]/participants`)
+- [x] Create participants list component with real-time updates
+- [x] Implement remove participant API (`DELETE /api/admin/events/[id]/participants/[participantId]`)
+- [x] Add remove participant button with confirmation
+- [x] Create QR code generation component
+- [x] Implement QR code fullscreen mode (modal or separate page)
+- [x] Add "Copy registration link" button
 
 ### Phase 6: Drawing System (Admin)
 - [x] Implement draw winner API route (`POST /api/admin/events/[id]/draw`)
 - [x] Create secure random selection algorithm (crypto.randomInt)
-- [ ] Implement get winners API route (`GET /api/admin/events/[id]/winners`)
-- [ ] Create drawing interface UI
-- [ ] Add "Draw Next Winner" button
-- [ ] Add "Close Event" button
-- [ ] Display winners list with draw order
-- [ ] Add visual feedback for drawing process
-- [ ] Implement winner exclusion logic (already drawn)
+- [x] Implement get winners API route (`GET /api/admin/events/[id]/winners`)
+- [x] Create drawing interface UI
+- [x] Add "Draw Next Winner" button
+- [x] Add "Close Event" button
+- [x] Display winners list with draw order
+- [x] Add visual feedback for drawing process
+- [x] Implement winner exclusion logic (already drawn)
 
 ### Phase 7: WebSocket Real-time Updates
 - [ ] Set up WebSocket server (Socket.io or similar)
@@ -98,24 +98,24 @@ Use this checklist to track progress. Mark tasks as complete by changing `- [ ]`
 
 ### Phase 8: User Registration Flow
 - [x] Create public event info API route (`GET /api/events/[id]`)
-- [ ] Create registration page (`/events/[id]/register`)
+- [x] Create registration page (`/events/[id]/register`)
 - [x] Implement register participant API (`POST /api/events/[id]/register`)
 - [x] Add unique name validation within event
-- [ ] Add localStorage check for existing registration
-- [ ] Create registration form with validation
-- [ ] Add success message and redirect logic
-- [ ] Implement cancel registration API (`DELETE /api/events/[id]/register/[participantId]`)
-- [ ] Add cancel registration button
+- [x] Add localStorage check for existing registration
+- [x] Create registration form with validation
+- [x] Add success message and redirect logic
+- [x] Implement cancel registration API (`DELETE /api/events/[id]/register/[participantId]`)
+- [x] Add cancel registration button
 
 ### Phase 9: User Waiting & Status Page
-- [ ] Create user status page (`/events/[id]/status`)
+- [x] Create user status page (`/events/[id]/status`)
 - [x] Implement get participant status API (`GET /api/events/[id]/status/[participantId]`)
-- [ ] Add localStorage registration ID handling
-- [ ] Create status display component (waiting, drawing, result)
+- [x] Add localStorage registration ID handling
+- [x] Create status display component (waiting, drawing, result)
 - [ ] Add WebSocket connection for real-time updates
-- [ ] Implement confetti animation for winners (canvas-confetti or react-confetti)
-- [ ] Add loading animation for drawing state
-- [ ] Display final results (winner/not winner) with statistics
+- [x] Implement confetti animation for winners (canvas-confetti or react-confetti)
+- [x] Add loading animation for drawing state
+- [x] Display final results (winner/not winner) with statistics
 
 ### Phase 10: UI/UX Polish
 - [ ] Verify DaisyUI themes work correctly (light/dark)
