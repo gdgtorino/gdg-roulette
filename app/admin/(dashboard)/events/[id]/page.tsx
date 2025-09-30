@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { EventStatus } from '@prisma/client';
 import { QRCodeSVG } from 'qrcode.react';
 import confetti from 'canvas-confetti';
+import { Modal } from '@/components/modal';
 
 interface Participant {
   id: string;
@@ -42,11 +43,26 @@ export default function EventDetailPage() {
   const [drawing, setDrawing] = useState(false);
   const [drawnWinner, setDrawnWinner] = useState<string | null>(null);
   const [showWinnerAnimation, setShowWinnerAnimation] = useState(false);
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    type: 'info' | 'success' | 'error' | 'warning' | 'confirm';
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    type: 'info',
+    title: '',
+    message: '',
+  });
 
   const registrationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3004'}/events/${params.id}/register`;
 
   useEffect(() => {
     fetchEvent();
+    // Polling ogni 3 secondi per aggiornare la lista partecipanti live
+    const interval = setInterval(fetchEvent, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchEvent = async () => {
@@ -55,7 +71,12 @@ export default function EventDetailPage() {
       const data = await res.json();
       setEvent(data);
     } catch {
-      alert('failed to load event');
+      setModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to load event',
+      });
     } finally {
       setLoading(false);
     }
@@ -71,13 +92,23 @@ export default function EventDetailPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error || 'failed to update status');
+        setModal({
+          isOpen: true,
+          type: 'error',
+          title: 'Error',
+          message: data.error || 'Failed to update status',
+        });
         return;
       }
 
       fetchEvent();
     } catch {
-      alert('failed to update status');
+      setModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to update status',
+      });
     }
   };
 
@@ -114,8 +145,8 @@ export default function EventDetailPage() {
     setDrawing(true);
     setShowWinnerAnimation(true);
 
-    // Simula un drumroll di 2 secondi
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Simula un drumroll di 1 secondo
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     try {
       const res = await fetch(`/api/admin/events/${params.id}/draw`, {
@@ -124,7 +155,12 @@ export default function EventDetailPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error || 'failed to draw winner');
+        setModal({
+          isOpen: true,
+          type: 'error',
+          title: 'Error',
+          message: data.error || 'Failed to draw winner',
+        });
         setShowWinnerAnimation(false);
         return;
       }
@@ -134,13 +170,18 @@ export default function EventDetailPage() {
       triggerConfetti();
 
       // Aspetta che l'animazione finisca prima di aggiornare
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       fetchEvent();
       setShowWinnerAnimation(false);
       setDrawnWinner(null);
     } catch {
-      alert('failed to draw winner');
+      setModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to draw winner',
+      });
       setShowWinnerAnimation(false);
     } finally {
       setDrawing(false);
@@ -149,28 +190,53 @@ export default function EventDetailPage() {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(registrationUrl);
-    alert('registration link copied!');
+    setModal({
+      isOpen: true,
+      type: 'success',
+      title: 'Copied!',
+      message: 'Registration link copied to clipboard',
+    });
   };
 
   const handleRemoveParticipant = async (participantId: string) => {
-    if (!confirm('are you sure you want to remove this participant?')) {
-      return;
-    }
+    setModal({
+      isOpen: true,
+      type: 'confirm',
+      title: 'Remove Participant',
+      message: 'Are you sure you want to remove this participant?',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/admin/events/${params.id}/participants/${participantId}`, {
+            method: 'DELETE',
+          });
 
-    try {
-      const res = await fetch(`/api/admin/events/${params.id}/participants/${participantId}`, {
-        method: 'DELETE',
-      });
+          if (!res.ok) {
+            setModal({
+              isOpen: true,
+              type: 'error',
+              title: 'Error',
+              message: 'Failed to remove participant',
+            });
+            return;
+          }
 
-      if (!res.ok) {
-        alert('failed to remove participant');
-        return;
-      }
-
-      fetchEvent();
-    } catch {
-      alert('failed to remove participant');
-    }
+          fetchEvent();
+          setModal({
+            isOpen: true,
+            type: 'success',
+            title: 'Success',
+            message: 'Participant removed successfully',
+          });
+        } catch {
+          setModal({
+            isOpen: true,
+            type: 'error',
+            title: 'Error',
+            message: 'Failed to remove participant',
+          });
+        }
+      },
+    });
   };
 
   const getStatusColor = (status: EventStatus) => {
@@ -203,10 +269,23 @@ export default function EventDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* WINNER DRAW ANIMATION */}
-      {showWinnerAnimation && (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-lg flex items-center justify-center z-[9999] animate-in fade-in duration-300">
+    <>
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+        title={modal.title}
+        type={modal.type}
+        onConfirm={modal.onConfirm}
+        confirmText={modal.type === 'confirm' ? 'Confirm' : 'OK'}
+        cancelText="Cancel"
+      >
+        {modal.message}
+      </Modal>
+
+      <div className="space-y-6">
+        {/* WINNER DRAW ANIMATION */}
+        {showWinnerAnimation && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[9999] animate-in fade-in duration-200">
           <div className="text-center max-w-4xl w-full px-8">
             {!drawnWinner ? (
               <>
@@ -552,6 +631,7 @@ export default function EventDetailPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

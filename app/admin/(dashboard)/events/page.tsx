@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { EventStatus } from '@prisma/client';
+import { Modal } from '@/components/modal';
 
 interface Event {
   id: string;
@@ -23,6 +24,18 @@ export default function EventsPage() {
   const [description, setDescription] = useState('');
   const [creating, setCreating] = useState(false);
   const [statusFilter, setStatusFilter] = useState<EventStatus | 'ALL'>('ALL');
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    type: 'info' | 'success' | 'error' | 'warning' | 'confirm';
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    type: 'info',
+    title: '',
+    message: '',
+  });
 
   useEffect(() => {
     fetchEvents();
@@ -34,31 +47,35 @@ export default function EventsPage() {
       const data = await res.json();
       setEvents(data);
     } catch {
-      alert('failed to load events');
+      setModal({ isOpen: true, type: 'error', title: 'Error', message: 'Failed to load events' });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (eventId: string, eventName: string) => {
-    if (!confirm(`are you sure you want to permanently delete "${eventName}"? this cannot be undone.`)) {
-      return;
-    }
+    setModal({
+      isOpen: true,
+      type: 'confirm',
+      title: 'Delete Event',
+      message: `Are you sure you want to permanently delete "${eventName}"? This cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/admin/events/${eventId}`, {
+            method: 'DELETE',
+          });
 
-    try {
-      const res = await fetch(`/api/admin/events/${eventId}`, {
-        method: 'DELETE',
-      });
+          if (!res.ok) {
+            setModal({ isOpen: true, type: 'error', title: 'Error', message: 'Failed to delete event' });
+            return;
+          }
 
-      if (!res.ok) {
-        alert('failed to delete event');
-        return;
+          fetchEvents();
+        } catch {
+          setModal({ isOpen: true, type: 'error', title: 'Error', message: 'Failed to delete event' });
+        }
       }
-
-      fetchEvents();
-    } catch {
-      alert('failed to delete event');
-    }
+    });
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -74,7 +91,7 @@ export default function EventsPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error || 'failed to create event');
+        setModal({ isOpen: true, type: 'error', title: 'Error', message: data.error || 'Failed to create event' });
         return;
       }
 
@@ -83,7 +100,7 @@ export default function EventsPage() {
       setShowCreate(false);
       fetchEvents();
     } catch {
-      alert('failed to create event');
+      setModal({ isOpen: true, type: 'error', title: 'Error', message: 'Failed to create event' });
     } finally {
       setCreating(false);
     }
@@ -125,7 +142,17 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <>
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+        title={modal.title}
+        type={modal.type}
+        onConfirm={modal.onConfirm}
+      >
+        {modal.message}
+      </Modal>
+      <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Events</h1>
         <button
@@ -307,6 +334,7 @@ export default function EventsPage() {
           <p className="text-xl text-gray-600 dark:text-gray-400">No events yet. Create one to get started!</p>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
