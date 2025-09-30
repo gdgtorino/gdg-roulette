@@ -7,6 +7,7 @@ export function getSocket(): Socket {
     socket = io({
       path: '/socket.io',
       autoConnect: true,
+      transports: ['polling', 'websocket'], // Prova prima polling, poi WebSocket
     });
   }
   return socket;
