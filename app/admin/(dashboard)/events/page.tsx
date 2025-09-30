@@ -88,77 +88,82 @@ export default function EventsPage() {
     }
   };
 
-  const getStatusBadge = (status: EventStatus) => {
-    const badges = {
-      INIT: 'badge-neutral',
-      REGISTRATION_OPEN: 'badge-success',
-      REGISTRATION_CLOSED: 'badge-warning',
-      DRAWING: 'badge-info',
-      CLOSED: 'badge-error',
+  const getStatusColor = (status: EventStatus) => {
+    const colors = {
+      INIT: 'from-gray-500 to-gray-600',
+      REGISTRATION_OPEN: 'from-green-500 to-emerald-600',
+      REGISTRATION_CLOSED: 'from-amber-500 to-orange-600',
+      DRAWING: 'from-blue-500 to-purple-600',
+      CLOSED: 'from-red-500 to-pink-600',
     };
-    return badges[status];
+    return colors[status];
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="flex justify-center py-12">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">events</h1>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Events</h1>
         <button
           onClick={() => setShowCreate(true)}
-          className="btn btn-primary"
+          className="py-3 px-6 rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-semibold shadow-lg hover:shadow-2xl transform hover:scale-[1.05] active:scale-[0.98] transition-all duration-300"
         >
-          create event
+          + Create Event
         </button>
       </div>
 
       {showCreate && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">create new event</h3>
-            <form onSubmit={handleCreate}>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">event name</span>
-                </label>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-md backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-8">
+            <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Create New Event</h3>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">Event Name</label>
                 <input
                   type="text"
-                  className="input input-bordered"
+                  className="w-full px-4 py-3 rounded-2xl bg-white/70 dark:bg-gray-800/70 border-2 border-transparent focus:border-purple-500 outline-none transition-all text-gray-900 dark:text-white"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
                   disabled={creating}
+                  placeholder="GDG Milano Meetup"
                 />
               </div>
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">description (optional)</span>
-                </label>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">Description (Optional)</label>
                 <textarea
-                  className="textarea textarea-bordered"
+                  className="w-full px-4 py-3 rounded-2xl bg-white/70 dark:bg-gray-800/70 border-2 border-transparent focus:border-purple-500 outline-none transition-all text-gray-900 dark:text-white resize-none"
+                  rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   disabled={creating}
+                  placeholder="Monthly community meetup"
                 />
               </div>
-              <div className="modal-action">
+              <div className="flex gap-3 pt-4">
                 <button
                   type="button"
-                  className="btn"
+                  className="flex-1 py-3 px-4 rounded-2xl bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
                   onClick={() => setShowCreate(false)}
                   disabled={creating}
                 >
-                  cancel
+                  Cancel
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={creating}>
-                  {creating ? <span className="loading loading-spinner"></span> : 'create'}
+                <button
+                  type="submit"
+                  className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50"
+                  disabled={creating}
+                >
+                  {creating ? 'Creating...' : 'Create'}
                 </button>
               </div>
             </form>
@@ -166,52 +171,54 @@ export default function EventsPage() {
         </div>
       )}
 
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         {events.map((event) => (
-          <div key={event.id} className="card bg-base-100 shadow-xl">
-            <div className="card-body">
-              <div className="flex justify-between items-start">
-                <Link href={`/admin/events/${event.id}`} className="flex-1 cursor-pointer hover:opacity-80">
-                  <div>
-                    <h2 className="card-title">{event.name}</h2>
-                    {event.description && (
-                      <p className="text-sm opacity-70">{event.description}</p>
-                    )}
-                  </div>
-                </Link>
-                <div className="flex items-center gap-2">
-                  <div className={`badge ${getStatusBadge(event.status)}`}>
-                    {event.status}
-                  </div>
+          <Link key={event.id} href={`/admin/events/${event.id}`}>
+            <div className="backdrop-blur-xl bg-white/40 dark:bg-gray-900/40 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 p-6 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{event.name}</h2>
+                  {event.description && (
+                    <p className="text-gray-600 dark:text-gray-400">{event.description}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r ${getStatusColor(event.status)}`}>
+                    {event.status.replace(/_/g, ' ')}
+                  </span>
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       handleDelete(event.id, event.name);
                     }}
-                    className="btn btn-sm btn-error"
+                    className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-all"
                   >
-                    delete
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                   </button>
                 </div>
               </div>
-              <div className="stats stats-horizontal shadow mt-4">
-                <div className="stat">
-                  <div className="stat-title">participants</div>
-                  <div className="stat-value text-2xl">{event._count.participants}</div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Participants</p>
+                  <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{event._count.participants}</p>
                 </div>
-                <div className="stat">
-                  <div className="stat-title">winners</div>
-                  <div className="stat-value text-2xl">{event._count.winners}</div>
+                <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Winners</p>
+                  <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{event._count.winners}</p>
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
       {events.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-lg opacity-70">no events yet. create one to get started!</p>
+        <div className="text-center py-20">
+          <div className="text-6xl mb-4">🎉</div>
+          <p className="text-xl text-gray-600 dark:text-gray-400">No events yet. Create one to get started!</p>
         </div>
       )}
     </div>
