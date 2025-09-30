@@ -11,30 +11,30 @@ A Next.js application for managing events with user registration and random winn
 Use this checklist to track progress. Mark tasks as complete by changing `- [ ]` to `- [x]`.
 
 ### Phase 1: Project Setup
-- [ ] Initialize Next.js project with TypeScript and App Router
-- [ ] Configure ESLint with strict rules (no `any` types)
-- [ ] Configure Prettier
-- [ ] Install and configure Tailwind CSS
-- [ ] Install and configure DaisyUI
-- [ ] Set up theme system (light/dark mode with OS detection)
-- [ ] Create theme toggle component (client component)
-- [ ] Set up Docker Compose with PostgreSQL and Redis services
-- [ ] Create Dockerfile with multi-stage build
-- [ ] Set up environment variables (.env.example and .env)
-- [ ] Initialize Prisma with PostgreSQL
-- [ ] Create initial database schema (Admin, Event, Participant, Winner models)
-- [ ] Run initial migration
-- [ ] Create seed script for default admin account
-- [ ] Set up folder structure (components, lib, types, hooks, app structure)
+- [x] Initialize Next.js project with TypeScript and App Router
+- [x] Configure ESLint with strict rules (no `any` types)
+- [x] Configure Prettier
+- [x] Install and configure Tailwind CSS
+- [x] Install and configure DaisyUI
+- [x] Set up theme system (light/dark mode with OS detection)
+- [x] Create theme toggle component (client component)
+- [x] Set up Docker Compose with PostgreSQL and Redis services
+- [x] Create Dockerfile with multi-stage build
+- [x] Set up environment variables (.env.example and .env)
+- [x] Initialize Prisma with PostgreSQL
+- [x] Create initial database schema (Admin, Event, Participant, Winner models)
+- [x] Run initial migration
+- [x] Create seed script for default admin account
+- [x] Set up folder structure (components, lib, types, hooks, app structure)
 
 ### Phase 2: Authentication & Admin Management
-- [ ] Implement JWT utility functions (sign, verify, hash password)
-- [ ] Create admin login page (`/admin/login`)
-- [ ] Implement login API route (`POST /api/admin/login`)
-- [ ] Implement logout API route (`POST /api/admin/logout`)
-- [ ] Create authentication middleware for protected routes
-- [ ] Implement "get current admin" API route (`GET /api/admin/me`)
-- [ ] Create admin CRUD API routes (`GET, POST, PUT, DELETE /api/admin/admins`)
+- [x] Implement JWT utility functions (sign, verify, hash password)
+- [x] Create admin login page (`/admin/login`)
+- [x] Implement login API route (`POST /api/admin/login`)
+- [x] Implement logout API route (`POST /api/admin/logout`)
+- [x] Create authentication middleware for protected routes
+- [x] Implement "get current admin" API route (`GET /api/admin/me`)
+- [x] Create admin CRUD API routes (`GET, POST, PUT, DELETE /api/admin/admins`)
 - [ ] Create admin management UI (list, create, edit, delete, set password)
 - [ ] Add confirmation dialogs for destructive actions
 
@@ -49,23 +49,23 @@ Use this checklist to track progress. Mark tasks as complete by changing `- [ ]`
 - [ ] Add translations for success messages
 
 ### Phase 4: Event Management (Admin)
-- [ ] Create admin dashboard layout with navigation
-- [ ] Implement events list API route (`GET /api/admin/events`)
-- [ ] Create admin events dashboard (grouped by status)
-- [ ] Implement create event API route (`POST /api/admin/events`)
-- [ ] Create event creation form/modal
-- [ ] Implement update event API route (`PUT /api/admin/events/[id]`)
+- [x] Create admin dashboard layout with navigation
+- [x] Implement events list API route (`GET /api/admin/events`)
+- [x] Create admin events dashboard (grouped by status)
+- [x] Implement create event API route (`POST /api/admin/events`)
+- [x] Create event creation form/modal
+- [x] Implement update event API route (`PUT /api/admin/events/[id]`)
 - [ ] Create event edit form (only for INIT status)
-- [ ] Implement delete event API route (`DELETE /api/admin/events/[id]`)
+- [x] Implement delete event API route (`DELETE /api/admin/events/[id]`)
 - [ ] Add event deletion with confirmation
-- [ ] Implement event status transition API (`POST /api/admin/events/[id]/status`)
+- [x] Implement event status transition API (`POST /api/admin/events/[id]/status`)
 - [ ] Add status transition buttons with validation
-- [ ] Create event statistics component (participants, winners, etc.)
+- [x] Create event statistics component (participants, winners, etc.)
 - [ ] Add event search/filter functionality
 
 ### Phase 5: Event Detail & Participant Management (Admin)
 - [ ] Create event detail page layout (`/admin/events/[id]`)
-- [ ] Implement get event details API (`GET /api/admin/events/[id]`)
+- [x] Implement get event details API (`GET /api/admin/events/[id]`)
 - [ ] Implement get participants API (`GET /api/admin/events/[id]/participants`)
 - [ ] Create participants list component with real-time updates
 - [ ] Implement remove participant API (`DELETE /api/admin/events/[id]/participants/[participantId]`)
@@ -75,8 +75,8 @@ Use this checklist to track progress. Mark tasks as complete by changing `- [ ]`
 - [ ] Add "Copy registration link" button
 
 ### Phase 6: Drawing System (Admin)
-- [ ] Implement draw winner API route (`POST /api/admin/events/[id]/draw`)
-- [ ] Create secure random selection algorithm (crypto.randomInt)
+- [x] Implement draw winner API route (`POST /api/admin/events/[id]/draw`)
+- [x] Create secure random selection algorithm (crypto.randomInt)
 - [ ] Implement get winners API route (`GET /api/admin/events/[id]/winners`)
 - [ ] Create drawing interface UI
 - [ ] Add "Draw Next Winner" button
@@ -97,10 +97,10 @@ Use this checklist to track progress. Mark tasks as complete by changing `- [ ]`
 - [ ] Add reconnection logic for WebSocket
 
 ### Phase 8: User Registration Flow
-- [ ] Create public event info API route (`GET /api/events/[id]`)
+- [x] Create public event info API route (`GET /api/events/[id]`)
 - [ ] Create registration page (`/events/[id]/register`)
-- [ ] Implement register participant API (`POST /api/events/[id]/register`)
-- [ ] Add unique name validation within event
+- [x] Implement register participant API (`POST /api/events/[id]/register`)
+- [x] Add unique name validation within event
 - [ ] Add localStorage check for existing registration
 - [ ] Create registration form with validation
 - [ ] Add success message and redirect logic
@@ -109,7 +109,7 @@ Use this checklist to track progress. Mark tasks as complete by changing `- [ ]`
 
 ### Phase 9: User Waiting & Status Page
 - [ ] Create user status page (`/events/[id]/status`)
-- [ ] Implement get participant status API (`GET /api/events/[id]/status/[participantId]`)
+- [x] Implement get participant status API (`GET /api/events/[id]/status/[participantId]`)
 - [ ] Add localStorage registration ID handling
 - [ ] Create status display component (waiting, drawing, result)
 - [ ] Add WebSocket connection for real-time updates
