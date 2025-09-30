@@ -39,6 +39,27 @@ export default function EventsPage() {
     }
   };
 
+  const handleDelete = async (eventId: string, eventName: string) => {
+    if (!confirm(`are you sure you want to permanently delete "${eventName}"? this cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/events/${eventId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        alert('failed to delete event');
+        return;
+      }
+
+      fetchEvents();
+    } catch {
+      alert('failed to delete event');
+    }
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreating(true);
@@ -147,33 +168,44 @@ export default function EventsPage() {
 
       <div className="grid gap-4">
         {events.map((event) => (
-          <Link key={event.id} href={`/admin/events/${event.id}`}>
-            <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer">
-              <div className="card-body">
-                <div className="flex justify-between items-start">
+          <div key={event.id} className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <div className="flex justify-between items-start">
+                <Link href={`/admin/events/${event.id}`} className="flex-1 cursor-pointer hover:opacity-80">
                   <div>
                     <h2 className="card-title">{event.name}</h2>
                     {event.description && (
                       <p className="text-sm opacity-70">{event.description}</p>
                     )}
                   </div>
+                </Link>
+                <div className="flex items-center gap-2">
                   <div className={`badge ${getStatusBadge(event.status)}`}>
                     {event.status}
                   </div>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDelete(event.id, event.name);
+                    }}
+                    className="btn btn-sm btn-error"
+                  >
+                    delete
+                  </button>
                 </div>
-                <div className="stats stats-horizontal shadow mt-4">
-                  <div className="stat">
-                    <div className="stat-title">participants</div>
-                    <div className="stat-value text-2xl">{event._count.participants}</div>
-                  </div>
-                  <div className="stat">
-                    <div className="stat-title">winners</div>
-                    <div className="stat-value text-2xl">{event._count.winners}</div>
-                  </div>
+              </div>
+              <div className="stats stats-horizontal shadow mt-4">
+                <div className="stat">
+                  <div className="stat-title">participants</div>
+                  <div className="stat-value text-2xl">{event._count.participants}</div>
+                </div>
+                <div className="stat">
+                  <div className="stat-title">winners</div>
+                  <div className="stat-value text-2xl">{event._count.winners}</div>
                 </div>
               </div>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
 
