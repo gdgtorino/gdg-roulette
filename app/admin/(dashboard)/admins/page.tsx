@@ -257,7 +257,7 @@ export default function AdminsPage() {
         {admins.map((admin) => (
           <div
             key={admin.id}
-            className="backdrop-blur-xl bg-white/40 dark:bg-gray-900/40 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 p-6 hover:scale-[1.01] transition-all duration-300"
+            className="backdrop-blur-xl bg-white/50 dark:bg-gray-900/40 rounded-3xl shadow-2xl shadow-purple-200/50 dark:shadow-none border border-white/20 dark:border-gray-700/30 p-6 hover:scale-[1.01] transition-all duration-300"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">

@@ -164,7 +164,7 @@ export default function EventsPage() {
       </div>
 
       {/* Status Filter */}
-      <div className="backdrop-blur-xl bg-white/40 dark:bg-gray-900/40 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 p-6">
+      <div className="backdrop-blur-xl bg-white/50 dark:bg-gray-900/40 rounded-3xl shadow-2xl shadow-purple-200/50 dark:shadow-none border border-white/20 dark:border-gray-700/30 p-6">
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setStatusFilter('ALL')}
@@ -282,7 +282,7 @@ export default function EventsPage() {
       <div className="grid gap-6">
         {filteredEvents.map((event) => (
           <Link key={event.id} href={`/admin/events/${event.id}`}>
-            <div className="backdrop-blur-xl bg-white/40 dark:bg-gray-900/40 rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/30 p-6 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+            <div className="backdrop-blur-xl bg-white/50 dark:bg-gray-900/40 rounded-3xl shadow-2xl shadow-purple-200/50 dark:shadow-none border border-white/20 dark:border-gray-700/30 p-6 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{event.name}</h2>
