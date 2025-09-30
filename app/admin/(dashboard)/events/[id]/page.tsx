@@ -69,20 +69,17 @@ export default function EventDetailPage() {
     socket.emit('join-event', params.id);
 
     // Listen for new participant
-    socket.on('participant-joined', (data: any) => {
-      console.log('Participant joined:', data);
+    socket.on('participant-joined', () => {
       fetchEvent(); // Refresh event data
     });
 
     // Listen for winner drawn
-    socket.on('winner-drawn', (data: any) => {
-      console.log('Winner drawn:', data);
+    socket.on('winner-drawn', () => {
       fetchEvent(); // Refresh event data
     });
 
     // Listen for event status changed
-    socket.on('event-status-changed', (data: any) => {
-      console.log('Event status changed:', data);
+    socket.on('event-status-changed', () => {
       fetchEvent(); // Refresh event data
     });
 

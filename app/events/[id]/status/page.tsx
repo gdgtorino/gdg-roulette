@@ -40,14 +40,12 @@ export default function StatusPage() {
     socket.emit('join-event', params.id);
 
     // Listen for winner drawn event
-    socket.on('winner-drawn', (data: any) => {
-      console.log('Winner drawn event received:', data);
+    socket.on('winner-drawn', () => {
       fetchStatus(); // Refresh status when winner is drawn
     });
 
     // Listen for event status changed
-    socket.on('event-status-changed', (data: any) => {
-      console.log('Event status changed:', data);
+    socket.on('event-status-changed', () => {
       fetchStatus(); // Refresh when event status changes
     });
 

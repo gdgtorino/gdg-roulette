@@ -8,7 +8,7 @@ export function getIO(): SocketIOServer | undefined {
   return global.io;
 }
 
-export function emitToEvent(eventId: string, event: string, data: any) {
+export function emitToEvent(eventId: string, event: string, data?: unknown) {
   const io = getIO();
   if (io) {
     io.to(`event-${eventId}`).emit(event, data);
@@ -16,7 +16,7 @@ export function emitToEvent(eventId: string, event: string, data: any) {
   }
 }
 
-export function emitGlobal(event: string, data: any) {
+export function emitGlobal(event: string, data?: unknown) {
   const io = getIO();
   if (io) {
     io.emit(event, data);
