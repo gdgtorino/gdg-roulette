@@ -5,7 +5,7 @@ COPY package*.json ./
 
 # dependencies stage
 FROM base AS dependencies
-RUN npm ci
+RUN npm install --frozen-lockfile
 
 # builder stage
 FROM base AS builder
