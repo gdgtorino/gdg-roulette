@@ -76,6 +76,30 @@ export default function StatusPage() {
     }
   };
 
+  const handleCancelRegistration = async () => {
+    if (!confirm('are you sure you want to cancel your registration?')) {
+      return;
+    }
+
+    const registrationId = localStorage.getItem(`event_${params.id}_registrationId`);
+    if (!registrationId) return;
+
+    try {
+      const res = await fetch(`/api/events/${params.id}/register/${registrationId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        localStorage.removeItem(`event_${params.id}_registrationId`);
+        router.push(`/events/${params.id}/register`);
+      } else {
+        alert('failed to cancel registration');
+      }
+    } catch {
+      alert('failed to cancel registration');
+    }
+  };
+
   const triggerConfetti = () => {
     const duration = 3000;
     const end = Date.now() + duration;
@@ -184,10 +208,17 @@ export default function StatusPage() {
             </>
           )}
 
-          {/* Refresh Button */}
-          <button onClick={fetchStatus} className="btn btn-ghost btn-sm mt-4">
-            refresh status
-          </button>
+          {/* Action Buttons */}
+          <div className="flex gap-2 mt-4">
+            <button onClick={fetchStatus} className="btn btn-ghost btn-sm flex-1">
+              refresh status
+            </button>
+            {status.event.status === EventStatus.REGISTRATION_OPEN && (
+              <button onClick={handleCancelRegistration} className="btn btn-error btn-sm flex-1">
+                cancel registration
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

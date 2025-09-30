@@ -104,6 +104,27 @@ export default function EventDetailPage() {
     alert('registration link copied!');
   };
 
+  const handleRemoveParticipant = async (participantId: string) => {
+    if (!confirm('are you sure you want to remove this participant?')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/events/${params.id}/participants/${participantId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        alert('failed to remove participant');
+        return;
+      }
+
+      fetchEvent();
+    } catch {
+      alert('failed to remove participant');
+    }
+  };
+
   const getStatusBadge = (status: EventStatus) => {
     const badges = {
       INIT: 'badge-neutral',
@@ -294,6 +315,7 @@ export default function EventDetailPage() {
                   <th>name</th>
                   <th>registered at</th>
                   <th>status</th>
+                  <th>actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -306,6 +328,16 @@ export default function EventDetailPage() {
                         <div className="badge badge-success">winner</div>
                       ) : (
                         <div className="badge badge-ghost">waiting</div>
+                      )}
+                    </td>
+                    <td>
+                      {event.status === EventStatus.REGISTRATION_OPEN && !participant.isWinner && (
+                        <button
+                          onClick={() => handleRemoveParticipant(participant.id)}
+                          className="btn btn-sm btn-error"
+                        >
+                          remove
+                        </button>
                       )}
                     </td>
                   </tr>
